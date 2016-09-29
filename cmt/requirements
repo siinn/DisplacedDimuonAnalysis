@@ -1,0 +1,66 @@
+## automatically generated CMT requirements file
+package DisplacedDimuonAnalysis
+author  che.32
+
+## for athena policies: this has to be the first use statement
+use AtlasPolicy 	AtlasPolicy-*
+
+## for gaudi tools, services and objects
+use GaudiInterface 	            GaudiInterface-*                External
+use AthenaBaseComps             AthenaBaseComps-*               Control
+
+# xAOD
+use xAODTracking                xAODTracking-*                  Event/xAOD
+
+private
+
+use AthenaKernel                AthenaKernel-*                  Control
+use AthAnalysisBaseComps        AthAnalysisBaseComps-*          Control
+use EventInfo                   EventInfo-*                     Event
+use GaudiInterface              GaudiInterface-*                External
+
+# xAOD
+use xAODEventInfo               xAODEventInfo-*                 Event/xAOD
+use xAODEgamma                  xAODEgamma-*                    Event/xAOD
+use xAODMuon                    xAODMuon-*                      Event/xAOD
+use xAODTruth                   xAODTruth-*                     Event/xAOD
+use xAODTracking                xAODTracking-*                  Event/xAOD
+use xAODEventInfo               xAODEventInfo-*                 Event/xAOD
+use xAODBase                    xAODBase-*                      Event/xAOD
+use xAODCore                    xAODCore-*                      Event/xAOD
+
+use PathResolver                PathResolver-*                  Tools
+
+# DV
+use DVTools                     DVTools-*                       DV_xAODAnalysis
+use DVCuts                      DVCuts-*                        DV_xAODAnalysis
+use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis
+
+# muon
+use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
+use MuonPerformanceHistUtils    MuonPerformanceHistUtils-*      PhysicsAnalysis/MuonID/MuonPerformanceAnalysis
+use MuonEfficiencyCorrections   MuonEfficiencyCorrections-*     PhysicsAnalysis/MuonID/MuonIDAnalysis 
+use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
+
+
+use AtlasROOT                   AtlasROOT-*                     External
+use AsgTools AsgTools-* Control/AthToolSupport
+
+end_private
+
+## put here your package dependencies...
+
+##
+
+branches src src/components doc python share
+
+## default is to make component library. See: https://twiki.cern.ch/twiki/bin/view/Main/LearningAthena#Libraries_in_CMT for alternatives
+
+
+apply_pattern declare_joboptions files="*.py"
+apply_pattern declare_python_modules files="*.py"
+
+
+
+library DisplacedDimuonAnalysis *.cxx components/*.cxx
+apply_pattern component_library
