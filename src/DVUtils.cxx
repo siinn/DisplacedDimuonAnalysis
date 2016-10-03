@@ -1,6 +1,10 @@
 // DisplacedDimuonAnalysis includes
 #include "DisplacedDimuonAnalysis/DVUtils.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthParticle.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODMuon/MuonAuxContainer.h"
 
 // DV
 
@@ -16,21 +20,6 @@ DVUtils::~DVUtils() {}
 
 
 StatusCode DVUtils::initialize() {
-    
-    //ATH_MSG_INFO ("Initializing " << name() << "...");
-    //ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
-
-    // define histograms
-    //m_dv_mass_all = new TH1F("dv_mass_all","All DV mass in GeV",50,0.,500.);
-    //m_dv_mass_dimuon = new TH1F("dv_mass_dimuon","Dimuon DV mass in GeV",50,0.,500.);
-
-    // registor for output
-    //CHECK( histSvc->regHist("/DV/SecondaryVertex/dv_mass_all", m_dv_mass_all) );
-    //CHECK( histSvc->regHist("/DV/SecondaryVertex/dv_mass_dimuon", m_dv_mass_dimuon) );
-
-    //int n_dv = 0;
-    //int n_muon_dv = 0;
-
     return StatusCode::SUCCESS;
 }
 
@@ -54,10 +43,26 @@ float DVUtils::getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 
 }
 
+bool DVUtils::IsReconstructedAsMuon(const xAOD::TruthParticle& tp) {
 
+    // retrieve muon container
+    const xAOD::MuonContainer* muc = nullptr;
+    CHECK( evtStore()->retrieve( muc, "Muons" ) );
 
+    // loop over muon container, looking for matched reco muon
+    for(auto mu: *muc) {
+        // use MS track which is not affected by badly matched ID tracks
+        const xAOD::IParticle* mu_ip = nullptr;
+        auto mstrk = mu->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+        if(mstrk == nullptr) mu_ip = mu;
+        else mu_ip = mstrk;
+    
+        double dr = tp.p4().DeltaR(mu_ip->p4());
+        if(dr < 0.10) {
+            return true;
+        }
+    } // end of loop over muon container
 
+    return false;
 
-
-
-
+}

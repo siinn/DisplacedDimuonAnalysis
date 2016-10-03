@@ -15,10 +15,10 @@
 #include "DVAnalyses/AlgBase.h"
 #include "DVCuts/IDVCuts.h"
 #include "DVCuts/IEventCuts.h"
-#include "DVCuts/IDiLepCosmics.h"
+//#include "DVCuts/IDiLepCosmics.h"
 #include "DVCuts/IDiLepDVCuts.h"
-#include "DVTools/IOverlapRemoval.h"
-#include "DVTools/IPhotonMatch.h"
+//#include "DVTools/IOverlapRemoval.h"
+//#include "DVTools/IPhotonMatch.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -52,9 +52,12 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         int n_dv;
         int n_muon_dv;
        
-        TH1F* m_dv_mass_all; //!
-        TH1F* m_dv_mass_dimuon; //!
-        TH1F* m_dv_R; //!
+        TH1F* m_dv_M; //!
+
+        // dimuon vertices
+        TH1F* m_dv_dimuon_pt; //!
+        TH1F* m_dv_dimuon_M; //!
+        TH1F* m_dv_dimuon_R; //!
           
     
 }; 

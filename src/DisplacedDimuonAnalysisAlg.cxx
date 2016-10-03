@@ -25,11 +25,10 @@ m_evtc("DV::EventCuts/DiLepEventCuts"),
 m_dvutils("DVUtils"),
 m_accMass("mass")
 {
+    // initialize tools
     declareProperty("DiLepDVCuts", m_dilepdvc);
     declareProperty("DVUtils", m_dvutils);
     declareProperty("DiLepEventCuts", m_evtc);
-
-    //declareProperty( "Property", m_nProperty ); //example property declaration
 
 }
 
@@ -42,14 +41,14 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // define histograms
-    m_dv_mass_all = new TH1F("dv_mass_all","All DV mass in GeV",50,0.,500.);
-    m_dv_mass_dimuon = new TH1F("dv_mass_dimuon","Dimuon DV mass in GeV",50,0.,500.);
-    m_dv_R = new TH1F("dv_R","R of dv [mm]",50,0.,400.);
+    m_dv_M = new TH1F("dv_M","All DV mass in GeV",50,0.,500.);
+    m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",50,0.,500.);
+    m_dv_dimuon_R = new TH1F("dv_dimuon_R","R of dimuon dv [mm]",50,0.,400.);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/dv_mass_all", m_dv_mass_all) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/dv_mass_dimuon", m_dv_mass_dimuon) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/dv_R", m_dv_R) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_M", m_dv_M) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_dimuon_M", m_dv_dimuon_M) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_dimuon_R", m_dv_dimuon_R) );
 
     int n_dv = 0;
     int n_muon_dv = 0;
@@ -117,15 +116,15 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // fill all dv
         n_dv++;
-        m_dv_mass_all->Fill(dv_mass);               // all dv
+        m_dv_M->Fill(dv_mass);               // all dv
 
         // require dv to have 2 muons
         if (dv_muc->size() != 2) continue;
 
         // fill dimuon vertex
-        n_muon_dv++;                                    // number of dimuon dv
-        m_dv_mass_dimuon->Fill(dv_mass);                // dimuon mass
-        m_dv_R->Fill( m_dvutils->getR( *dv, *pv ) );    // R in [mm]
+        n_muon_dv++;                                           // number of dimuon dv
+        m_dv_dimuon_M->Fill(dv_mass);                          // dimuon mass
+        m_dv_dimuon_R->Fill( m_dvutils->getR( *dv, *pv ) );    // R in [mm]
         
 
     }

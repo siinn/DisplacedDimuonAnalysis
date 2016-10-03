@@ -1,18 +1,30 @@
 // DisplacedDimuonAnalysis includes
 #include "MuonEfficiency.h"
 
-//#include "xAODEventInfo/EventInfo.h"
+// plotting
+#include "GaudiKernel/ITHistSvc.h"
+#include "TProfile.h"
 
-//uncomment the line below to use the HistSvc for outputting trees and histograms
-//#include "GaudiKernel/ITHistSvc.h"
-//#include "TTree.h"
-//#include "TH1D.h"
+// xAOD
+#include "xAODTruth/TruthVertex.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODMuon/MuonAuxContainer.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
+
+#include <vector>
 
 
+using std::pair;
+using std::make_pair;
 
-MuonEfficiency::MuonEfficiency( const std::string& name, ISvcLocator* pSvcLocator ) : AthAnalysisAlgorithm( name, pSvcLocator ){
+MuonEfficiency::MuonEfficiency( const std::string& name, ISvcLocator* pSvcLocator ) :
+AthAnalysisAlgorithm( name, pSvcLocator ),
+m_dvutils("DVUtils")
+{
 
-  //declareProperty( "Property", m_nProperty ); //example property declaration
+    // initialize tools
+    declareProperty("DVUtils", m_dvutils);
 
 }
 
@@ -21,77 +33,97 @@ MuonEfficiency::~MuonEfficiency() {}
 
 
 StatusCode MuonEfficiency::initialize() {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
-  //
-  //This is called once, before the start of the event loop
-  //Retrieves of tools you have configured in the joboptions go here
-  //
+    ATH_MSG_INFO ("Initializing " << name() << "...");
+    
+    ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
+   
+    // signal tracking efficiency
+    m_eff_eta_01 = new TProfile("m_eff_eta_01", "Muon tracking efficiency vs eta, dr < 0.01", 50,-3.0,3.0);
+    m_eff_pt_01 = new TProfile("m_eff_pt_01", "Muon tracking efficiency vs pt, dr < 0.01", 50,0,300);
 
-  //HERE IS AN EXAMPLE
-  //We will create a histogram and a ttree and register them to the histsvc
-  //Remember to uncomment the configuration of the histsvc stream in the joboptions
-  //
-  //ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
-  //TH1D* myHist = new TH1D("myHist","myHist",10,0,10);
-  //CHECK( histSvc->regHist("/MYSTREAM/myHist", myHist) ); //registers histogram to output stream (like SetDirectory in EventLoop)
-  //TTree* myTree = new TTree("myTree","myTree");
-  //CHECK( histSvc->regTree("/MYSTREAM/SubDirectory/myTree", myTree) ); //registers tree to output stream (like SetDirectory in EventLoop) inside a sub-directory
+    // output 
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_eta_01", m_eff_eta_01) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_pt_01", m_eff_pt_01) );
 
-
-  return StatusCode::SUCCESS;
+    int signal_truth = 0;
+    int signal_reconstructed = 0;
+    
+    return StatusCode::SUCCESS;
 }
 
 StatusCode MuonEfficiency::finalize() {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
-  //
-  //Things that happen once at the end of the event loop go here
-  //
+
+    ATH_MSG_INFO ("Finalizing " << name() << "...");
+
+    // counting number of signal muons
+    ATH_MSG_INFO( "Number of signal truth = " << signal_truth);
+    ATH_MSG_INFO( "Number of signal reconstructed = " << signal_reconstructed);
 
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode MuonEfficiency::execute() {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
-  setFilterPassed(false); //optional: start with algorithm not passed
+    ATH_MSG_DEBUG ("Executing " << name() << "...");
 
+    // get truth container
+    const xAOD::TruthParticleContainer* truthParticles = nullptr;
+    CHECK( evtStore()->retrieve( truthParticles, "MuonTruthParticles" ) );
 
+    const xAOD::MuonContainer* muc = nullptr;
+    CHECK( evtStore()->retrieve( muc, "Muons" ) );
+   
+    // main muon truth loop for efficiency 
+    if (truthParticles) {
+        for(auto mu_truth: *truthParticles) {
+    
+            // truth selection 
+            //if (!TrackSelection(mu_truth) continue;    // turn off truth selection for now
 
-  //
-  //Your main analysis code goes here
-  //If you will use this algorithm to perform event skimming, you
-  //should ensure the setFilterPassed method is called
-  //If never called, the algorithm is assumed to have 'passed' by default
-  //
+            // select signal truth
+            if (!isSignal(mu_truth)) continue;
+            else {signal_truth++;}
+            
+            bool reconstructed_01 = false;
 
+            if (m_dvutils->IsReconstructedAsMuon(*mu_truth)) {
+                signal_reconstructed++;
+                reconstructed_01 = true;
+            } // end of IsReconstructedAsMuon
 
-  //HERE IS AN EXAMPLE
-  //const xAOD::EventInfo* evtInfo = 0;
-  //CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
-  //ATH_MSG_INFO("eventNumber=" << evtInfo->eventNumber() );
+            // fill efficiency
+            m_eff_eta_01->Fill(mu_truth->eta(), reconstructed_01);
+            m_eff_pt_01->Fill(mu_truth->pt() / 1000., reconstructed_01);
 
-
-  setFilterPassed(true); //if got here, assume that means algorithm passed
-  return StatusCode::SUCCESS;
+        } // end of truth muon loop
+    } // end of truth muon
+    
+    return StatusCode::SUCCESS;
 }
 
 StatusCode MuonEfficiency::beginInputFile() { 
-  //
-  //This method is called at the start of each input file, even if
-  //the input file contains no events. Accumulate metadata information here
-  //
-
-  //example of retrieval of CutBookkeepers: (remember you will need to include the necessary header files and use statements in requirements file)
-  // const xAOD::CutBookkeeperContainer* bks = 0;
-  // CHECK( inputMetaStore()->retrieve(bks, "CutBookkeepers") );
-
-  //example of IOVMetaData retrieval (see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/AthAnalysisBase#How_to_access_file_metadata_in_C)
-  //float beamEnergy(0); CHECK( retrieveMetadata("/TagInfo","beam_energy",beamEnergy) );
-  //std::vector<float> bunchPattern; CHECK( retrieveMetadata("/Digitiation/Parameters","BeamIntensityPattern",bunchPattern) );
-
-
 
   return StatusCode::SUCCESS;
 }
 
+bool MuonEfficiency::isSignal (const xAOD::TruthParticle* p) {
+    if ( (p->status() ==1) and (p->absPdgId() == 13) and (p->barcode() < 200000) ){
+        const xAOD::TruthParticle *parent = p;
+        do {
+            parent = parent->parent();
+            if (parent->absPdgId() == 32) {
+                return true;
+            }
+        } while (parent->parent() != NULL );
+    } // end of muon
+    return false;
+} // end of isSignal
+
+bool MuonEfficiency::TrackSelection (const xAOD::TruthParticle* tp) {
+    float maxEta = 2.5;
+    float minPt = 1000;
+    if ( (tp->pt()>1e-7 ? (fabs(tp->eta()) < maxEta) : false) &&  \
+         (tp->pt() > minPt) ) return true;
+    else return false;
+} // end of TrackSelection
 
