@@ -1,8 +1,0 @@
-document listcomponents DisplacedDimuonAnalysisComponentsList LIBNAME=DisplacedDimuonAnalysis
-make_fragment make_header /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/CMT/v1r25p20160527/mgr/fragments/make_header
-make_fragment dependencies /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/AthAnalysisBase/2.4.18/AtlasPolicy/cmt/fragments/dependencies
-make_fragment cleanup_header /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/AthAnalysisBase/2.4.18/AtlasPolicy/cmt/fragments/cleanup_header
-make_fragment listcomponents -header=listcomponents_header /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/GAUDI/v26r2p1-lcg81e/GaudiPluginService/cmt/fragments/listcomponents
-make_fragment listcomponents_header /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/GAUDI/v26r2p1-lcg81e/GaudiPluginService/cmt/fragments/listcomponents_header
-make_fragment document_header /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/CMT/v1r25p20160527/mgr/fragments/document_header
-make_fragment dependency /cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.18/CMT/v1r25p20160527/mgr/fragments/dependency
