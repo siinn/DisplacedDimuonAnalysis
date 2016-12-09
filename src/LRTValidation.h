@@ -26,8 +26,17 @@ class LRTValidation: public ::AthAnalysisAlgorithm {
     private: 
         ToolHandle<IDVUtils>  m_dvutils; //!
 
-        float signal_truth;
-        float signal_reconstructed;
+        float signal_truth; //!
+        float signal_reconstructed; //!
+
+        float n_truth_matched_by_hit; //!
+        float n_truth_matched_by_dR_loose; //!
+        float n_truth_matched_by_dR_tight; //!
+        float n_truth_matched_by_dR_tight_ptcut; //!
+        float n_reco_matched_by_hit; //!
+        float n_reco_matched_by_dR_loose; //!
+        float n_reco_matched_by_dR_tight; //!
+        float n_reco_matched_by_dR_tight_ptcut; //!
 
         // efficiency plots
         TProfile* m_eff_eta_prob; //!
@@ -74,9 +83,37 @@ class LRTValidation: public ::AthAnalysisAlgorithm {
         TH1F* m_dpt_norm_prob; //!
         TH1F* m_dpt_norm_dR_tight; //!
         TH1F* m_dpt_norm_dR_loose; //!
+        
+        TH1F* m_dR; //!
+        TH1F* m_dR_hitMatched; //!
+        TH1F* m_dR_hitFake; //!
 
-        TH1F* m_prob_dist; //!
-        TH1F* m_dR_dist; //!
+        // 2D plots
+        TH2F* m_dpt_vs_dR; //!
+        TH2F* m_dpt_vs_dR_hitMatched; //!
+        TH2F* m_dpt_vs_dR_hitFake; //!
+
+        // plots to see if phi, eta, and theta are consistent between reco and truth
+        TH2F* m_dphi_vs_truth_prodVtxR; //!
+        TH2F* m_deta_vs_truth_prodVtxR; //!
+        TH2F* m_dtheta_vs_truth_prodVtxR; //!
+
+        TH1F* m_dphi_prompt; //!
+        TH1F* m_dphi_displaced; //!
+        TH1F* m_dphi_far_displaced; //!
+
+        TH1F* m_dphi_wrt_bp_prompt; //!
+        TH1F* m_dphi_wrt_bp_displaced; //!
+        TH1F* m_dphi_wrt_bp_far_displaced; //!
+
+        TH1F* m_deta_prompt; //!
+        TH1F* m_deta_displaced; //!
+        TH1F* m_deta_far_displaced; //!
+
+        //TH1F* m_prob_dist; //!
+        //TH1F* m_dR_dist; //!
+
+        TH1F* m_average_match; //!
 
 
 

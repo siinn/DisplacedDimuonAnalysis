@@ -3,6 +3,7 @@
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
 #include "DVCuts/IDiLepDVCuts.h"
+#include "DVCuts/IDVCuts.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -18,13 +19,14 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
   virtual StatusCode  execute();
   virtual StatusCode  finalize();
 
-  int n_truth_siganl_dv;
-  int n_matched_signal_dv;
   
 
  private: 
-        ToolHandle<DV::IDiLepDVCuts> m_dilepdvc; //!
         ToolHandle<IDVUtils>  m_dvutils; //!
+        ToolHandle<DV::IDVCuts> m_dvc; //!
+
+        // DV mass accessor
+        SG::AuxElement::ConstAccessor<float> m_accMass;
 
         TH1D* m_dv_cutflow; //!
 
@@ -32,8 +34,15 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         TProfile* m_dv_eff_phi; //! 
         TProfile* m_dv_eff_mass; //! 
         TProfile* m_dv_eff_R; //! 
+        TProfile* m_dv_eff_d0; //! 
 
-        int n_accepted; //!
+        // efficiency as a function of Z' parameters
+        TProfile* m_dv_eff_zp_eta; //! 
+        TProfile* m_dv_eff_zp_pt; //! 
+
+        // invariant mass of all signal truth vertex
+        TH1F* m_dv_mass; //!
+
 
 }; 
 

@@ -24,11 +24,13 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 
-#include "xAODBase/IParticleHelpers.h"
-#include "xAODCore/ShallowCopy.h"
+//#include "xAODBase/IParticleHelpers.h"
+//#include "xAODCore/ShallowCopy.h"
 
 #include "TProfile.h"
+#include "TProfile2D.h"
 #include "cmath"
+#include "vector"
 
 //#include "xAODEventInfo/EventInfo.h"
 
@@ -40,10 +42,11 @@
 DVEfficiency::DVEfficiency( const std::string& name, ISvcLocator* pSvcLocator ) : 
 AthAnalysisAlgorithm( name, pSvcLocator ),
 m_dvutils("DVUtils"),
-m_dilepdvc("DV::DiLepDVCuts/DiLepDVCuts")
+m_dvc("DV::DVCuts/DiLepBaseCuts"),
+m_accMass("mass")
 {
     declareProperty("DVUtils", m_dvutils);
-    declareProperty("DiLepDVCuts", m_dilepdvc);
+    declareProperty("DiLepBaseCuts", m_dvc);
 }
 
 
@@ -54,33 +57,40 @@ StatusCode DVEfficiency::initialize() {
     ATH_MSG_INFO ("Initializing " << name() << "...");
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
-    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Signal truth dv cutflow", 10,0,10);
-    m_dv_eff_eta = new TProfile( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 50, -3.0, 3.0);
+    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Signal truth dv cutflow", 5,0,5);
+    m_dv_mass = new TH1F( "m_dv_mass", "Invariant mass of all signal vertex", 50, 0, 1500 ); // GeV
+
+    // efficiency plots
+    m_dv_eff_eta = new TProfile( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 50, -4.0, 4.0);
     m_dv_eff_phi = new TProfile( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 50, -M_PI, M_PI);
-    m_dv_eff_mass = new TProfile( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 50, 0, 400); // GeV
-    m_dv_eff_R = new TProfile( "m_dv_eff_R", "DV reconstruction efficiency vs R", 50, 0, 400); // mm
+    m_dv_eff_mass = new TProfile( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 150, 0, 1500); // GeV
+    m_dv_eff_R = new TProfile( "m_dv_eff_R", "DV reconstruction efficiency vs R", 100, 0, 400); // mm
+    m_dv_eff_d0 = new TProfile( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 100, 0, 400); // mm
 
-    CHECK( histSvc->regHist("/DV/TruthVertex/SignalCutFlow/dv_cutflow", m_dv_cutflow) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv_eff_eta", m_dv_eff_eta) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv_eff_phi", m_dv_eff_phi) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv_eff_mass", m_dv_eff_mass) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv_eff_R", m_dv_eff_R) );
-   
+    // efficiency as a function of Z' parameters
+    m_dv_eff_zp_eta = new TProfile("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 50, -3.0, 3.0);
+    m_dv_eff_zp_pt = new TProfile("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 50, 0, 1000); // GeV
+ 
 
-    int n_truth_siganl_dv = 0;
-    int n_matched_signal_dv = 0;
-    // number of truth dv that passes acceptance cut
-    // i.e. both muons must have eta < 2.4
-    int n_accepted = 0;
+    // output
+    CHECK( histSvc->regHist("/DV/TruthVertex/dv_cutflow", m_dv_cutflow) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/dv_mass", m_dv_mass) );
+
+    // efficiency plots
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_eta", m_dv_eff_eta) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_phi", m_dv_eff_phi) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_mass", m_dv_eff_mass) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_R", m_dv_eff_R) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_d0", m_dv_eff_d0) );
+
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/zp_parameters/dv_eff_zp_eta", m_dv_eff_zp_eta) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/zp_parameters/dv_eff_zp_pt", m_dv_eff_zp_pt) );
 
     return StatusCode::SUCCESS;
 }
 
 StatusCode DVEfficiency::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
-    ATH_MSG_INFO ("Number of signal DV = " << n_truth_siganl_dv );
-    ATH_MSG_INFO ("Number of signal DV accepted within detector volume = " << n_accepted );
-    ATH_MSG_INFO ("Number of matched signal DV = " << n_matched_signal_dv );
     
     return StatusCode::SUCCESS;
 }
@@ -92,133 +102,98 @@ StatusCode DVEfficiency::execute() {
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     CHECK( evtStore()->retrieve( tru_vc, "TruthVertices"));
 
-    // retrieve secondary vertices
-    const xAOD::VertexContainer* dvc = nullptr;
-    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
-
-    // make a copy of vertex containers
-    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
-
-    // retrieve lepton container
-    const xAOD::MuonContainer* muc = nullptr;
-    CHECK( evtStore()->retrieve( muc, "Muons" ));
-
-    // make copies of leptons
-    auto muc_copy = xAOD::shallowCopyContainer(*muc);
-    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
-
-    // perform lepton matching
-    for(auto dv: *dvc_copy.first)
-    {
-        m_dilepdvc->ApplyLeptonMatching(*dv, *muc_copy.first);
-
-    }
+    // vector to store truth vertex and reconstruction flag
+    std::vector< std::pair<xAOD::TruthVertex*,bool> > tvv;
 
     // loop over the truth vertex container
-    for (auto vertex_truth: *tru_vc){
-
-        // access parent
-        const xAOD::TruthParticle* parent = vertex_truth->incomingParticle(0);
+    for (auto tru_v: *tru_vc){
 
         //-----------------------------------------------------------------
-        // select signal truth, Z'
+        // select signal dv
         //-----------------------------------------------------------------
-        if (!(vertex_truth->nIncomingParticles() == 1)) continue;
-        if (!(vertex_truth->nOutgoingParticles() == 2)) continue;
-        if (!(parent->absPdgId() ==32)) continue;
-
-        // counting signal dv
-        n_truth_siganl_dv++;
+        if (!m_dvutils->isSignalVertex(tru_v)) continue;
         m_dv_cutflow->Fill("Signal", 1);
 
-        // access signal muons
-        const xAOD::TruthParticle* truth_child0 = vertex_truth->outgoingParticle(0);
-        const xAOD::TruthParticle* truth_child1 = vertex_truth->outgoingParticle(1);
+        // fill truth vertex vector, initially 0 means not reconstructed
+        tvv.emplace_back(tru_v,false);
 
         //-----------------------------------------------------------------
-        // acceptance cut
+        // acceptance cut (both muons eta < 2.4)
         //-----------------------------------------------------------------
-        if ( !((truth_child0->eta()) < 2.4) or !((truth_child1->eta() < 2.4)) ) continue;
-
-        // fill cut flow histogram
-        m_dv_cutflow->Fill("Accepted", 1);
-        n_accepted++;
-
-        //-----------------------------------------------------------------
-        // minimum displacement cut
-        //-----------------------------------------------------------------
-        if (! (vertex_truth->perp() > 3.)) continue;
-        m_dv_cutflow->Fill("MinDist", 1);
+        if (!(m_dvutils->PassAcceptance(tru_v))) continue;
+        m_dv_cutflow->Fill("#eta_{#mu} < 2.4", 1);
 
         //-----------------------------------------------------------------
         // check if two muons are reconstructed
         //-----------------------------------------------------------------
-        if (!(m_dvutils->IsReconstructedAsMuon(*truth_child0) and m_dvutils->IsReconstructedAsMuon(*truth_child0))) continue;
-        m_dv_cutflow->Fill("DiMuonReconst.", 1);
-
-        // calculate invariant mass of truth vertex
-        TLorentzVector outgoing_tlv;
-
-        // sum four momentum of outgoing particles
-        outgoing_tlv = TLorentzVector( truth_child0->px(), truth_child0->py(), truth_child0->pz(), truth_child0->e());
-        outgoing_tlv += TLorentzVector( truth_child1->px(), truth_child1->py(), truth_child1->pz(), truth_child1->e());
-
-        bool dv_matched = false;
-
-        // loop over dv's
-        for (auto dv: *dvc_copy.first) {
-
-            // set flag
-            bool muon_match0 = false;
-            bool muon_match1 = false;
-
-            // collect muons from this dv
-            auto dv_muc = m_dilepdvc->GetMu(*dv);
-
-            // require dv to have 2 muons
-            if (dv_muc->size() != 2) continue;
-
-            // loop over reconstructed dv's to find match
-            for(auto mu: *dv_muc){
-                // use MS track which is not affected by badly matched ID tracks
-                const xAOD::IParticle* mu_ip = nullptr;
-                auto mstrk = mu->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-                if(mstrk == nullptr) mu_ip = mu;
-                else mu_ip = mstrk;
-
-                // find angle between muons from dv and truth dv
-                double dr0 = truth_child0->p4().DeltaR(mu_ip->p4());
-                double dr1 = truth_child1->p4().DeltaR(mu_ip->p4());
-
-                // if muons are matched, set flag
-                if (dr0 < 0.1) muon_match0 = true;
-                if (dr1 < 0.1) muon_match1 = true;
-
-            } // end of muon container
-
-            // if we have two muons matched, this truth dv is reconstructed
-            if (muon_match0 and muon_match1) dv_matched = true;
-
-        } // end of loop over dvc
-
-        // fill efficiency plots
-        m_dv_eff_eta->Fill( vertex_truth->eta(), dv_matched);
-        m_dv_eff_phi->Fill( vertex_truth->phi(), dv_matched);
-        m_dv_eff_mass->Fill( outgoing_tlv.M() / 1000. , dv_matched);
-        m_dv_eff_R->Fill( vertex_truth->perp() , dv_matched);
+        if (!(m_dvutils->MuonsReconstructed(tru_v))) continue;
+        m_dv_cutflow->Fill("2 muons reconst.", 1);
 
         //-----------------------------------------------------------------
+        // match truth dv to reco dv
+        //-----------------------------------------------------------------
+        bool dv_matched = m_dvutils->IsReconstructed(tru_v);
+
+        // fill vector of truth pair to flag if reconstructed
+        tvv.back().second = dv_matched;
+
         // require reco maching
-        //-----------------------------------------------------------------
         if (!dv_matched) continue;
+        m_dv_cutflow->Fill("DV reconst.", 1);
 
-        m_dv_cutflow->Fill("DVReconst.", 1);
+        //-----------------------------------------------------------------
+        // minimum displacement cut
+        //-----------------------------------------------------------------
 
-        // counting matched dv
-        n_matched_signal_dv++;
+        // minimum distance from pv (0 for MC)
+        float minDist = 3.0; // mm
+        if (! (tru_v->perp() > minDist)) continue;
+        m_dv_cutflow->Fill("r_{DV} > 3 mm", 1);
 
-        ////m_dv_R->Fill( m_dvutils->getR( *dv, *pv ) );    // R in [mm]
+        //-----------------------------------------------------------------
+        // minimum truth DV mass cut
+        //-----------------------------------------------------------------
+
+        // minimum DV mass cut
+        //float minMass = 10.0; // GeV
+        //if ( m_dvutils->TruthMass(tru_v) / 1000. < minMass) continue;
+        //m_dv_cutflow->Fill("MinDVMass", 1);
+
+
     } // end of truth vertex loop
+
+
+    //-----------------------------------------------------------------
+    // end of truth cut flow                                          -
+    // below is for dv reconstruction efficiency                      -
+    //-----------------------------------------------------------------
+
+    // loop over the truth vertex container
+    for (auto tru_vv: tvv){
+
+        float DVMass = m_dvutils->TruthMass(tru_vv.first) / 1000.;
+        bool dv_matched = tru_vv.second;
+
+        // fill truth signal vertex mass
+        m_dv_mass->Fill( DVMass );
+     
+        // fill efficiency plots
+        m_dv_eff_eta->Fill( tru_vv.first->eta(), dv_matched);
+        m_dv_eff_phi->Fill( tru_vv.first->phi(), dv_matched);
+        m_dv_eff_mass->Fill( DVMass, dv_matched);
+        m_dv_eff_R->Fill( tru_vv.first->perp() , dv_matched);
+        m_dv_eff_d0->Fill( m_dvutils->GetMaxd0(tru_vv.first), dv_matched );
+
+        // efficiency as a function of Z'
+        float zp_eta = tru_vv.first->incomingParticle(0)->eta();
+        float zp_pt = tru_vv.first->incomingParticle(0)->pt();
+
+        m_dv_eff_zp_eta->Fill(zp_eta, dv_matched);
+        m_dv_eff_zp_pt->Fill(zp_pt / 1000., dv_matched);
+
+    } // end of efficiency loop
+
+
     return StatusCode::SUCCESS;
 }
 

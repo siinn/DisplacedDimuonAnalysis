@@ -15,8 +15,28 @@ DECLARE_ALGORITHM_FACTORY( MuonEfficiency )
 #include "../DVEfficiency.h"
 DECLARE_ALGORITHM_FACTORY( DVEfficiency )
 
+
+#include "../LRTValidation.h"
+DECLARE_ALGORITHM_FACTORY( LRTValidation )
+
+
+#include "../VertexRes.h"
+DECLARE_ALGORITHM_FACTORY( VertexRes )
+
+
+#include "../TruthPlots.h"
+DECLARE_ALGORITHM_FACTORY( TruthPlots )
+
+
+#include "../LumiCalc.h"
+DECLARE_ALGORITHM_FACTORY( LumiCalc )
+
 DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis ) 
 {
+  DECLARE_ALGORITHM( LumiCalc );
+  DECLARE_ALGORITHM( TruthPlots );
+  DECLARE_ALGORITHM( VertexRes );
+  DECLARE_ALGORITHM( LRTValidation );
   DECLARE_ALGORITHM( DVEfficiency );
   DECLARE_ALGORITHM( MuonEfficiency );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )

@@ -38,12 +38,35 @@ StatusCode MuonEfficiency::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
    
     // signal tracking efficiency
-    m_eff_eta_01 = new TProfile("m_eff_eta_01", "Muon tracking efficiency vs eta, dr < 0.01", 50,-3.0,3.0);
-    m_eff_pt_01 = new TProfile("m_eff_pt_01", "Muon tracking efficiency vs pt, dr < 0.01", 50,0,300);
+    m_eff_eta = new TProfile("m_eff_eta", "Muon tracking efficiency vs Z' eta", 50,-3.0,3.0);
+    m_eff_pt = new TProfile("m_eff_pt", "Muon tracking efficiency vs pt", 50,0,800);
+    m_eff_R = new TProfile("m_eff_R", "Muon tracking efficiency vs R", 50,0,400);
+    m_eff_d0 = new TProfile("m_eff_d0", "Muon tracking efficiency vs d0", 50,0,400);
+
+    // 2D efficiency
+    m_eff_pt_vs_prodVtxR_num = new TH2F("m_eff_pt_vs_prodVtxR_num", "signal eff pt vs prodVtx R, num", 50, 0, 300, 50, 0, 1000); // GeV
+    m_eff_pt_vs_prodVtxR_den = new TH2F("m_eff_pt_vs_prodVtxR_den", "signal eff pt vs prodVtx R, den", 50, 0, 300, 50, 0, 1000); // GeV
+
+    m_eff_eta_vs_prodVtxR_num = new TH2F("m_eff_eta_vs_prodVtxR_num", "signal eff eta vs prodVtx R, num", 50, 0, 300, 50, -3.0, 3.0); // GeV
+    m_eff_eta_vs_prodVtxR_den = new TH2F("m_eff_eta_vs_prodVtxR_den", "signal eff eta vs prodVtx R, den", 50, 0, 300, 50, -3.0, 3.0); // GeV
+
+    m_eff_pt_vs_d0_num = new TH2F("m_eff_pt_vs_d0_num", "signal eff pt vs d0, num", 50, 0, 300, 50, 0, 1000); // GeV
+    m_eff_pt_vs_d0_den = new TH2F("m_eff_pt_vs_d0_den", "signal eff pt vs d0, den", 50, 0, 300, 50, 0, 1000); // GeV
+
+    m_eff_eta_vs_d0_num = new TH2F("m_eff_eta_vs_d0_num", "signal eff eta vs d0, num", 50, 0, 300, 50, -3.0, 3.0); // GeV
+    m_eff_eta_vs_d0_den = new TH2F("m_eff_eta_vs_d0_den", "signal eff eta vs d0, den", 50, 0, 300, 50, -3.0, 3.0); // GeV
 
     // output 
-    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_eta_01", m_eff_eta_01) );
-    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_pt_01", m_eff_pt_01) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_eta", m_eff_eta) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_pt", m_eff_pt) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_R", m_eff_R) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_d0", m_eff_d0) );
+
+    // 2D efficiency
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_pt_vs_prodVtxR", m_eff_pt_vs_prodVtxR_num) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_eta_vs_prodVtxR", m_eff_eta_vs_prodVtxR_num) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_pt_vs_d0", m_eff_pt_vs_d0_num) );
+    CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_eta_vs_d0", m_eff_eta_vs_d0_num) );
 
     int signal_truth = 0;
     int signal_reconstructed = 0;
@@ -54,6 +77,12 @@ StatusCode MuonEfficiency::initialize() {
 StatusCode MuonEfficiency::finalize() {
 
     ATH_MSG_INFO ("Finalizing " << name() << "...");
+
+    // divide 2D histograms to get efficiency plot
+    m_eff_pt_vs_prodVtxR_num->Divide(m_eff_pt_vs_prodVtxR_den);
+    m_eff_eta_vs_prodVtxR_num->Divide(m_eff_eta_vs_prodVtxR_den);
+    m_eff_pt_vs_d0_num->Divide(m_eff_pt_vs_d0_den);
+    m_eff_eta_vs_d0_num->Divide(m_eff_eta_vs_d0_den);
 
     // counting number of signal muons
     ATH_MSG_INFO( "Number of signal truth = " << signal_truth);
@@ -77,26 +106,51 @@ StatusCode MuonEfficiency::execute() {
     if (truthParticles) {
         for(auto mu_truth: *truthParticles) {
     
-            // truth selection 
-            //if (!TrackSelection(mu_truth) continue;    // turn off truth selection for now
+            // truth selection  + signal selection
+            if (!m_dvutils->TrackSelection(mu_truth)) continue;
+            if (!m_dvutils->isSignal(mu_truth)) continue;
 
-            // select signal truth
-            if (!isSignal(mu_truth)) continue;
-            else {signal_truth++;}
+            // count signal truth
+            signal_truth++;
             
-            bool reconstructed_01 = false;
+            bool reconstructed = false;
 
-            if (m_dvutils->IsReconstructedAsMuon(*mu_truth)) {
+            if (m_dvutils->IsReconstructedAsMuon(mu_truth)) {
                 signal_reconstructed++;
-                reconstructed_01 = true;
+                reconstructed = true;
             } // end of IsReconstructedAsMuon
 
             // fill efficiency
-            m_eff_eta_01->Fill(mu_truth->eta(), reconstructed_01);
-            m_eff_pt_01->Fill(mu_truth->pt() / 1000., reconstructed_01);
+            m_eff_eta->Fill(mu_truth->eta(), reconstructed);
+            m_eff_pt->Fill(mu_truth->pt() / 1000., reconstructed);
+            m_eff_R->Fill(mu_truth->prodVtx()->perp(), reconstructed );
+
+            // fill 2D efficiency
+            m_eff_pt_vs_prodVtxR_den->Fill(mu_truth->prodVtx()->perp(), mu_truth->pt() / 1000.);
+            m_eff_eta_vs_prodVtxR_den->Fill(mu_truth->prodVtx()->perp(), mu_truth->eta() );
+
+            if (reconstructed) {
+                m_eff_pt_vs_prodVtxR_num->Fill(mu_truth->prodVtx()->perp(), mu_truth->pt() / 1000.);
+                m_eff_eta_vs_prodVtxR_num->Fill(mu_truth->prodVtx()->perp(), mu_truth->eta() );
+            }
+
+            // efficiency vs d0
+            if (mu_truth->isAvailable<float>("d0") ) {
+
+                float d0 = fabs(mu_truth->auxdata< float >("d0"));
+                m_eff_d0->Fill( d0, reconstructed );
+
+                // fill 2D efficiency
+                m_eff_pt_vs_d0_den->Fill(d0, mu_truth->pt() / 1000.);
+                m_eff_eta_vs_d0_den->Fill(d0, mu_truth->eta() );
+                if (reconstructed) {
+                    m_eff_pt_vs_d0_num->Fill(d0, mu_truth->pt() / 1000.);
+                    m_eff_eta_vs_d0_num->Fill(d0, mu_truth->eta() );
+                }
+            }
 
         } // end of truth muon loop
-    } // end of truth muon
+    } // end of truthParticles (truth muon)
     
     return StatusCode::SUCCESS;
 }
@@ -105,25 +159,3 @@ StatusCode MuonEfficiency::beginInputFile() {
 
   return StatusCode::SUCCESS;
 }
-
-bool MuonEfficiency::isSignal (const xAOD::TruthParticle* p) {
-    if ( (p->status() ==1) and (p->absPdgId() == 13) and (p->barcode() < 200000) ){
-        const xAOD::TruthParticle *parent = p;
-        do {
-            parent = parent->parent();
-            if (parent->absPdgId() == 32) {
-                return true;
-            }
-        } while (parent->parent() != NULL );
-    } // end of muon
-    return false;
-} // end of isSignal
-
-bool MuonEfficiency::TrackSelection (const xAOD::TruthParticle* tp) {
-    float maxEta = 2.5;
-    float minPt = 1000;
-    if ( (tp->pt()>1e-7 ? (fabs(tp->eta()) < maxEta) : false) &&  \
-         (tp->pt() > minPt) ) return true;
-    else return false;
-} // end of TrackSelection
-

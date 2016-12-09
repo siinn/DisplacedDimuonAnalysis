@@ -22,11 +22,6 @@ class MuonEfficiency: public ::AthAnalysisAlgorithm {
         virtual StatusCode  finalize();
         
         virtual StatusCode beginInputFile();
-
-        //bool TrackSelection (const xAOD::TrackParticle* p);
-        bool TrackSelection (const xAOD::TruthParticle* p);
-        bool isSignal ( const xAOD::TruthParticle* p );
-        bool decorateTruth(const xAOD::TruthParticle & particle);
     
     private: 
 
@@ -35,8 +30,23 @@ class MuonEfficiency: public ::AthAnalysisAlgorithm {
         int signal_truth;
         int signal_reconstructed;
 
-        TProfile* m_eff_eta_01; //!
-        TProfile* m_eff_pt_01; //!
+        TProfile* m_eff_eta; //!
+        TProfile* m_eff_pt; //!
+        TProfile* m_eff_R; //!
+        TProfile* m_eff_d0; //!
+
+        // 2D efficiency plots
+        TH2F* m_eff_pt_vs_prodVtxR_num; //!
+        TH2F* m_eff_pt_vs_prodVtxR_den; //!
+
+        TH2F* m_eff_eta_vs_prodVtxR_num; //!
+        TH2F* m_eff_eta_vs_prodVtxR_den; //!
+
+        TH2F* m_eff_pt_vs_d0_num; //!
+        TH2F* m_eff_pt_vs_d0_den; //!
+
+        TH2F* m_eff_eta_vs_d0_num; //!
+        TH2F* m_eff_eta_vs_d0_den; //!
 
 }; 
 
