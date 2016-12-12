@@ -78,11 +78,13 @@ StatusCode MuonEfficiency::finalize() {
 
     ATH_MSG_INFO ("Finalizing " << name() << "...");
 
-    // divide 2D histograms to get efficiency plot
-    m_eff_pt_vs_prodVtxR_num->Divide(m_eff_pt_vs_prodVtxR_den);
-    m_eff_eta_vs_prodVtxR_num->Divide(m_eff_eta_vs_prodVtxR_den);
-    m_eff_pt_vs_d0_num->Divide(m_eff_pt_vs_d0_den);
-    m_eff_eta_vs_d0_num->Divide(m_eff_eta_vs_d0_den);
+    if (signal_truth > 0.){
+        // divide 2D histograms to get efficiency plot
+        m_eff_pt_vs_prodVtxR_num->Divide(m_eff_pt_vs_prodVtxR_den);
+        m_eff_eta_vs_prodVtxR_num->Divide(m_eff_eta_vs_prodVtxR_den);
+        m_eff_pt_vs_d0_num->Divide(m_eff_pt_vs_d0_den);
+        m_eff_eta_vs_d0_num->Divide(m_eff_eta_vs_d0_den);
+    }
 
     // counting number of signal muons
     ATH_MSG_INFO( "Number of signal truth = " << signal_truth);

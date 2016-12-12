@@ -119,20 +119,21 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     m_event_cutflow->Fill("AllEvents", 1);
 
-    if (!isMC) {
+    //if (!isMC) {
+    //if (isMC) {
 
-        // GRL
-        if(!m_evtc->PassGRL(*evtInfo)) return StatusCode::SUCCESS;
-        m_event_cutflow->Fill("PassedGRL", 1);
+    // GRL
+    if(!m_evtc->PassGRL(*evtInfo)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("PassedGRL", 1);
 
-        // trigger check
-        if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
-        m_event_cutflow->Fill("PasseedTrig", 1);
+    // trigger check
+    if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("PasseedTrig", 1);
 
-        // event cleaning
-        if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
-        m_event_cutflow->Fill("PassedEvtCleaning", 1);
-    }
+    // event cleaning
+    if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("PassedEvtCleaning", 1);
+    //}
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
