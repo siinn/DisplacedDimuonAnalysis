@@ -54,6 +54,9 @@ class IDVUtils: virtual public IAlgTool {
         // check two muons pass acceptance ( eta < 2.4)
         virtual bool PassAcceptance(const xAOD::TruthVertex* tru_v) = 0;
 
+        // check if one muon of DV is matched to trigger
+        virtual bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc) = 0;
+
         // get maximum d0 among outgoing particles
         virtual float GetMaxd0(const xAOD::TruthVertex* tru_v) = 0;
 

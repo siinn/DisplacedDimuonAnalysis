@@ -77,7 +77,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_dimuon_M_matched = new TH1F("dv_dimuon_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
     m_dv_dimuon_R_matched = new TH1F("dv_dimuon_R_matched","R of matched dimuon dv [mm]",50,0.,300.);
     m_dv_dimuon_R_M_matched = new TH2F("dv_dimuon_R_M_matched","matched dimuon DV position R vs M", 50,0,300,200,0,2000);
-
     m_chi2_ndof = new TH1F("chi2_ndof", "chi^2 / ndof", 50, 0, 50);
 
     // registor for output
@@ -90,7 +89,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_dimuon_z", m_dv_dimuon_z) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_dimuon_r", m_dv_dimuon_r) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_R_M", m_dv_dimuon_R_M) );
-
     CHECK( histSvc->regHist("/DV/SecondaryVertex/chi2_ndof", m_chi2_ndof) );
 
     // only for MC
@@ -119,9 +117,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     m_event_cutflow->Fill("AllEvents", 1);
 
-    //if (!isMC) {
-    //if (isMC) {
-
     // GRL
     if(!m_evtc->PassGRL(*evtInfo)) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("PassedGRL", 1);
@@ -133,7 +128,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // event cleaning
     if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("PassedEvtCleaning", 1);
-    //}
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -183,6 +177,12 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         //----------------------------------------
         if (dv_muc->size() != 2) continue;
         m_dv_cutflow->Fill("#mu#mu", 1);
+
+        //----------------------------------------
+        // Trigger matching
+        //----------------------------------------
+        if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
+        m_dv_cutflow->Fill("Trig. Matching", 1);
 
         //----------------------------------------
         // vertex fit quality

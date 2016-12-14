@@ -8,6 +8,9 @@
 // custom tool
 #include "IDVUtils.h"
 
+// trigger matching tool
+#include "TriggerMatchingTool/IMatchingTool.h"
+
 // from DV framework
 #include "DVCuts/IMuonCuts.h"
 #include "DVCuts/IDiLepDVCuts.h"
@@ -59,6 +62,9 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         // check two muons pass acceptance ( eta < 2.4)
         bool PassAcceptance(const xAOD::TruthVertex* tru_v);
 
+        // check if one muon of DV is matched to trigger
+        bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc);
+
         // get maximum d0 among outgoing particles
         float GetMaxd0(const xAOD::TruthVertex* tru_v);
 
@@ -84,6 +90,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
         ToolHandle<DV::IMuonCuts> m_mc; //!
         ToolHandle<DV::IDiLepDVCuts> m_dilepdvc; //!
+        ToolHandle<Trig::IMatchingTool> m_tmt;
 
 
 };

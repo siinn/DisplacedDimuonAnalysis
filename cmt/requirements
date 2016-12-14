@@ -7,12 +7,16 @@ author  che.32
 #-------------------------------------------------------
 
 ## for athena policies: this has to be the first use statement
-use AtlasPolicy 	AtlasPolicy-*
+use AtlasPolicy 	            AtlasPolicy-*
 
 ## for gaudi tools, services and objects
 use GaudiInterface 	            GaudiInterface-*                External
 use AthenaBaseComps             AthenaBaseComps-*               Control
 use AsgTools                    AsgTools-*                      Control/AthToolSupport
+
+# trigger matching tool
+use TriggerMatchingTool         TriggerMatchingTool-*           Trigger/TrigAnalysis
+
 # DV
 use DVCuts                      DVCuts-*                        DV_xAODAnalysis
 

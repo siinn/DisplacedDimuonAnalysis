@@ -18,11 +18,13 @@ AthAlgTool( type, name, parent ),
 m_accTr("recoTrackLink"),
 m_accMu("DV_Muons"),
 m_dilepdvc("DV::DiLepDVCuts/DiLepDVCuts"),
+m_tmt("Trig::MatchingTool/MyMatchingTool"),
 m_mc("DV::MuonCuts/DiLepMuonCuts")
 {
     declareInterface<IDVUtils>(this);
     declareProperty("MuonCut", m_mc);
     declareProperty("DiLepDVCuts", m_dilepdvc);
+    declareProperty("TriggerMatchingTool", m_tmt);
 
 }
 
@@ -165,6 +167,18 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc
 
     // return null if there is no match (reco dv is not matched to truth)
     return nullptr;
+}
+
+// trigger matching. check if one muon of DV is matched to trigger
+bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc) {
+
+    bool pass = false;
+
+    for(auto mu: dv_muc){
+        ATH_MSG_DEBUG("Trigger matched = " << m_tmt->match(*mu,"HLT_mu60_0eta105_msonly"));
+        if (m_tmt->match(*mu,"HLT_mu60_0eta105_msonly")) pass = true;
+    }
+    return pass;
 }
 
 //-------------------------------------------------------------
