@@ -2,8 +2,8 @@
 #define DISPLACEDDIMUONANALYSIS_VERTEXRES_H 1
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
-#include "DVCuts/IDiLepDVCuts.h"
-#include "DVCuts/IEventCuts.h"
+#include "DDLBase/IDiLepDVCuts.h"
+#include "DDLBase/IEventCuts.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -19,9 +19,9 @@ class VertexRes: public ::AthAnalysisAlgorithm {
   virtual StatusCode  finalize();
 
  private: 
-        ToolHandle<DV::IDiLepDVCuts> m_dilepdvc; //!
+        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc; //!
+        ToolHandle<DDL::IEventCuts> m_evtc; //!
         ToolHandle<IDVUtils>  m_dvutils; //!
-        ToolHandle<DV::IEventCuts> m_evtc; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

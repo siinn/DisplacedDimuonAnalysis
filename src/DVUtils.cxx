@@ -17,9 +17,9 @@ DVUtils::DVUtils( const std::string& type,const std::string& name, const IInterf
 AthAlgTool( type, name, parent ),
 m_accTr("recoTrackLink"),
 m_accMu("DV_Muons"),
-m_dilepdvc("DV::DiLepDVCuts/DiLepDVCuts"),
-m_tmt("Trig::MatchingTool/MyMatchingTool"),
-m_mc("DV::MuonCuts/DiLepMuonCuts")
+m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
+m_mc("DDL::MuonCuts/DiLepMuonCuts"),
+m_tmt("Trig::MatchingTool/MyMatchingTool")
 {
     declareInterface<IDVUtils>(this);
     declareProperty("MuonCut", m_mc);
@@ -98,30 +98,62 @@ float DVUtils::getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 }
 
 // apply muon matching and decorate dv with muon
-void DVUtils::ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc) {
-    // create containers
-    auto dv_muc = std::make_shared<xAOD::MuonContainer>(SG::VIEW_ELEMENTS);
-    m_accMu(dv) = dv_muc;
+//void DVUtils::ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc) {
+//
+//  
+//    ATH_MSG_INFO("DEBUG: 1"); 
+//    // create containers
+//    auto dv_muc = std::make_shared<xAOD::MuonContainer>(SG::VIEW_ELEMENTS);
+//    m_accMu(dv) = dv_muc;
+//    ATH_MSG_INFO("DEBUG: 2"); 
+//
+//    // muon matching via pointer comparison
+//    for(auto trl: dv.trackParticleLinks()) {
+//        ATH_MSG_INFO("DEBUG: 3"); 
+//
+//        //bool recoTrackLink = (*trl)->auxdata<ElementLink<xAOD::TrackParticleContainer> >("recoTrackLink");
+//        //if (!recoTrackLink) continue;
+//
+//        const xAOD::TrackParticle* tr = *(m_accTr(**trl));
+//        ATH_MSG_INFO("DEBUG: 3.1, tr = *(m_accTr(**trl)) = " << tr); 
+//
+//        ATH_MSG_INFO("DEBUG: 4"); 
+//        for(auto mu: muc) {
+//            ATH_MSG_INFO("DEBUG: 5"); 
+//
+//            // retrieve ID track from muon
+//            auto mu_idtr = m_mc->GetTrack(*mu);
+//            ATH_MSG_INFO("DEBUG: 5.1, getTrack(*mu) = mm_idtr = " << mu_idtr); 
+//            ATH_MSG_INFO("DEBUG: 6.1, is mu_idtr == tr? "); 
+//
+//            if(mu_idtr == nullptr) continue;
+//            if(mu_idtr == tr) {
+//                dv_muc->push_back(mu);
+//                ATH_MSG_INFO("DEBUG: 6.2, YES"); 
+//            }
+//            ATH_MSG_INFO("DEBUG: 6.3, NO"); 
+//
+//
+//        } // end of muon loop
+//    } // end of dv trackparticle link
+//} // end of ApplyMuonMatching
 
-    // muon matching via pointer comparison
-    for(auto trl: dv.trackParticleLinks()) {
 
-        bool recoTrackLink = (*trl)->auxdata<ElementLink<xAOD::TrackParticleContainer> >("recoTrackLink");
-        if (!recoTrackLink) continue;
+//bool DVUtils::CheckDVMuon(const xAOD::Vertex& dv) {
+//
+//    if(!m_accMu.isAvailable(dv)) {
+//        ATH_MSG_INFO("DEBUG: accuMu is not available"); 
+//        return false;
+//    }
+//    if(m_accMu(dv) == nullptr) {
+//        ATH_MSG_INFO("DEBUG: accuMu is empty"); 
+//        return false;
+//    }
+//    ATH_MSG_INFO("DEBUG: Muon is available, dv = "); 
+//    ATH_MSG_INFO(&dv); 
+//    return true;
+//}
 
-        const xAOD::TrackParticle* tr = *(m_accTr(**trl));
-
-        for(auto mu: muc) {
-
-            // retrieve ID track from muon
-            auto mu_idtr = m_mc->GetTrack(*mu);
-
-            if(mu_idtr == nullptr) continue;
-            if(mu_idtr == tr) dv_muc->push_back(mu);
-
-        } // end of muon loop
-    } // end of dv trackparticle link
-} // end of ApplyMuonMatching
 
 
 // match dv to signal truth
@@ -199,13 +231,20 @@ bool DVUtils::IsReconstructed(const xAOD::TruthVertex* tru_v) {
     const xAOD::MuonContainer* muc = nullptr;
     CHECK( evtStore()->retrieve( muc, "Muons" ));
 
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
     // make copies of muon
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
     xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
 
+    auto elc_copy = xAOD::shallowCopyContainer(*elc);
+    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
+
     // perform lepton matching
     for(auto dv: *dvc_copy.first) {
-        ApplyMuonMatching(*dv, *muc_copy.first);
+        //ApplyMuonMatching(*dv, *muc_copy.first);
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
     }
 
     // access signal muons

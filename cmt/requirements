@@ -16,14 +16,18 @@ use AsgTools                    AsgTools-*                      Control/AthToolS
 
 # trigger matching tool
 use TriggerMatchingTool         TriggerMatchingTool-*           Trigger/TrigAnalysis
+use GoodRunsLists               GoodRunsLists-*                 DataQuality
+use TrigDecisionTool            TrigDecisionTool-*              Trigger/TrigAnalysis
 
 # DV
-use DVCuts                      DVCuts-*                        DV_xAODAnalysis
+use DDLBase                     DDLBase-*                       
 
 # xAOD
 use xAODTracking                xAODTracking-*                  Event/xAOD
 use xAODTruth                   xAODTruth-*                     Event/xAOD
 use xAODMuon                    xAODMuon-*                      Event/xAOD
+use xAODBase                    xAODBase-*                      Event/xAOD
+
 
 #-------------------------------------------------------
 # private
@@ -41,7 +45,6 @@ use xAODEventInfo               xAODEventInfo-*                 Event/xAOD
 use xAODEgamma                  xAODEgamma-*                    Event/xAOD
 use xAODTracking                xAODTracking-*                  Event/xAOD
 use xAODEventInfo               xAODEventInfo-*                 Event/xAOD
-use xAODBase                    xAODBase-*                      Event/xAOD
 use xAODCore                    xAODCore-*                      Event/xAOD
 
 use PathResolver                PathResolver-*                  Tools
@@ -49,6 +52,7 @@ use PathResolver                PathResolver-*                  Tools
 # DV
 use DVTools                     DVTools-*                       DV_xAODAnalysis
 use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis
+use DVCuts                      DVCuts-*                        DV_xAODAnalysis
 
 # muon
 use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID

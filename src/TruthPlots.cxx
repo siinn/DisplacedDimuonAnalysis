@@ -58,7 +58,15 @@ StatusCode TruthPlots::initialize() {
     m_zp_eta_slice1 = new TH1F("m_zp_eta_slice1", "Z' eta distribution, slice 1", 50, -3.0, 3.0); // eta distribution with 0 < r < 10 mm
     m_zp_eta_slice2 = new TH1F("m_zp_eta_slice2", "Z' eta distribution, slice 2", 50, -3.0, 3.0);  // eta distribution with 10 < r < 50 mm
     m_zp_eta_slice3 = new TH1F("m_zp_eta_slice3", "Z' eta distribution, slice 3", 50, -3.0, 3.0);  // eta distribution with r > 50 mm
-    m_zp_eta_slice4 = new TH1F("m_zp_eta_slice4", "Z' eta distribution, slice 3", 50, -3.0, 3.0);  // eta distribution with 40 < r < 60 mm
+    m_zp_eta_slice4 = new TH1F("m_zp_eta_slice4", "Z' eta distribution, slice 4", 50, -3.0, 3.0);  // eta distribution with 40 < r < 60 mm
+
+    m_zp_eta_slice2_pt_slice = new TH1F("m_zp_eta_slice2_pt_slice", "Z' eta distribution, eta slice 2, pt slice", 50, -3.0, 3.0);  // eta distribution with 10 < r < 50 mm, 60 < pT < 80 GeV
+    m_zp_eta_slice3_pt_slice = new TH1F("m_zp_eta_slice3_pt_slice", "Z' eta distribution, eta slice 3, pt slice", 50, -3.0, 3.0);  // eta distribution with 10 < r < 50 mm, 180 < pT < 240 GeV
+
+    m_zp_eta_low_pt = new TH1F("m_zp_eta_low_pt", "Z' eta distribution, low pt", 50, -3.0, 3.0);  // eta distribution with pT < 20 GeV
+    m_zp_eta_high_pt = new TH1F("m_zp_eta_high_pt", "Z' eta distribution, high pt", 50, -3.0, 3.0);  // eta distribution with 80 < pT < 120 GeV
+    m_zp_R_low_pt = new TH1F("m_zp_R_low_pt", "Z' R distribution, low pt", 50, 0, 300.0);  // R distribution with pT < 20 GeV
+    m_zp_R_high_pt = new TH1F("m_zp_R_high_pt", "Z' R distribution, high pt", 50, 0, 300.0);  // R distribution with 80 < pT < 120 GeV
 
     m_zp_pt_slice1 = new TH1F("m_zp_pt_slice1", "Z' pt distribution, slice1", 50, 0, 1000); // pt distribution with 0 < r < 10 mm
     m_zp_pt_slice2 = new TH1F("m_zp_pt_slice2", "Z' pt distribution, slice2", 50, 0, 1000); // pt distribution with 10 < r < 50 mm
@@ -90,6 +98,14 @@ StatusCode TruthPlots::initialize() {
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_slice3", m_zp_eta_slice3) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_slice4", m_zp_eta_slice4) );
 
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_slice2_pt_slice", m_zp_eta_slice2_pt_slice) );
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_slice3_pt_slice", m_zp_eta_slice3_pt_slice) );
+
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_low_pt", m_zp_eta_low_pt) );
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_high_pt", m_zp_eta_high_pt) );
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/zp_R_low_pt", m_zp_R_low_pt) );
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/zp_R_high_pt", m_zp_R_high_pt) );
+
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/pt/zp_pt_slice1", m_zp_pt_slice1) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/pt/zp_pt_slice2", m_zp_pt_slice2) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/pt/zp_pt_slice3", m_zp_pt_slice3) );
@@ -102,25 +118,25 @@ StatusCode TruthPlots::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
 
     // normalize distributions
-    m_truth_pt_slice1->Scale( 1/ m_truth_pt_slice1->Integral() );
-    m_truth_pt_slice2->Scale( 1/ m_truth_pt_slice2->Integral() );
-    m_truth_pt_slice3->Scale( 1/ m_truth_pt_slice3->Integral() );
-    m_truth_pt_slice4->Scale( 1/ m_truth_pt_slice4->Integral() );
+    //m_truth_pt_slice1->Scale( 1/ m_truth_pt_slice1->Integral() );
+    //m_truth_pt_slice2->Scale( 1/ m_truth_pt_slice2->Integral() );
+    //m_truth_pt_slice3->Scale( 1/ m_truth_pt_slice3->Integral() );
+    //m_truth_pt_slice4->Scale( 1/ m_truth_pt_slice4->Integral() );
 
-    m_truth_eta_slice1->Scale( 1/ m_truth_eta_slice1->Integral() );
-    m_truth_eta_slice2->Scale( 1/ m_truth_eta_slice2->Integral() );
-    m_truth_eta_slice3->Scale( 1/ m_truth_eta_slice3->Integral() );
-    m_truth_eta_slice4->Scale( 1/ m_truth_eta_slice4->Integral() );
+    //m_truth_eta_slice1->Scale( 1/ m_truth_eta_slice1->Integral() );
+    //m_truth_eta_slice2->Scale( 1/ m_truth_eta_slice2->Integral() );
+    //m_truth_eta_slice3->Scale( 1/ m_truth_eta_slice3->Integral() );
+    //m_truth_eta_slice4->Scale( 1/ m_truth_eta_slice4->Integral() );
 
-    m_zp_eta_slice1->Scale( 1/m_zp_eta_slice1->Integral() );
-    m_zp_eta_slice2->Scale( 1/m_zp_eta_slice2->Integral() );
-    m_zp_eta_slice3->Scale( 1/m_zp_eta_slice3->Integral() );
-    m_zp_eta_slice4->Scale( 1/m_zp_eta_slice4->Integral() );
+    //m_zp_eta_slice1->Scale( 1/m_zp_eta_slice1->Integral() );
+    //m_zp_eta_slice2->Scale( 1/m_zp_eta_slice2->Integral() );
+    //m_zp_eta_slice3->Scale( 1/m_zp_eta_slice3->Integral() );
+    //m_zp_eta_slice4->Scale( 1/m_zp_eta_slice4->Integral() );
 
-    m_zp_pt_slice1->Scale( 1/m_zp_pt_slice1->Integral() );
-    m_zp_pt_slice2->Scale( 1/m_zp_pt_slice2->Integral() );
-    m_zp_pt_slice3->Scale( 1/m_zp_pt_slice3->Integral() );
-    m_zp_pt_slice4->Scale( 1/m_zp_pt_slice4->Integral() );
+    //m_zp_pt_slice1->Scale( 1/m_zp_pt_slice1->Integral() );
+    //m_zp_pt_slice2->Scale( 1/m_zp_pt_slice2->Integral() );
+    //m_zp_pt_slice3->Scale( 1/m_zp_pt_slice3->Integral() );
+    //m_zp_pt_slice4->Scale( 1/m_zp_pt_slice4->Integral() );
 
     
     return StatusCode::SUCCESS;
@@ -191,14 +207,34 @@ StatusCode TruthPlots::execute() {
         if ( (tru_v->perp() > 10.) and (tru_v->perp() < 50.) ) {
             m_zp_eta_slice2->Fill(zp_eta);
             m_zp_pt_slice2->Fill(zp_pt / 1000.); // GeV
+
+            // also pT slice
+            if ( (zp_pt > 60000) and (zp_pt < 80000) ){ // MeV
+                m_zp_eta_slice2_pt_slice->Fill(zp_eta);
+            }
         }
         if (tru_v->perp() > 50.) {
             m_zp_eta_slice3->Fill(zp_eta);
             m_zp_pt_slice3->Fill(zp_pt / 1000.); // GeV
+
+            // also pT slice
+            if ( (zp_pt > 180000) and (zp_pt < 240000) ){ // MeV
+                m_zp_eta_slice3_pt_slice->Fill(zp_eta);
+            }
         }
         if ( (tru_v->perp() > 40.) and (tru_v->perp() < 60.) ) {
             m_zp_eta_slice4->Fill(zp_eta);
             m_zp_pt_slice4->Fill(zp_pt / 1000.); // GeV
+        }
+
+        // Z' distribution separated by pT
+        if ( zp_pt < 20000 ) { // MeV
+            m_zp_eta_low_pt->Fill(zp_eta);
+            m_zp_R_low_pt->Fill(tru_v->perp());
+        }
+        if ( (zp_pt > 80000) and (zp_pt < 120000)) { // MeV
+            m_zp_eta_high_pt->Fill(zp_eta);
+            m_zp_R_high_pt->Fill(tru_v->perp());
         }
 
 

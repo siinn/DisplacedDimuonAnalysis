@@ -43,7 +43,10 @@ class IDVUtils: virtual public IAlgTool {
         virtual const xAOD::TruthParticle* FindFinalState(const xAOD::TruthParticle* tp) = 0;
 
         // muon matching tool
-        virtual void ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc) = 0;
+        //virtual void ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc) = 0;
+
+        // check if muons associated with DV exist
+        //virtual bool CheckDVMuon(const xAOD::Vertex& dv) = 0;
 
         // match truth dv to reco dv
         virtual bool IsReconstructed(const xAOD::TruthVertex* vertex_truth) = 0;

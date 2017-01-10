@@ -12,8 +12,8 @@
 #include "TriggerMatchingTool/IMatchingTool.h"
 
 // from DV framework
-#include "DVCuts/IMuonCuts.h"
-#include "DVCuts/IDiLepDVCuts.h"
+#include "DDLBase/IMuonCuts.h"
+#include "DDLBase/IDiLepDVCuts.h"
 
 #include "xAODTracking/Vertex.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -51,7 +51,10 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         const xAOD::TruthParticle* FindFinalState(const xAOD::TruthParticle* tp);
 
         // muon matching tool
-        void ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc);
+        //void ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc);
+
+        // check if muons associated with DV exist
+        //bool CheckDVMuon(const xAOD::Vertex& dv);
 
         // match truth dv to reco dv
         bool IsReconstructed(const xAOD::TruthVertex* vertex_truth);
@@ -88,8 +91,8 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
     private:
 
-        ToolHandle<DV::IMuonCuts> m_mc; //!
-        ToolHandle<DV::IDiLepDVCuts> m_dilepdvc; //!
+        ToolHandle<DDL::IMuonCuts> m_mc; //!
+        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc; //!
         ToolHandle<Trig::IMatchingTool> m_tmt;
 
 

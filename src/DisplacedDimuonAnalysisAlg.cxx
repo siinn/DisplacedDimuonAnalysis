@@ -10,6 +10,7 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODCore/ShallowCopy.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
@@ -28,10 +29,12 @@
 
 DisplacedDimuonAnalysisAlg::DisplacedDimuonAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
 AthAnalysisAlgorithm( name, pSvcLocator ),
-m_dilepdvc("DV::DiLepDVCuts/DiLepDVCuts"),
-m_evtc("DV::EventCuts/DiLepEventCuts"),
+m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
+m_evtc("DDL::EventCuts/DiLepEventCuts"),
+m_dvc("DDL::DVCuts/DiLepBaseCuts"),
 m_dvutils("DVUtils"),
-m_dvc("DV::DVCuts/DiLepBaseCuts"),
+m_grlTool("GoodRunsListSelectionTool/GRLTool"),
+m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
 m_accMass("mass")
 {
     // initialize tools
@@ -39,6 +42,8 @@ m_accMass("mass")
     declareProperty("DVUtils", m_dvutils);
     declareProperty("DiLepEventCuts", m_evtc);
     declareProperty("DiLepBaseCuts", m_dvc);
+    declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
+    declareProperty("TrigDecisionTool", m_tdt);
 
 }
 
@@ -53,10 +58,11 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // Event cut
     //--------------------------------------------------------
 
-    auto evtc = dynamic_cast<DV::EventCuts*>(&*m_evtc);
+    //auto evtc = dynamic_cast<DV::EventCuts*>(&*m_evtc);
 
     // set trigger
-    evtc->SetTriggers({"HLT_mu60_0eta105_msonly"});
+    //evtc->SetTriggers({"HLT_mu60_0eta105_msonly"});
+    m_evtc->SetTriggers({"HLT_mu60_0eta105_msonly"});
 
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
@@ -114,28 +120,53 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
+    ATH_MSG_DEBUG("DEBUG: processing event " << evtInfo->eventNumber());
 
     m_event_cutflow->Fill("AllEvents", 1);
 
     // GRL
-    if(!m_evtc->PassGRL(*evtInfo)) return StatusCode::SUCCESS;
-    m_event_cutflow->Fill("PassedGRL", 1);
+    if (!isMC) {
+        ATH_MSG_DEBUG("DEBUG: checking GRL..");
+        if(!m_grlTool->passRunLB(*evtInfo)) {
+            ATH_MSG_DEBUG("DEBUG: GRL not passed");
+            return StatusCode::SUCCESS;
+            }
+        m_event_cutflow->Fill("PassedGRL", 1);
+    }
+    ATH_MSG_DEBUG("DEBUG: GRL passed");
 
     // trigger check
-    if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
+    ATH_MSG_DEBUG("DEBUG: checking trigger..");
+    if(!m_evtc->PassTrigger()) {
+        ATH_MSG_DEBUG("DEBUG: Trigger not passed");
+        return StatusCode::SUCCESS;
+        }
+
+    ATH_MSG_DEBUG("DEBUG: Trigger passed");
+
+    //if(!m_tdt->isPassed("HLT_mu60_0eta105_msonly")) return StatusCode::SUCCESS;
+    //ATH_MSG_DEBUG("DEBUG: Trigger passed?");
     m_event_cutflow->Fill("PasseedTrig", 1);
 
     // event cleaning
     if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("PassedEvtCleaning", 1);
 
+    ATH_MSG_DEBUG("DEBUG: Passed event cleaning");
+
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
     CHECK( evtStore()->retrieve( muc, "Muons" ));
 
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
     // make copies of leptons
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
     xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
+
+    auto elc_copy = xAOD::shallowCopyContainer(*elc);
+    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
 
     // retrieve primary vertices
     const xAOD::VertexContainer* pvc = nullptr;
@@ -151,18 +182,34 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // make a copy of vertex containers
     auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
 
+        // good so far
+    ATH_MSG_DEBUG("DEBUG: Before lepton matching");
+
     // perform lepton matching
     for(auto dv: *dvc_copy.first) {
-        m_dvutils->ApplyMuonMatching(*dv, *muc_copy.first);
+        ATH_MSG_DEBUG("DEBUG: start muon matching for dv = " << dv);
+        //m_dvutils->ApplyMuonMatching(*dv, *muc_copy.first);
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
+        ATH_MSG_DEBUG("DEBUG: end of matching for this dv");
     }
+    
+    ATH_MSG_DEBUG("DEBUG: End of lepton matching");
+
 
     // final plotting
     for(auto dv: *dvc_copy.first) {
+        ATH_MSG_DEBUG("DEBUG: DV loop, dv = " << dv);
+
+        // check if dv has associated muon
+        //if (!m_dvutils->CheckDVMuon(*dv)) continue;
+
         // access invariant mass
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
 
+        ATH_MSG_DEBUG("DEBUG: Before GetMu");
         // collect muons from this dv
         auto dv_muc = m_dilepdvc->GetMu(*dv);
+        ATH_MSG_DEBUG("DEBUG: After GetMu");
 
         // fill all dv
         m_dv_M->Fill(dv_mass);               // all dv
@@ -170,7 +217,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         //----------------------------------------
         // counting all dv's
         //----------------------------------------
-        m_dv_cutflow->Fill("All DV", 1);
+        m_dv_cutflow->Fill("All DV with #mu > 0", 1);
 
         //----------------------------------------
         // require dv to have 2 muons

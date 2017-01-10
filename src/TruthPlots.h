@@ -42,6 +42,15 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         TH1F* m_zp_eta_slice2;
         TH1F* m_zp_eta_slice3;
         TH1F* m_zp_eta_slice4;
+
+        TH1F* m_zp_eta_slice2_pt_slice;
+        TH1F* m_zp_eta_slice3_pt_slice;
+
+        TH1F* m_zp_eta_low_pt;
+        TH1F* m_zp_eta_high_pt;
+        TH1F* m_zp_R_low_pt;
+        TH1F* m_zp_R_high_pt;
+
         TH2F* m_zp_eta_vs_prodVtxR; //!
 
         TH1F* m_zp_pt_slice1;

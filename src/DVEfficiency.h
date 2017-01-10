@@ -2,8 +2,8 @@
 #define DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H 1
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
-#include "DVCuts/IDiLepDVCuts.h"
-#include "DVCuts/IDVCuts.h"
+#include "DDLBase/IDiLepDVCuts.h"
+#include "DDLBase/IDVCuts.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -23,7 +23,7 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
 
  private: 
         ToolHandle<IDVUtils>  m_dvutils; //!
-        ToolHandle<DV::IDVCuts> m_dvc; //!
+        ToolHandle<DDL::IDVCuts> m_dvc; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

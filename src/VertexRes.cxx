@@ -13,12 +13,14 @@
 // xAOD
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
 
 
 VertexRes::VertexRes( const std::string& name, ISvcLocator* pSvcLocator ) :
 AthAnalysisAlgorithm( name, pSvcLocator ),
-m_dilepdvc("DV::DiLepDVCuts/DiLepDVCuts"),
-m_evtc("DV::EventCuts/DiLepEventCuts"),
+m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
+m_evtc("DDL::EventCuts/DiLepEventCuts"),
 m_dvutils("DVUtils"),
 m_accMass("mass")
 {
@@ -82,14 +84,21 @@ StatusCode VertexRes::execute() {
     const xAOD::MuonContainer* muc = nullptr;
     CHECK( evtStore()->retrieve( muc, "Muons" ));
 
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
     // make copies of leptons
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
     xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
 
+    auto elc_copy = xAOD::shallowCopyContainer(*elc);
+    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
+
 
     // perform lepton matching
     for(auto dv: *dvc_copy.first) {
-        m_dvutils->ApplyMuonMatching(*dv, *muc_copy.first);
+        //m_dvutils->ApplyMuonMatching(*dv, *muc_copy.first);
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
     }
 
     // loop over sv to calculate deviation

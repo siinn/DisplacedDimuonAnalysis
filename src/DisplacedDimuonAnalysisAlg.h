@@ -13,15 +13,22 @@
 
 // DV
 #include "DVAnalyses/AlgBase.h"
-#include "DVCuts/IDVCuts.h"
-#include "DVCuts/IEventCuts.h"
+#include "DDLBase/IDVCuts.h"
+#include "DDLBase/IEventCuts.h"
 //#include "DVCuts/IDiLepCosmics.h"
-#include "DVCuts/IDiLepDVCuts.h"
+#include "DDLBase/IDiLepDVCuts.h"
 //#include "DVTools/IOverlapRemoval.h"
 //#include "DVTools/IPhotonMatch.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
+
+// GRL
+//#include "GoodRunsLists/GoodRunsListSelectionTool.h"
+#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
+
+// Trigger decision tool
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 
 class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm { 
@@ -43,10 +50,12 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         //StoreGateSvc* m_StoreGate;
 
         // tool for muon matching to dv
-        ToolHandle<DV::IDiLepDVCuts> m_dilepdvc; //!
-        ToolHandle<DV::IEventCuts> m_evtc; //!
+        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc; //!
+        ToolHandle<DDL::IEventCuts> m_evtc; //!
         ToolHandle<IDVUtils>  m_dvutils; //!
-        ToolHandle<DV::IDVCuts> m_dvc; //!
+        ToolHandle<DDL::IDVCuts> m_dvc; //!
+        ToolHandle<IGoodRunsListSelectionTool> m_grlTool;
+        ToolHandle<Trig::TrigDecisionTool> m_tdt;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
