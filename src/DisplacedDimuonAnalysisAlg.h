@@ -43,6 +43,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         
         virtual StatusCode beginInputFile();
 
+        virtual void  plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc);
     
     private:
 
@@ -76,6 +77,21 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
 
         // check vertex fit
         TH1F* m_chi2_ndof; //!
+
+        // muon kinematics
+        TH1F* m_signal_muon_pt; //!
+        TH1F* m_signal_muon_pt_low; //!
+        TH1F* m_signal_muon_eta; //!
+        TH1F* m_signal_muon_phi; //!
+        TH1F* m_signal_muon_DeltaR; //!
+        TH1F* m_signal_muon_Delta_pT; //!
+
+
+
+
+
+
+
 
         // only for MC
 

@@ -57,6 +57,12 @@ class IDVUtils: virtual public IAlgTool {
         // check two muons pass acceptance ( eta < 2.4)
         virtual bool PassAcceptance(const xAOD::TruthVertex* tru_v) = 0;
 
+        // find delta R between two muons from dv muon container
+        virtual float getDeltaR(const DataVector<xAOD::Muon> dv_muc) = 0;
+
+        // find delta pT between two muons from dv muon container
+        virtual float getDelta_pT(const DataVector<xAOD::Muon> dv_muc) = 0;
+
         // check if one muon of DV is matched to trigger
         virtual bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc) = 0;
 

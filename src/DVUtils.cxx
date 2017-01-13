@@ -404,7 +404,32 @@ bool DVUtils::IsReconstructedAsMuon(const xAOD::TruthParticle* tp) {
 
 }
 
+// find delta R between two muons from dv muon container
+float DVUtils::getDeltaR(const DataVector<xAOD::Muon> dv_muc ) {
 
+    // define TLorentzVector of muons
+    TLorentzVector tlv_mu0 = dv_muc.at(0)->p4();
+    TLorentzVector tlv_mu1 = dv_muc.at(1)->p4();
+
+    float deltaR_tlv = tlv_mu0.DeltaR(tlv_mu1);
+
+    return deltaR_tlv;
+}
+
+// find delta pT between two muons from dv muon container
+float DVUtils::getDelta_pT(const DataVector<xAOD::Muon> dv_muc ) {
+
+    // define TLorentzVector of muons
+    TLorentzVector tlv_mu0 = dv_muc.at(0)->p4();
+    TLorentzVector tlv_mu1 = dv_muc.at(1)->p4();
+
+    float deltapT = (tlv_mu0 - tlv_mu1).Perp() / 1000.;
+
+    //ATH_MSG_INFO("delta pT = " << deltapT);
+
+    return deltapT;
+
+}
 
 //-------------------------------------------------------------
 // ID track tools

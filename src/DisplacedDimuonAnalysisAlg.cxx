@@ -20,6 +20,9 @@
 // DV
 #include "DVCuts/EventCuts.h"
 
+// for M_PI
+#include "cmath"
+
 
 // debug
 //#include "StoreGate/StoreGate.h"
@@ -75,9 +78,17 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_M = new TH1F("dv_M","All DV mass in GeV",200,0.,2000.);
     m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",200,0.,2000.);
     m_dv_dimuon_R = new TH1F("dv_dimuon_R","R of dimuon dv [mm]",50,0.,300.);
-    m_dv_dimuon_z = new TH1F("dv_dimuon_z","z of dimuon dv [mm]",100,0.,1000.);
+    m_dv_dimuon_z = new TH1F("dv_dimuon_z","z of dimuon dv [mm]",100,-1000.,1000.);
     m_dv_dimuon_r = new TH1F("dv_dimuon_r","r of dimuon dv [mm]",100,0.,1000.);
     m_dv_dimuon_R_M = new TH2F("dv_dimuon_R_M","Dimuon DV position R vs M", 50,0,300,200,0,2000);
+
+    // muon kinematics distribution
+    m_signal_muon_pt = new TH1F("signal_muon_pt","Signal muon pT",50,0.,1000.);
+    m_signal_muon_pt_low = new TH1F("signal_muon_pt_low","Signal muon low pT",50,0.,100.);
+    m_signal_muon_eta = new TH1F("signal_muon_eta","Signal muon eta",50,-3.0,3.0);
+    m_signal_muon_phi = new TH1F("signal_muon_phi","Signal muon phi",50,-M_PI,M_PI);
+    m_signal_muon_DeltaR = new TH1F("signal_muon_DeltaR","Signal muon Delta R",100, 0., 5.);
+    m_signal_muon_Delta_pT = new TH1F("signal_muon_Delta_pT","Signal muon Delta pT",100, 0., 500.);
 
     // only for MC
     m_dv_dimuon_M_matched = new TH1F("dv_dimuon_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
@@ -96,6 +107,14 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_dimuon_r", m_dv_dimuon_r) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/reco_dv_R_M", m_dv_dimuon_R_M) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/chi2_ndof", m_chi2_ndof) );
+
+    // muon kinematics distribution
+    CHECK( histSvc->regHist("/DV/Dimuon/Reconstructed/signal_muon_pt", m_signal_muon_pt) );
+    CHECK( histSvc->regHist("/DV/Dimuon/Reconstructed/signal_muon_pt_low", m_signal_muon_pt_low) );
+    CHECK( histSvc->regHist("/DV/Dimuon/Reconstructed/signal_muon_eta", m_signal_muon_eta) );
+    CHECK( histSvc->regHist("/DV/Dimuon/Reconstructed/signal_muon_phi", m_signal_muon_phi) );
+    CHECK( histSvc->regHist("/DV/Dimuon/Reconstructed/signal_muon_DeltaR", m_signal_muon_DeltaR) );
+    CHECK( histSvc->regHist("/DV/Dimuon/Reconstructed/signal_muon_Delta_pT", m_signal_muon_Delta_pT) );
 
     // only for MC
     CHECK( histSvc->regHist("/DV/SecondaryVertex/Reconstructed/truth-matched/reco_dv_dimuon_M", m_dv_dimuon_M_matched) );
@@ -217,7 +236,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         //----------------------------------------
         // counting all dv's
         //----------------------------------------
-        m_dv_cutflow->Fill("All DV with #mu > 0", 1);
+        m_dv_cutflow->Fill("All SV", 1);
 
         //----------------------------------------
         // require dv to have 2 muons
@@ -290,8 +309,12 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_dimuon_M_matched->Fill(dv_mass);                          // dimuon mass
             m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
             m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
-
         } // end of isMC
+
+
+        // plot muon kinematics
+        plot_muon_kinematics(*dv_muc);
+
     } // end of dv loop
     
     return StatusCode::SUCCESS;
@@ -302,4 +325,26 @@ StatusCode DisplacedDimuonAnalysisAlg::beginInputFile() {
   return StatusCode::SUCCESS;
 }
 
+void DisplacedDimuonAnalysisAlg::plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc) {
+    ATH_MSG_DEBUG ("Plotting muon kinematics" << name() << "...");
+
+    for(auto mu: dv_muc){
+        ATH_MSG_DEBUG("muon pt = " << mu->pt() );
+
+        float mu_pt = mu->pt() / 1000.; // GeV
+        m_signal_muon_pt->Fill(mu_pt);
+        m_signal_muon_pt_low->Fill(mu_pt);
+        m_signal_muon_eta->Fill(mu->eta());
+        m_signal_muon_phi->Fill(mu->phi());
+    }
+
+    float delta_R = m_dvutils->getDeltaR(dv_muc);
+    float delta_pT = m_dvutils->getDelta_pT(dv_muc);
+
+    m_signal_muon_DeltaR->Fill(delta_R); // angular difference between two muons
+    m_signal_muon_Delta_pT->Fill(delta_pT); // sqrt(dpx^2 + dpy^2) in GeV
+
+
+    return;
+}
 
