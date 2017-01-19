@@ -139,23 +139,6 @@ float DVUtils::getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 //} // end of ApplyMuonMatching
 
 
-//bool DVUtils::CheckDVMuon(const xAOD::Vertex& dv) {
-//
-//    if(!m_accMu.isAvailable(dv)) {
-//        ATH_MSG_INFO("DEBUG: accuMu is not available"); 
-//        return false;
-//    }
-//    if(m_accMu(dv) == nullptr) {
-//        ATH_MSG_INFO("DEBUG: accuMu is empty"); 
-//        return false;
-//    }
-//    ATH_MSG_INFO("DEBUG: Muon is available, dv = "); 
-//    ATH_MSG_INFO(&dv); 
-//    return true;
-//}
-
-
-
 // match dv to signal truth
 const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc ) {
 
@@ -404,6 +387,10 @@ bool DVUtils::IsReconstructedAsMuon(const xAOD::TruthParticle* tp) {
 
 }
 
+//-------------------------------------------------------------
+// help functions for signal muons
+//-------------------------------------------------------------
+
 // find delta R between two muons from dv muon container
 float DVUtils::getDeltaR(const DataVector<xAOD::Muon> dv_muc ) {
 
@@ -416,6 +403,30 @@ float DVUtils::getDeltaR(const DataVector<xAOD::Muon> dv_muc ) {
     return deltaR_tlv;
 }
 
+// find delta phi - Pi between two muons from dv muon container
+float DVUtils::getDeltaPhiMinusPi(const DataVector<xAOD::Muon> dv_muc ) {
+
+    // define TLorentzVector of muons
+    TLorentzVector tlv_mu0 = dv_muc.at(0)->p4();
+    TLorentzVector tlv_mu1 = dv_muc.at(1)->p4();
+
+    float DeltaPhiMinusPi = std::fabs(std::fabs(tlv_mu0.DeltaPhi(tlv_mu1)) - std::acos(-1.));
+
+    return DeltaPhiMinusPi;
+}
+
+// find sum of eta of two muons from dv muon container
+float DVUtils::getSumEta(const DataVector<xAOD::Muon> dv_muc ) {
+
+    // define TLorentzVector of muons
+    TLorentzVector tlv_mu0 = dv_muc.at(0)->p4();
+    TLorentzVector tlv_mu1 = dv_muc.at(1)->p4();
+
+    float SumEta = tlv_mu0.Eta() + tlv_mu1.Eta();
+
+    return SumEta;
+}
+
 // find delta pT between two muons from dv muon container
 float DVUtils::getDelta_pT(const DataVector<xAOD::Muon> dv_muc ) {
 
@@ -423,7 +434,7 @@ float DVUtils::getDelta_pT(const DataVector<xAOD::Muon> dv_muc ) {
     TLorentzVector tlv_mu0 = dv_muc.at(0)->p4();
     TLorentzVector tlv_mu1 = dv_muc.at(1)->p4();
 
-    float deltapT = (tlv_mu0 - tlv_mu1).Perp() / 1000.;
+    float deltapT = (tlv_mu0 + tlv_mu1).Perp() / 1000.;
 
     //ATH_MSG_INFO("delta pT = " << deltapT);
 

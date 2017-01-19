@@ -19,6 +19,7 @@
 #include "DDLBase/IDiLepDVCuts.h"
 //#include "DVTools/IOverlapRemoval.h"
 //#include "DVTools/IPhotonMatch.h"
+#include "DDLBase/IDiLepCosmics.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -43,7 +44,9 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         
         virtual StatusCode beginInputFile();
 
-        virtual void  plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc);
+        virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc);
+        virtual void plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc);
+        virtual void plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
     
     private:
 
@@ -53,10 +56,11 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         // tool for muon matching to dv
         ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc; //!
         ToolHandle<DDL::IEventCuts> m_evtc; //!
-        ToolHandle<IDVUtils>  m_dvutils; //!
+        ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<DDL::IDVCuts> m_dvc; //!
-        ToolHandle<IGoodRunsListSelectionTool> m_grlTool;
-        ToolHandle<Trig::TrigDecisionTool> m_tdt;
+        ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
+        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<DDL::IDiLepCosmics> m_cos; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
@@ -83,18 +87,14 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         TH1F* m_signal_muon_pt_low; //!
         TH1F* m_signal_muon_eta; //!
         TH1F* m_signal_muon_phi; //!
+
+        // cosmic veto
         TH1F* m_signal_muon_DeltaR; //!
-        TH1F* m_signal_muon_Delta_pT; //!
-
-
-
-
-
-
-
+        TH1F* m_signal_muon_DeltaR_low; //!
+        TH1F* m_signal_muon_Rcos; //!
+        TH1F* m_signal_muon_Rcos_low; //!
 
         // only for MC
-
         // dimuon vertices
         TH1F* m_dv_dimuon_M_matched; //!
         TH1F* m_dv_dimuon_R_matched; //!

@@ -53,9 +53,6 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         // muon matching tool
         //void ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc);
 
-        // check if muons associated with DV exist
-        //bool CheckDVMuon(const xAOD::Vertex& dv);
-
         // match truth dv to reco dv
         bool IsReconstructed(const xAOD::TruthVertex* vertex_truth);
 
@@ -65,8 +62,10 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         // check two muons pass acceptance ( eta < 2.4)
         bool PassAcceptance(const xAOD::TruthVertex* tru_v);
 
-        // find delta R between two muons from dv muon container
+        // find delta between two muons from dv muon container
         float getDeltaR(const DataVector<xAOD::Muon> dv_muc);
+        float getDeltaPhiMinusPi(const DataVector<xAOD::Muon> dv_muc);
+        float getSumEta(const DataVector<xAOD::Muon> dv_muc);
 
         // find delta pT between two muons from dv muon container
         float getDelta_pT(const DataVector<xAOD::Muon> dv_muc);
