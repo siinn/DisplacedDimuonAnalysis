@@ -66,12 +66,17 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         float getDeltaR(const DataVector<xAOD::Muon> dv_muc);
         float getDeltaPhiMinusPi(const DataVector<xAOD::Muon> dv_muc);
         float getSumEta(const DataVector<xAOD::Muon> dv_muc);
+        float getMinPT(const DataVector<xAOD::Muon> dv_muc);
+        float getMaxPT(const DataVector<xAOD::Muon> dv_muc);
 
         // find delta pT between two muons from dv muon container
         float getDelta_pT(const DataVector<xAOD::Muon> dv_muc);
 
         // check if one muon of DV is matched to trigger
         bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc);
+
+        // check if two muons are combined muons
+        bool IsCombinedMuon(const DataVector<xAOD::Muon> dv_muc);
 
         // get maximum d0 among outgoing particles
         float GetMaxd0(const xAOD::TruthVertex* tru_v);

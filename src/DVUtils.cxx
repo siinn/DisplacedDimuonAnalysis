@@ -12,6 +12,7 @@
 #include "xAODCore/ShallowCopy.h"
 #include "xAODBase/IParticleHelpers.h"
 #include "cmath"
+#include <algorithm>    // to find min and max
 
 DVUtils::DVUtils( const std::string& type,const std::string& name, const IInterface* parent) :
 AthAlgTool( type, name, parent ),
@@ -192,6 +193,17 @@ bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc) {
     for(auto mu: dv_muc){
         ATH_MSG_DEBUG("Trigger matched = " << m_tmt->match(*mu,"HLT_mu60_0eta105_msonly"));
         if (m_tmt->match(*mu,"HLT_mu60_0eta105_msonly")) pass = true;
+    }
+    return pass;
+}
+
+// check if two muons are both combined muons
+bool DVUtils::IsCombinedMuon(const DataVector<xAOD::Muon> dv_muc) {
+
+    bool pass = true;
+
+    for(auto mu: dv_muc){
+        if(mu->muonType() != xAOD::Muon::Combined) pass = false;
     }
     return pass;
 }
@@ -425,6 +437,32 @@ float DVUtils::getSumEta(const DataVector<xAOD::Muon> dv_muc ) {
     float SumEta = tlv_mu0.Eta() + tlv_mu1.Eta();
 
     return SumEta;
+}
+
+// find the lowest pT of two muons from dv muon container
+float DVUtils::getMinPT(const DataVector<xAOD::Muon> dv_muc ) {
+
+    // access pT of each muon
+    float mu0_pt = dv_muc.at(0)->pt() / 1000.;  // GeV
+    float mu1_pt = dv_muc.at(1)->pt() / 1000.;  // GeV
+
+    float min_pT = std::min( mu0_pt, mu1_pt );
+
+    return min_pT;
+
+}
+
+// find the lowest pT of two muons from dv muon container
+float DVUtils::getMaxPT(const DataVector<xAOD::Muon> dv_muc ) {
+
+    // access pT of each muon
+    float mu0_pt = dv_muc.at(0)->pt() / 1000.;  // GeV
+    float mu1_pt = dv_muc.at(1)->pt() / 1000.;  // GeV
+
+    float max_pT = std::max( mu0_pt, mu1_pt );
+
+    return max_pT;
+
 }
 
 // find delta pT between two muons from dv muon container

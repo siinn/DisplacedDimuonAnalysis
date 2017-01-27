@@ -58,12 +58,17 @@ class IDVUtils: virtual public IAlgTool {
         virtual float getDeltaR(const DataVector<xAOD::Muon> dv_muc) = 0;
         virtual float getDeltaPhiMinusPi(const DataVector<xAOD::Muon> dv_muc) = 0;
         virtual float getSumEta(const DataVector<xAOD::Muon> dv_muc) = 0;
+        virtual float getMinPT(const DataVector<xAOD::Muon> dv_muc) = 0;
+        virtual float getMaxPT(const DataVector<xAOD::Muon> dv_muc) = 0;
 
         // find delta pT between two muons from dv muon container
         virtual float getDelta_pT(const DataVector<xAOD::Muon> dv_muc) = 0;
 
         // check if one muon of DV is matched to trigger
         virtual bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc) = 0;
+
+        // check if two muons are combined muons
+        virtual bool IsCombinedMuon(const DataVector<xAOD::Muon> dv_muc) = 0;
 
         // get maximum d0 among outgoing particles
         virtual float GetMaxd0(const xAOD::TruthVertex* tru_v) = 0;

@@ -73,8 +73,9 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         // dimuon vertices
         TH1F* m_dv_dimuon_M; //!
         TH1F* m_dv_dimuon_R; //!
+        TH1F* m_dv_dimuon_R_low; //!
         TH1F* m_dv_dimuon_z; //!
-        TH1F* m_dv_dimuon_r; //!
+        TH1F* m_dv_dimuon_l; //!
 
         // ABCD method
         TH2F* m_dv_dimuon_R_M; //!
@@ -87,12 +88,21 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         TH1F* m_signal_muon_pt_low; //!
         TH1F* m_signal_muon_eta; //!
         TH1F* m_signal_muon_phi; //!
+        TH1F* m_signal_muon_d0; //!
+        TH1F* m_signal_muon_z0; //!
+
+        TH1F* m_signal_muon_pt_min; //!
+        TH1F* m_signal_muon_pt_min_low; //!
+        TH1F* m_signal_muon_pt_max; //!
+        TH1F* m_signal_muon_pt_max_low; //!
 
         // cosmic veto
         TH1F* m_signal_muon_DeltaR; //!
         TH1F* m_signal_muon_DeltaR_low; //!
         TH1F* m_signal_muon_Rcos; //!
         TH1F* m_signal_muon_Rcos_low; //!
+        
+        TH2F* m_signal_muon_phi_eta; //!
 
         // only for MC
         // dimuon vertices

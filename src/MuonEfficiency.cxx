@@ -56,6 +56,7 @@ StatusCode MuonEfficiency::initialize() {
     m_eff_eta_vs_d0_num = new TH2F("m_eff_eta_vs_d0_num", "signal eff eta vs d0, num", 50, 0, 300, 50, -3.0, 3.0); // GeV
     m_eff_eta_vs_d0_den = new TH2F("m_eff_eta_vs_d0_den", "signal eff eta vs d0, den", 50, 0, 300, 50, -3.0, 3.0); // GeV
 
+
     // output 
     CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_eta", m_eff_eta) );
     CHECK( histSvc->regHist("/DV/Muons/Efficiency/eff_pt", m_eff_pt) );
@@ -103,7 +104,7 @@ StatusCode MuonEfficiency::execute() {
 
     const xAOD::MuonContainer* muc = nullptr;
     CHECK( evtStore()->retrieve( muc, "Muons" ) );
-   
+
     // main muon truth loop for efficiency 
     if (truthParticles) {
         for(auto mu_truth: *truthParticles) {
@@ -153,6 +154,8 @@ StatusCode MuonEfficiency::execute() {
 
         } // end of truth muon loop
     } // end of truthParticles (truth muon)
+
+
     
     return StatusCode::SUCCESS;
 }

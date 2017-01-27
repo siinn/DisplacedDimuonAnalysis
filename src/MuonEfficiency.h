@@ -48,6 +48,8 @@ class MuonEfficiency: public ::AthAnalysisAlgorithm {
         TH2F* m_eff_eta_vs_d0_num; //!
         TH2F* m_eff_eta_vs_d0_den; //!
 
+
+
 }; 
 
 #endif //> !DISPLACEDDIMUONANALYSIS_MUONEFFICIENCY_H
