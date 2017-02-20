@@ -47,6 +47,9 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc);
         virtual void plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc);
         virtual void plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
+
+        virtual void plot_muon60_kinematics(const DataVector<xAOD::Muon> dv_muc);
+        virtual void plot_dv60(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
     
     private:
 
@@ -101,8 +104,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         TH1F* m_signal_muon_DeltaR_low; //!
         TH1F* m_signal_muon_Rcos; //!
         TH1F* m_signal_muon_Rcos_low; //!
-        
-        TH2F* m_signal_muon_phi_eta; //!
 
         // only for MC
         // dimuon vertices
@@ -112,7 +113,26 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         // ABCD method
         TH2F* m_dv_dimuon_R_M_matched; //!
 
-          
+        // pT > 60 GeV cut plots
+        TH1F* m_dv_dimuon60_M; //!
+        TH1F* m_dv_dimuon60_R; //!
+        TH1F* m_dv_dimuon60_R_low; //!
+        TH1F* m_dv_dimuon60_z; //!
+        TH1F* m_dv_dimuon60_l; //!
+        TH1F* m_signal_muon60_pt; //!
+        TH1F* m_signal_muon60_pt_low; //!
+        TH1F* m_signal_muon60_eta; //!
+        TH1F* m_signal_muon60_phi; //!
+        TH1F* m_signal_muon60_d0; //!
+        TH1F* m_signal_muon60_z0; //!
+        TH1F* m_signal_muon60_pt_min; //!
+        TH1F* m_signal_muon60_pt_min_low; //!
+        TH1F* m_signal_muon60_pt_max; //!
+        TH1F* m_signal_muon60_pt_max_low; //!
+        TH1F* m_signal_muon60_DeltaR; //!
+        TH1F* m_signal_muon60_DeltaR_low; //!
+        TH1F* m_signal_muon60_Rcos; //!
+        TH1F* m_signal_muon60_Rcos_low; //!
     
 }; 
 

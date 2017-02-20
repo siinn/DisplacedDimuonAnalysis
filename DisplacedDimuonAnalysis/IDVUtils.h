@@ -72,6 +72,7 @@ class IDVUtils: virtual public IAlgTool {
 
         // get maximum d0 among outgoing particles
         virtual float GetMaxd0(const xAOD::TruthVertex* tru_v) = 0;
+        virtual float GetMinPT(const xAOD::TruthVertex* tru_v) = 0;
 
         // check if truth track is signal muon
         virtual bool isSignal (const xAOD::TruthParticle* p) = 0;

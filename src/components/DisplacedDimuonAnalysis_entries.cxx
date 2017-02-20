@@ -31,8 +31,12 @@ DECLARE_ALGORITHM_FACTORY( TruthPlots )
 #include "../LumiCalc.h"
 DECLARE_ALGORITHM_FACTORY( LumiCalc )
 
+#include "../MuonPlots.h"
+DECLARE_ALGORITHM_FACTORY( MuonPlots )
+
 DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis ) 
 {
+  DECLARE_ALGORITHM( MuonPlots );
   DECLARE_ALGORITHM( LumiCalc );
   DECLARE_ALGORITHM( TruthPlots );
   DECLARE_ALGORITHM( VertexRes );

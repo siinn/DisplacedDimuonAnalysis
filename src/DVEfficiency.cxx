@@ -77,14 +77,14 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regHist("/DV/TruthVertex/dv_mass", m_dv_mass) );
 
     // efficiency plots
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_eta", m_dv_eff_eta) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_phi", m_dv_eff_phi) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_mass", m_dv_eff_mass) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_R", m_dv_eff_R) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/dv/dv_eff_d0", m_dv_eff_d0) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_eta", m_dv_eff_eta) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_phi", m_dv_eff_phi) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_mass", m_dv_eff_mass) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_R", m_dv_eff_R) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_d0", m_dv_eff_d0) );
 
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/zp_parameters/dv_eff_zp_eta", m_dv_eff_zp_eta) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/Efficiency/zp_parameters/dv_eff_zp_pt", m_dv_eff_zp_pt) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/zp_parameters/dv_eff_zp_eta", m_dv_eff_zp_eta) );
+    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/zp_parameters/dv_eff_zp_pt", m_dv_eff_zp_pt) );
 
     return StatusCode::SUCCESS;
 }

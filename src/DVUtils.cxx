@@ -327,6 +327,22 @@ float DVUtils::GetMaxd0(const xAOD::TruthVertex* tru_v) {
     return Maxd0;
 }
 
+// find pT of lower pT muon
+float DVUtils::GetMinPT(const xAOD::TruthVertex* tru_v) {
+
+    float min_pT = 0;
+
+    // loop over outgoing particles at the truth vertex
+    for (unsigned int i = 0; i < tru_v->nOutgoingParticles(); i++){
+
+        const xAOD::TruthParticle* truth_child = FindFinalState(tru_v->outgoingParticle(i));
+        float pt = truth_child->pt();
+
+        min_pT = std::max(pt, min_pT);
+    }
+    return min_pT;
+}
+
 // return final state of given truth particle
 const xAOD::TruthParticle* DVUtils::FindFinalState(const xAOD::TruthParticle* tp) {
 

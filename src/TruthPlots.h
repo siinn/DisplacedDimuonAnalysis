@@ -22,6 +22,8 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         ToolHandle<IDVUtils>  m_dvutils; //!
 
         // signal muon distribution
+        TH1F* m_truth_pt; //!
+        TH1F* m_truth_pt_low; //!
         TH1F* m_truth_pt_slice1; //!
         TH1F* m_truth_pt_slice2; //!
         TH1F* m_truth_pt_slice3; //!
@@ -38,6 +40,14 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         TH2F* m_truth_eta_vs_prodVtxR; //!
 
         // signal Z' distribution
+        TH1F* m_zp_R;
+        TH1F* m_zp_R_low;
+        TH1F* m_zp_eta;
+        TH1F* m_zp_l;
+        TH1F* m_zp_z;
+
+        TProfile* m_fraction_dv_cut;
+
         TH1F* m_zp_eta_slice1;
         TH1F* m_zp_eta_slice2;
         TH1F* m_zp_eta_slice3;
@@ -48,6 +58,7 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
 
         TH1F* m_zp_eta_low_pt;
         TH1F* m_zp_eta_high_pt;
+
         TH1F* m_zp_R_low_pt;
         TH1F* m_zp_R_high_pt;
 

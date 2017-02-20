@@ -80,6 +80,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
         // get maximum d0 among outgoing particles
         float GetMaxd0(const xAOD::TruthVertex* tru_v);
+        float GetMinPT(const xAOD::TruthVertex* tru_v);
 
         // check if truth track is signal muon
         bool isSignal (const xAOD::TruthParticle* p);
