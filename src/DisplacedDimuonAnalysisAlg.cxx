@@ -75,7 +75,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // define histograms
 
     m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
-    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 9,0,9);
+    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 8,0,8);
 
     m_dv_M = new TH1F("dv_M","All DV mass in GeV",200,0.,2000.);
     m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",5, m_dv_dimuon_M_bins );
@@ -109,6 +109,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_dimuon_R_matched = new TH1F("dv_dimuon_R_matched","R of matched dimuon dv [mm]",50,0.,300.);
     m_dv_dimuon_R_M_matched = new TH2F("dv_dimuon_R_M_matched","matched dimuon DV position R vs M", 50,0,300,200,0,2000);
     m_chi2_ndof = new TH1F("chi2_ndof", "chi^2 / ndof", 100, 0, 10);
+    m_chi2_ndof_nocosmic = new TH1F("chi2_ndof_nocosmic", "chi^2 / ndof", 100, 0, 10);
 
 
     // pT > 60 cut plots
@@ -146,6 +147,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_dimuon_l", m_dv_dimuon_l) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_R_M", m_dv_dimuon_R_M) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/chi2_ndof", m_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/SecondaryVertex/chi2_ndof_nocosmic", m_chi2_ndof_nocosmic) );
 
     // muon kinematics distribution
     CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt", m_signal_muon_pt) );
@@ -323,12 +325,27 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if(!PassCosmicVeto(*dv_muc)) continue;
         m_dv_cutflow->Fill("R_{CR} > 0.04", 1);
 
+        // plot pT > 60 cut
+        m_chi2_ndof_nocosmic->Fill (dv->chiSquared() / dv->numberDoF() );
+        plot_dv60(*dv, *pv);
+        plot_muon60_kinematics(*dv_muc);
+
+        ATH_MSG_INFO("Found DV before cosmic veto with mass = " << dv_mass << ", runNumber = "
+        << evtInfo->runNumber() << ", eventNumber = "
+        << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+
         //----------------------------------------
         // delta R 
         //----------------------------------------
         float deltaR_min = 0.5;
         if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
         m_dv_cutflow->Fill("#DeltaR > 0.5", 1);
+
+        //----------------------------------------
+        // investigating pT cut
+        //----------------------------------------
+        //if(m_dvutils->getMinPT(*dv_muc) < 20.) continue;
+        //m_dv_cutflow->Fill("p_{T}^{#mu} > 20 GeV", 1);
 
     
         //----------------------------------------
@@ -359,15 +376,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         //    m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
         //} // end of isMC
 
-        //----------------------------------------
-        // investigating pT cut
-        //----------------------------------------
-        if(m_dvutils->getMinPT(*dv_muc) < 60.) continue;
-        m_dv_cutflow->Fill("p_{T}^{#mu} > 60 GeV", 1);
 
-        // plot pT > 60 cut
-        plot_dv60(*dv, *pv);
-        plot_muon60_kinematics(*dv_muc);
 
 
     } // end of dv loop

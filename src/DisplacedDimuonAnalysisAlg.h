@@ -85,6 +85,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
 
         // check vertex fit
         TH1F* m_chi2_ndof; //!
+        TH1F* m_chi2_ndof_nocosmic; //!
 
         // muon kinematics
         TH1F* m_signal_muon_pt; //!
