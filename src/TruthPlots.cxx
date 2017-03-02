@@ -60,6 +60,8 @@ StatusCode TruthPlots::initialize() {
     m_zp_z = new TH1F("m_zp_z", "Z' z distribution", 100, -500, 500);
     m_zp_R = new TH1F("m_zp_R", "Z' R distribution", 50, 0, 300.0); 
     m_zp_R_low = new TH1F("m_zp_R_low", "Z' R distribution low", 50, 0, 50.0); 
+    m_zp_t_barrel = new TH1F("m_zp_t_barrel", "Z' lifetime in lab frame (barrel)", 50, 0, 25);
+    m_zp_t_endcap = new TH1F("m_zp_t_endcap", "Z' lifetime in lab frame (endcap)", 50, 0, 25);
     m_fraction_dv_cut = new TProfile("m_fraction_dv_cut","fraction of Z' that decays within R < 2 mm", 1,0,1);
 
     m_zp_eta_vs_prodVtxR = new TH2F("m_zp_eta_vs_prodVtxR", "signal Z' eta vs prodVtx R", 50, 0, 300, 50, -3.0, 3.0);
@@ -107,6 +109,8 @@ StatusCode TruthPlots::initialize() {
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/zp_R_low", m_zp_R_low) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta", m_zp_eta) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/l/zp_l", m_zp_l) );
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/t/zp_t_barrel", m_zp_t_barrel) );
+    CHECK( histSvc->regHist("/DV/Truth/signal_zp/t/zp_t_endcap", m_zp_t_endcap) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/z/zp_z", m_zp_z) );
     CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/fraction_dv_within_2mm", m_fraction_dv_cut) );
 
@@ -217,6 +221,7 @@ StatusCode TruthPlots::execute() {
         float zp_eta = tru_v->incomingParticle(0)->eta();
         float zp_pt = tru_v->incomingParticle(0)->pt();
         float zp_l = sqrt( tru_v->perp()*tru_v->perp() + tru_v->z()*tru_v->z() );
+        float zp_t = ( tru_v->incomingParticle(0)->e() / tru_v->incomingParticle(0)->m() ) * 1.6; // lifetime of 500 mm at lab frame
 
         // basic plots
         m_zp_R->Fill(tru_v->perp());
@@ -224,6 +229,10 @@ StatusCode TruthPlots::execute() {
         m_zp_eta->Fill(zp_eta);
         m_zp_l->Fill(zp_l);
         m_zp_z->Fill(tru_v->z());
+
+        // Delta t (time shift) due to long lifetime
+        if (std::abs(zp_eta) < 1) m_zp_t_barrel->Fill(zp_t);
+        if (std::abs(zp_eta) > 1 and std::abs(zp_eta) < 2.5) m_zp_t_endcap->Fill(zp_t);
 
         bool NotPass_R = false;
         if (tru_v->perp() < 2) NotPass_R = true;

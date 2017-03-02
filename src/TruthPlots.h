@@ -45,6 +45,8 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         TH1F* m_zp_eta;
         TH1F* m_zp_l;
         TH1F* m_zp_z;
+        TH1F* m_zp_t_barrel;
+        TH1F* m_zp_t_endcap;
 
         TProfile* m_fraction_dv_cut;
 

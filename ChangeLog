@@ -1,0 +1,3 @@
+2017-03-02 Siinn Che <sche@cern.ch>
+	* Moved grl xml into the package
+	* Cleaned up the main jobOption, analysis_jobOption.py

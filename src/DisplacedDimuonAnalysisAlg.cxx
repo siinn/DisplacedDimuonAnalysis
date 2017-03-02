@@ -70,7 +70,8 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // custom binning
-    Float_t m_dv_dimuon_M_bins[] = {0,100,400,700,1000,2000};
+    //Float_t m_dv_dimuon_M_bins[] = {0,100,400,700,1000,2000};
+    Float_t m_dv_dimuon_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
 
     // define histograms
 
@@ -78,7 +79,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 8,0,8);
 
     m_dv_M = new TH1F("dv_M","All DV mass in GeV",200,0.,2000.);
-    m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",5, m_dv_dimuon_M_bins );
+    m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",8, m_dv_dimuon_M_bins );
     m_dv_dimuon_R = new TH1F("dv_dimuon_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_dimuon_R_low = new TH1F("dv_dimuon_R_low","R of dimuon dv [mm], low",100,0.,10.);
     m_dv_dimuon_z = new TH1F("dv_dimuon_z","z of dimuon dv [mm]",100,-1000.,1000.);
@@ -101,8 +102,8 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // cosmic veto
     m_signal_muon_DeltaR = new TH1F("signal_muon_DeltaR","Signal muon Delta R",100, 0., 5.);
     m_signal_muon_DeltaR_low = new TH1F("signal_muon_DeltaR_low","Signal muon Delta R low",100, 0., 1);
-    m_signal_muon_Rcos = new TH1F("signal_muon_Rcos","Signal muon Rcos",100, 0., 5.);
-    m_signal_muon_Rcos_low = new TH1F("signal_muon_Rcos_low","Signal muon Rcos low",100, 0., 0.5);
+    m_signal_muon_Rcos = new TH1F("signal_muon_Rcos","Signal muon Rcos",50, 0., 5.);
+    m_signal_muon_Rcos_low = new TH1F("signal_muon_Rcos_low","Signal muon Rcos low",25, 0., 0.1);
 
     // only for MC
     m_dv_dimuon_M_matched = new TH1F("dv_dimuon_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
@@ -209,10 +210,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 
-    ATH_MSG_INFO("bookkeeping:" << ", runNumber = "
-    << evtInfo->runNumber() << ", eventNumber = "
-    << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
-
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
@@ -229,6 +226,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // trigger check
     if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
+
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -325,7 +323,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if(!PassCosmicVeto(*dv_muc)) continue;
         m_dv_cutflow->Fill("R_{CR} > 0.04", 1);
 
-        // plot pT > 60 cut
+        //----------------------------------------
+        // filling additional histograms 
         m_chi2_ndof_nocosmic->Fill (dv->chiSquared() / dv->numberDoF() );
         plot_dv60(*dv, *pv);
         plot_muon60_kinematics(*dv_muc);
@@ -333,6 +332,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         ATH_MSG_INFO("Found DV before cosmic veto with mass = " << dv_mass << ", runNumber = "
         << evtInfo->runNumber() << ", eventNumber = "
         << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+        //----------------------------------------
 
         //----------------------------------------
         // delta R 

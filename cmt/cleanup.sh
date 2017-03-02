@@ -1,7 +1,7 @@
 # echo "cleanup DisplacedDimuonAnalysis DisplacedDimuonAnalysis-00-00-00 in /n/atlas05/userdata/sche/2.4.21.DV_Analysis"
 
 if test "${CMTROOT}" = ""; then
-  CMTROOT=/cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.24/CMT/v1r25p20160527; export CMTROOT
+  CMTROOT=/cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.27/CMT/v1r25p20160527; export CMTROOT
 fi
 . ${CMTROOT}/mgr/setup.sh
 cmtDisplacedDimuonAnalysistempfile=`${CMTROOT}/${CMTBIN}/cmt.exe -quiet build temporary_name`
