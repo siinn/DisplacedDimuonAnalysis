@@ -10,7 +10,7 @@ from AthenaCommon.GlobalFlags import globalflags
 import glob   
 
 theApp.EvtMax = -1
-#theApp.EvtMax = 200
+#theApp.EvtMax = 500
 
 #--------------------------------------------
 # DAOD_SUSY15 data
@@ -19,7 +19,7 @@ theApp.EvtMax = -1
 #svcMgr.EventSelector.InputCollections = glob.glob( "/n/atlas05/userdata/sche/data/DAOD_SUSY15/*/*.root.1" )
 
 # trigger filtered
-svcMgr.EventSelector.InputCollections += glob.glob("/n/atlas05/userdata/sche/data/DAOD_SUSY15_FILTERED/user.sche.data16_13TeV.physics_Main.DAOD_RPVLL.r8669.trigfilter.r1_EXT0/*.root")
+#svcMgr.EventSelector.InputCollections += glob.glob("/n/atlas05/userdata/sche/data/DAOD_SUSY15_FILTERED/user.sche.data16_13TeV.physics_Main.DAOD_RPVLL.r8669.trigfilter.r1_EXT0/*.root")
 
 
 #--------------------------------------------
@@ -27,7 +27,7 @@ svcMgr.EventSelector.InputCollections += glob.glob("/n/atlas05/userdata/sche/dat
 #--------------------------------------------
 
 # SUSY15, official
-#svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301911.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
+svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301911.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301912.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t250.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301913.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t500.recon.DAOD_RPVLL.e4125_s2698_r8788.r14_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301914.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m500t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
@@ -73,7 +73,7 @@ algseq += CfgMgr.DisplacedDimuonAnalysisAlg()
 #algseq += CfgMgr.MuonPlots()
 
 # MC sample only
-#algseq += CfgMgr.DVEfficiency()
+algseq += CfgMgr.DVEfficiency()
 #algseq += CfgMgr.MuonEfficiency()
 #algseq += CfgMgr.TruthPlots()
 #algseq += CfgMgr.VertexRes()
@@ -92,19 +92,28 @@ svcMgr.MessageSvc.OutputLevel = INFO
 svcMgr.MessageSvc.defaultLimit = 9999
 
 # DVCuts tool
-ToolSvc += CfgMgr.DV__DVCuts("DiLepBaseCuts")
+ToolSvc += CfgMgr.DDL__DVCuts("DiLepBaseCuts")
 ToolSvc.DiLepBaseCuts.distMin  = 2. # mm
-#ToolSvc.DiLepBaseCuts.DVMassMin  = 100000.0 # MeV 
-#ToolSvc.DiLepBaseCuts.MaterialMapFile = "/n/atlas05/userdata/sche/2.4.18.DV_Analysis/DV_xAODAnalysis/DVAnalyses/data/materialMap3D_Run2_v2.root"
+ToolSvc.DiLepBaseCuts.DisabledModuleMapFile = "DisabledModuleMap_Run2_v2.root"
+
+# EventCuts
+ToolSvc += CfgMgr.DDL__EventCuts("DiLepEventCuts")
+ToolSvc.DiLepEventCuts.TriggerNames = ["HLT_mu60_0eta105_msonly"]
 
 # GoodRunsListSelectorTool
-#vecStringGRL = '/n/atlas05/userdata/sche/2.4.21.DV_Analysis/DV_xAODAnalysis/DVAnalyses/data/data16_13TeV.periodAllYear_DetStatus-v83-pro20-15_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns_DAOD_RPVLL_r8669.xml'
-vecStringGRL = 'grl/data16_13TeV.periodAllYear_DetStatus-v83-pro20-15_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns_DAOD_RPVLL_r8669.xml'
-
+vecStringGRL = '/n/atlas05/userdata/sche/2.4.21.DV_Analysis/DV_xAODAnalysis/DVAnalyses/data/data16_13TeV.periodAllYear_DetStatus-v83-pro20-15_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns_DAOD_RPVLL_r8669.xml'
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool")
 ToolSvc.GRLTool.GoodRunsListVec=[vecStringGRL]
-#ToolSvc.GRLTool.PassThrough = False
 ToolSvc.GRLTool.OutputLevel = INFO
+
+# Overlap removal tool
+#from AssociationUtils.config import recommended_tools
+#orTool = recommended_tools(masterName="OverlapRemovalTool",
+#                           doElectrons=False,
+#                           doMuons=True,
+#                           doJets=False,
+#                           doTaus=False,
+#                           doPhotons=False)
 
 
 #---------------------------------------------------------------

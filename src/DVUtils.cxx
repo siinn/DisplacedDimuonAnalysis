@@ -200,10 +200,11 @@ bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc) {
 // check if two muons are both combined muons
 bool DVUtils::IsCombinedMuon(const DataVector<xAOD::Muon> dv_muc) {
 
-    bool pass = false;
+    bool pass = true;
 
     for(auto mu: dv_muc){
-        if( (mu->muonType() == xAOD::Muon::Combined) or (mu->muonType() == xAOD::Muon::MuonStandAlone)) pass = true;
+        //if( (mu->muonType() == xAOD::Muon::Combined) or (mu->muonType() == xAOD::Muon::MuonStandAlone)) pass = true;
+        if(!(mu->muonType() == xAOD::Muon::Combined)) pass = false;
     }
     return pass;
 }

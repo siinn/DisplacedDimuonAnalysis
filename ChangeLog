@@ -1,3 +1,8 @@
+2017-03-28 Siinn Che <sche@cern.ch>
+	* Updated efficiency plot to correctly represent analysis cuts
+	* Added Disabled pixel module veto
+	* Fixed compatibility issue with SUSY xAOD_analysis framework
+
 2017-03-02 Siinn Che <sche@cern.ch>
 	* Moved grl xml into the package
 	* Cleaned up the main jobOption, analysis_jobOption.py

@@ -13,6 +13,8 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthVertex.h"
+#include "xAODTruth/TruthVertexContainer.h"
 
 // tools
 #include "PathResolver/PathResolver.h"
@@ -23,12 +25,8 @@
 // for M_PI
 #include "cmath"
 
-
 // debug
-//#include "StoreGate/StoreGate.h"
-//#include "StoreGate/StoreGateSvc.h"
-
-
+#include <typeinfo>
 
 DisplacedDimuonAnalysisAlg::DisplacedDimuonAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
 AthAnalysisAlgorithm( name, pSvcLocator ),
@@ -39,6 +37,8 @@ m_cos("DDL::DiLepCosmics/DiLepCosmics"),
 m_dvutils("DVUtils"),
 m_grlTool("GoodRunsListSelectionTool/GRLTool"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
+m_or("DDL::OverlapRemoval/OverlapRemoval"),
+//m_decorate_truv("reconstructed"),
 m_accMass("mass")
 {
     // initialize tools
@@ -49,6 +49,8 @@ m_accMass("mass")
     declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
     declareProperty("TrigDecisionTool", m_tdt);
     declareProperty("DiLepCosmics", m_cos);
+    declareProperty("OverlapRemoval", m_or);
+
 
 }
 
@@ -64,8 +66,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     // set trigger
-    m_evtc->SetTriggers({"HLT_mu60_0eta105_msonly"});
-
+    //m_evtc->SetTriggers({"HLT_mu60_0eta105_msonly"});
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
@@ -76,7 +77,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // define histograms
 
     m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
-    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 8,0,8);
+    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 10,0,10);
 
     m_dv_M = new TH1F("dv_M","All DV mass in GeV",200,0.,2000.);
     m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",8, m_dv_dimuon_M_bins );
@@ -242,6 +243,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     auto elc_copy = xAOD::shallowCopyContainer(*elc);
     xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
 
+    // apply overlap removal
+    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
+
     // retrieve primary vertices
     const xAOD::VertexContainer* pvc = nullptr;
     CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
@@ -271,6 +275,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // collect muons from this dv
         auto dv_muc = m_dilepdvc->GetMu(*dv);
+
+        // remove overlapping muon
+        m_dilepdvc->ApplyOverlapRemoval(*dv);
 
         // fill all dv
         m_dv_M->Fill(dv_mass);               // all dv
@@ -314,8 +321,14 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         //----------------------------------------
         // charge requirements
         //----------------------------------------
-        if(!m_dilepdvc->PassChargeRequirement(*dv)) continue;
+        if(!m_dvc->PassChargeRequirement(*dv)) continue;
         m_dv_cutflow->Fill("#mu^{+}#mu^{-}", 1);
+
+        //----------------------------------------
+        // disabled module
+        //----------------------------------------
+        if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        m_dv_cutflow->Fill("DisabledModule", 1);
 
         //----------------------------------------
         // cosmic veto
@@ -362,19 +375,19 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         plot_muon_kinematics(*dv_muc);
 
         // only for MC: find truth dv matched to this dv
-        //if (isMC) {
-        //    // find truth dv matched to this dv
-        //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+        if (isMC) {
+            // find truth dv matched to this dv
+            const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
 
-        //    if (tru_v == nullptr) continue;
-        //    m_dv_cutflow->Fill("Truth-matched", 1);
+            if (tru_v == nullptr) continue;
+            m_dv_cutflow->Fill("Truth-matched", 1);
 
-        //    // fill matched dimuon vertex
-        //    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-        //    m_dv_dimuon_M_matched->Fill(dv_mass);                          // dimuon mass
-        //    m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
-        //    m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
-        //} // end of isMC
+            // fill matched dimuon vertex
+            float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+            m_dv_dimuon_M_matched->Fill(dv_mass);                          // dimuon mass
+            m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
+            m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
+        } // end of isMC
 
 
 
