@@ -88,6 +88,10 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         bool isSignalVertex (const xAOD::TruthVertex* v);
         // calculate invariant mass of truth vertex
         float TruthMass (const xAOD::TruthVertex* v);
+        // calculate pt of truth vertex
+        float TruthPt (const xAOD::TruthVertex* v);
+        // calculate dr of truth vertex
+        float Truth_dr (const xAOD::TruthVertex* v);
 
         // check if ID track is LRT
         bool isLargeD0Track (const xAOD::TrackParticle* tp);

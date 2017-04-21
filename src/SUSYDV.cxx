@@ -1,5 +1,5 @@
 // DisplacedDimuonAnalysis includes
-#include "DisplacedDimuonAnalysisAlg.h"
+#include "SUSYDV.h"
 
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/ITHistSvc.h"
@@ -25,15 +25,12 @@
 // for M_PI
 #include "cmath"
 
-// debug
-#include <typeinfo>
-
-DisplacedDimuonAnalysisAlg::DisplacedDimuonAnalysisAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
+SUSYDV::SUSYDV( const std::string& name, ISvcLocator* pSvcLocator ) : 
 AthAnalysisAlgorithm( name, pSvcLocator ),
-m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
+m_dilep("DDL::DiLepDVCuts/DiLepDVCuts"),
 m_evtc("DDL::EventCuts/DiLepEventCuts"),
-m_dvc("DDL::DVCuts/DiLepBaseCuts"),
 m_cos("DDL::DiLepCosmics/DiLepCosmics"),
+m_vxc("DDL::DVCuts/DiLepBaseCuts"),
 m_dvutils("DVUtils"),
 m_grlTool("GoodRunsListSelectionTool/GRLTool"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
@@ -42,28 +39,29 @@ m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_accMass("mass")
 {
     // initialize tools
-    declareProperty("DiLepDVCuts", m_dilepdvc);
+    declareProperty("DiLepDVCuts", m_dilep);
     declareProperty("DVUtils", m_dvutils);
     declareProperty("DiLepEventCuts", m_evtc);
-    declareProperty("DiLepBaseCuts", m_dvc);
+    declareProperty("DiLepBaseCuts", m_vxc);
     declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
     declareProperty("TrigDecisionTool", m_tdt);
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
-
-
 }
 
 
-DisplacedDimuonAnalysisAlg::~DisplacedDimuonAnalysisAlg() {}
+SUSYDV::~SUSYDV() {}
 
 
-StatusCode DisplacedDimuonAnalysisAlg::initialize() {
+StatusCode SUSYDV::initialize() {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     //--------------------------------------------------------
     // Event cut
     //--------------------------------------------------------
+
+    // set trigger
+    //m_evtc->SetTriggers({"HLT_mu60_0eta105_msonly"});
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
@@ -73,8 +71,8 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     // define histograms
 
-    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
-    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 12,0,12);
+    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 6,0,6);
+    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 16,0,16);
 
     m_dv_M = new TH1F("dv_M","All DV mass in GeV",200,0.,2000.);
     m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",8, m_dv_dimuon_M_bins );
@@ -191,17 +189,17 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_DeltaR_low", m_signal_muon60_DeltaR_low) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_Rcos", m_signal_muon60_Rcos) );
     CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_Rcos_low", m_signal_muon60_Rcos_low) );
-
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode DisplacedDimuonAnalysisAlg::finalize() {
-    ATH_MSG_INFO ("Finalizing " << name() << "...");
     return StatusCode::SUCCESS;
 }
 
-StatusCode DisplacedDimuonAnalysisAlg::execute() {
+StatusCode SUSYDV::finalize() {
+    ATH_MSG_INFO ("Finalizing " << name() << "...");
+    
+    
+    return StatusCode::SUCCESS;
+}
+
+StatusCode SUSYDV::execute() {  
     ATH_MSG_DEBUG ("Executing " << name() << "...");
 
     // retrieve event info
@@ -213,18 +211,17 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     m_event_cutflow->Fill("AllEvents", 1);
 
-    // GRL
-    if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
-    m_event_cutflow->Fill("GRL (Data)", 1);
-
     // event cleaning
     if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("EvtCleaning (Data)", 1);
 
+    // GRL
+    if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("GRL (Data)", 1);
+
     // trigger check
     if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
-
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -260,8 +257,17 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // perform lepton matching
     for(auto dv: *dvc_copy.first) {
         //m_dvutils->ApplyMuonMatching(*dv, *muc_copy.first);
-        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
+        m_dilep->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
     }
+
+    // cosmics veto
+    if(!m_cos->PassCosmicEventVeto(*elc, *muc)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("CosmicVeto", 1);
+
+    // check for PV in allowed volume
+    if(!m_evtc->PassPVCuts(*pvc)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("z_{PV} < 200 mm", 1);
+
 
     // cut flow
     for(auto dv: *dvc_copy.first) {
@@ -271,10 +277,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
 
         // collect muons from this dv
-        auto dv_muc = m_dilepdvc->GetMu(*dv);
+        auto dv_muc = m_dilep->GetMu(*dv);
 
         // remove overlapping muon
-        m_dilepdvc->ApplyOverlapRemoval(*dv);
+        //m_dilep->ApplyOverlapRemoval(*dv);
 
         // fill all dv
         m_dv_M->Fill(dv_mass);               // all dv
@@ -282,95 +288,147 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         //----------------------------------------
         // counting all dv's
         //----------------------------------------
+        //CHANGE dv to *dv
+        //CHANGE return to continue
+
+        DDL::DiLepType dv_type = DDL::DiLepType::mm;
+
         m_dv_cutflow->Fill("DV", 1);
+        
+        if(!m_vxc->PassFiducialCuts(*dv)) continue;
+        m_dv_cutflow->Fill("R_{DV}, z_{DV} < 300 mm", 1);
 
-        //----------------------------------------
-        // require dv to have 2 muons
-        //----------------------------------------
-        if (dv_muc->size() != 2) continue;
-        m_dv_cutflow->Fill("#mu#mu", 1);
-
-        //----------------------------------------
-        // Trigger matching
-        //----------------------------------------
-        if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
-        m_dv_cutflow->Fill("Trig. Matching", 1);
-
-        //----------------------------------------
-        // combined muon
-        //----------------------------------------
-        if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
-        m_dv_cutflow->Fill("CombinedMuon", 1);
-
-        //----------------------------------------
-        // vertex fit quality
-        //----------------------------------------
-        m_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
-        if(!m_dvc->PassChisqCut(*dv)) continue;
+        if(!m_vxc->PassDistCut(*dv, *pvc)) continue;
+        m_dv_cutflow->Fill("Disp > 4 mm", 1);
+            
+        if(!m_vxc->PassChisqCut(*dv)) continue;
         m_dv_cutflow->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-        //----------------------------------------
-        // minimum distance from pv (from 0 for MC)
-        //----------------------------------------
-        if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-        m_dv_cutflow->Fill("Disp. > 2 mm", 1);
+        if(!m_vxc->PassMaterialVeto(*dv)) continue;
+        m_dv_cutflow->Fill("MaterialVeto", 1);
 
-        //----------------------------------------
-        // charge requirements
-        //----------------------------------------
-        if(!m_dvc->PassChargeRequirement(*dv)) continue;
-        m_dv_cutflow->Fill("#mu^{+}#mu^{-}", 1);
-
-        //----------------------------------------
-        // disabled module
-        //----------------------------------------
-        if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        if(!m_vxc->PassDisabledModuleVeto(*dv)) continue;
         m_dv_cutflow->Fill("DisabledModule", 1);
 
-        //----------------------------------------
-        // DESD filter
-        //----------------------------------------
-        m_dilepdvc->DoTriggerMatching(*dv);
-        if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
-        m_dv_cutflow->Fill("PassDESDMatching", 1);
+        if(!m_dilep->PassNLeptons(*dv, dv_type)) continue;
+        m_dv_cutflow->Fill("#mu#mu", 1);
 
-        //----------------------------------------
-        // cosmic veto
-        //----------------------------------------
-        if(!PassCosmicVeto(*dv_muc)) continue;
-        m_dv_cutflow->Fill("R_{CR} > 0.04", 1);
+        m_dilep->ApplyKinematics(*dv);
+        if(!m_dilep->PassNLeptons(*dv, dv_type)) continue;
+        m_dv_cutflow->Fill("p_{T}^{#mu} > 10 GeV, #eta^{#mu} < 2.5", 1);
 
-        //----------------------------------------
-        // filling additional histograms 
-        m_chi2_ndof_nocosmic->Fill (dv->chiSquared() / dv->numberDoF() );
-        plot_dv60(*dv, *pv);
-        plot_muon60_kinematics(*dv_muc);
+        m_dilep->ApplyTightness(*dv);
+        if(!m_dilep->PassNLeptons(*dv, dv_type)) continue;
+        m_dv_cutflow->Fill("CombinedMuon", 1);
 
-        ATH_MSG_INFO("Found DV before cosmic veto with mass = " << dv_mass << ", runNumber = "
-        << evtInfo->runNumber() << ", eventNumber = "
-        << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
-        //----------------------------------------
+        m_dilep->ApplyOverlapRemoval(*dv);
+        if(!m_dilep->PassNLeptons(*dv, dv_type)) continue;
+        m_dv_cutflow->Fill("OverlapRemoval", 1);
 
-        //----------------------------------------
-        // delta R 
-        //----------------------------------------
-        float deltaR_min = 0.5;
-        if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
-        m_dv_cutflow->Fill("#DeltaR > 0.5", 1);
+        m_dilep->DoTriggerMatching(*dv);
+        if(!m_dilep->PassTriggerMatching(*dv)) continue;
+        m_dv_cutflow->Fill("TriggerMatching", 1);
 
-        //----------------------------------------
-        // investigating pT cut
-        //----------------------------------------
-        //if(m_dvutils->getMinPT(*dv_muc) < 20.) continue;
-        //m_dv_cutflow->Fill("p_{T}^{#mu} > 20 GeV", 1);
+        if(!m_dilep->PassDESDMatching(*dv)) continue;
+        m_dv_cutflow->Fill("DESDMatching", 1);
+
+        if(!m_vxc->PassLowMassVeto(*dv)) continue;
+        m_dv_cutflow->Fill("m_{DV} > 6 GeV (p4)", 1);
+
+        if(!m_vxc->PassMassCut(*dv)) continue;
+        m_dv_cutflow->Fill("m_{DV} > 10 GeV", 1);
+
+        if(!m_vxc->PassChargeRequirement(*dv)) continue;
+        m_dv_cutflow->Fill("#mu^{+}#mu^{-}", 1);
+
+
+        ////----------------------------------------
+        //// require dv to have 2 muons
+        ////----------------------------------------
+        //if (dv_muc->size() != 2) continue;
+        //m_dv_cutflow->Fill("#mu#mu", 1);
+
+        ////----------------------------------------
+        //// Trigger matching
+        ////----------------------------------------
+        //if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
+        //m_dv_cutflow->Fill("Trig. Matching", 1);
+
+        ////----------------------------------------
+        //// combined muon
+        ////----------------------------------------
+        //if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
+        //m_dv_cutflow->Fill("CombinedMuon", 1);
+
+        ////----------------------------------------
+        //// vertex fit quality
+        ////----------------------------------------
+        //m_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+        //if(!m_vxc->PassChisqCut(*dv)) continue;
+        //m_dv_cutflow->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+        ////----------------------------------------
+        //// minimum distance from pv (from 0 for MC)
+        ////----------------------------------------
+        ////if(!m_vxc->PassDistCut(*dv, *pvc)) continue;
+        ////m_dv_cutflow->Fill("r_{DV} > 2 mm", 1);
+
+        ////----------------------------------------
+        //// charge requirements
+        ////----------------------------------------
+        //if(!m_vxc->PassChargeRequirement(*dv)) continue;
+        //m_dv_cutflow->Fill("#mu^{+}#mu^{-}", 1);
+
+        ////----------------------------------------
+        //// disabled module
+        ////----------------------------------------
+        //if(!m_vxc->PassDisabledModuleVeto(*dv)) continue;
+        //m_dv_cutflow->Fill("DisabledModule", 1);
+
+        ////----------------------------------------
+        //// DESD filter
+        ////----------------------------------------
+        //m_dilep->DoTriggerMatching(*dv);
+        //if(!m_dilep->PassDESDMatching(*dv)) continue;
+        //m_dv_cutflow->Fill("PassDESDMatching", 1);
+
+        ////----------------------------------------
+        //// cosmic veto
+        ////----------------------------------------
+        //if(!PassCosmicVeto(*dv_muc)) continue;
+        //m_dv_cutflow->Fill("R_{CR} > 0.04", 1);
+
+        ////----------------------------------------
+        //// filling additional histograms 
+        //m_chi2_ndof_nocosmic->Fill (dv->chiSquared() / dv->numberDoF() );
+        //plot_dv60(*dv, *pv);
+        //plot_muon60_kinematics(*dv_muc);
+
+        //ATH_MSG_INFO("Found DV before cosmic veto with mass = " << dv_mass << ", runNumber = "
+        //<< evtInfo->runNumber() << ", eventNumber = "
+        //<< evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+        ////----------------------------------------
+
+        ////----------------------------------------
+        //// delta R 
+        ////----------------------------------------
+        //float deltaR_min = 0.5;
+        //if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
+        //m_dv_cutflow->Fill("#DeltaR > 0.5", 1);
+
+        ////----------------------------------------
+        //// investigating pT cut
+        ////----------------------------------------
+        ////if(m_dvutils->getMinPT(*dv_muc) < 20.) continue;
+        ////m_dv_cutflow->Fill("p_{T}^{#mu} > 20 GeV", 1);
 
     
-        //----------------------------------------
-        // end of cut flow. Now plotting
-        //----------------------------------------
-        ATH_MSG_INFO("Found DV with mass = " << dv_mass << ", runNumber = "
-        << evtInfo->runNumber() << ", eventNumber = "
-        << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+        ////----------------------------------------
+        //// end of cut flow. Now plotting
+        ////----------------------------------------
+        //ATH_MSG_INFO("Found DV with mass = " << dv_mass << ", runNumber = "
+        //<< evtInfo->runNumber() << ", eventNumber = "
+        //<< evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
 
         // plot dv distributions
         plot_dv(*dv, *pv);
@@ -392,21 +450,15 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
             m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
         } // end of isMC
-
-
-
-
     } // end of dv loop
-    
     return StatusCode::SUCCESS;
 }
 
-StatusCode DisplacedDimuonAnalysisAlg::beginInputFile() { 
-
-  return StatusCode::SUCCESS;
+StatusCode SUSYDV::beginInputFile() { 
+    return StatusCode::SUCCESS;
 }
 
-bool DisplacedDimuonAnalysisAlg::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc) {
+bool SUSYDV::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc) {
     ATH_MSG_DEBUG ("Plotting cosmic veto" << name() << "...");
 
     bool PassCosmicVeto = true;
@@ -453,7 +505,7 @@ bool DisplacedDimuonAnalysisAlg::PassCosmicVeto(const DataVector<xAOD::Muon> dv_
 }
 
 
-void DisplacedDimuonAnalysisAlg::plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc) {
+void SUSYDV::plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc) {
     ATH_MSG_DEBUG ("Plotting muon kinematics" << name() << "...");
 
     // plot muon pT
@@ -478,7 +530,7 @@ void DisplacedDimuonAnalysisAlg::plot_muon_kinematics(const DataVector<xAOD::Muo
     return;
 }
 
-void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
+void SUSYDV::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
     ATH_MSG_DEBUG ("Plotting dv distribution" << name() << "...");
 
     // access invariant mass
@@ -502,7 +554,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
 
 
 
-void DisplacedDimuonAnalysisAlg::plot_muon60_kinematics(const DataVector<xAOD::Muon> dv_muc) {
+void SUSYDV::plot_muon60_kinematics(const DataVector<xAOD::Muon> dv_muc) {
     ATH_MSG_DEBUG ("Plotting muon kinematics" << name() << "...");
 
     // plot muon pT
@@ -528,7 +580,7 @@ void DisplacedDimuonAnalysisAlg::plot_muon60_kinematics(const DataVector<xAOD::M
     return;
 }
 
-void DisplacedDimuonAnalysisAlg::plot_dv60(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
+void SUSYDV::plot_dv60(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
     ATH_MSG_DEBUG ("Plotting dv distribution" << name() << "...");
 
     // access invariant mass
@@ -548,6 +600,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv60(const xAOD::Vertex& dv, const xAOD::V
 
     return;
 }
+
 
 
 

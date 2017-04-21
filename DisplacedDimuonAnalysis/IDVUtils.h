@@ -80,6 +80,10 @@ class IDVUtils: virtual public IAlgTool {
         virtual bool isSignalVertex (const xAOD::TruthVertex* v) = 0;
         // calculate invariant mass of truth vertex
         virtual float TruthMass (const xAOD::TruthVertex* v) = 0;
+        // calculate pt of truth vertex
+        virtual float TruthPt (const xAOD::TruthVertex* v) = 0;
+        // calculate dr of truth vertex
+        virtual float Truth_dr (const xAOD::TruthVertex* v) = 0;
 
         // check if ID track is LRT
         virtual bool isLargeD0Track (const xAOD::TrackParticle* tp) = 0;

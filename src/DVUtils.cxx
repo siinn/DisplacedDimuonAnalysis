@@ -574,6 +574,35 @@ float DVUtils::TruthMass (const xAOD::TruthVertex* v) {
 
 } // end of TruthMass
 
+// calculate pt of truth vertex
+float DVUtils::TruthPt (const xAOD::TruthVertex* v) {
+
+    // Lorentz vector to calculate pt of truth vertex
+    TLorentzVector outgoing_tlv;
+
+    for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
+
+        const xAOD::TruthParticle* p = v->outgoingParticle(i);
+        outgoing_tlv += TLorentzVector( p->px(), p->py(), p->pz(), p->e());
+    } // end of outgoingn particle loop
+
+    return outgoing_tlv.Pt(); // return pt in MeV
+} // end of TruthPt
+
+// calculate dr of truth vertex
+float DVUtils::Truth_dr (const xAOD::TruthVertex* v) {
+
+    const xAOD::TruthParticle* tp0 = FindFinalState(v->outgoingParticle(0));
+    const xAOD::TruthParticle* tp1 = FindFinalState(v->outgoingParticle(1));
+
+    // define TLorentzVector of muons
+    TLorentzVector tlv_p0 = tp0->p4();
+    TLorentzVector tlv_p1 = tp1->p4();
+
+    float deltaR_tlv = tlv_p0.DeltaR(tlv_p1);
+
+    return deltaR_tlv;
+} // end of Truth_dr
 
 
 //-------------------------------------------------------------

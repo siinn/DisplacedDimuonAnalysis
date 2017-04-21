@@ -216,6 +216,12 @@ StatusCode DVEfficiency::execute() {
         if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
 
         //----------------------------------------
+        // DESD filter
+        //----------------------------------------
+        m_dilepdvc->DoTriggerMatching(*dv);
+        if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
+
+        //----------------------------------------
         // cosmic veto
         //----------------------------------------
         if(!PassCosmicVeto(*dv_muc)) continue;
