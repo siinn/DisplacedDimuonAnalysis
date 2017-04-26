@@ -188,7 +188,7 @@ StatusCode DVEfficiency::execute() {
         //----------------------------------------
         // Trigger matching
         //----------------------------------------
-        if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
+        //if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
 
         //----------------------------------------
         // combined muon

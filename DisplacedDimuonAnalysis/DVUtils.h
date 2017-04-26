@@ -19,7 +19,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODMuon/MuonContainer.h"
-#include "xAODMuon/MuonAuxContainer.h"
+//#include "xAODMuon/MuonAuxContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include <string>
 
 class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
@@ -36,10 +38,13 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         float getz(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
         float getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
 
+        // get decay channel
+        std::string DecayChannel(xAOD::Vertex& dv);
+
         // reco dv is matched to signal truth dv
         const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc);
 
-        // trut tools --------------------------
+        // truth tools --------------------------
 
         // reco match using dR method
         bool IsReconstructedAsMuon(const xAOD::TruthParticle* tp);
@@ -73,7 +78,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         float getDelta_pT(const DataVector<xAOD::Muon> dv_muc);
 
         // check if one muon of DV is matched to trigger
-        bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc);
+        bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc);
 
         // check if two muons are combined muons
         bool IsCombinedMuon(const DataVector<xAOD::Muon> dv_muc);
@@ -101,8 +106,10 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
         // accessor for original ID track
         SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> m_accTr;
+
         // accessors for leptons associated to a DV
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
+        SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
 
     private:
 

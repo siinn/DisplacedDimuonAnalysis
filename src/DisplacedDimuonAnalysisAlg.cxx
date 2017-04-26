@@ -35,15 +35,20 @@ m_evtc("DDL::EventCuts/DiLepEventCuts"),
 m_dvc("DDL::DVCuts/DiLepBaseCuts"),
 m_cos("DDL::DiLepCosmics/DiLepCosmics"),
 m_dvutils("DVUtils"),
+m_leptool("LeptonSelectionTools"),
+m_costool("CosmicTools"),
 m_grlTool("GoodRunsListSelectionTool/GRLTool"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
 m_or("DDL::OverlapRemoval/OverlapRemoval"),
-//m_decorate_truv("reconstructed"),
+m_accMu("DDL_Muons"),
+m_accEl("DDL_Electrons"),
 m_accMass("mass")
 {
     // initialize tools
     declareProperty("DiLepDVCuts", m_dilepdvc);
     declareProperty("DVUtils", m_dvutils);
+    declareProperty("LeptonSelectionTool", m_leptool);
+    declareProperty("CosmicTool", m_costool);
     declareProperty("DiLepEventCuts", m_evtc);
     declareProperty("DiLepBaseCuts", m_dvc);
     declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
@@ -61,137 +66,243 @@ DisplacedDimuonAnalysisAlg::~DisplacedDimuonAnalysisAlg() {}
 StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
-    //--------------------------------------------------------
-    // Event cut
-    //--------------------------------------------------------
-
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
-    // custom binning
-    //Float_t m_dv_dimuon_M_bins[] = {0,100,400,700,1000,2000};
-    Float_t m_dv_dimuon_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-
-    // define histograms
-
+    // event cut flow
     m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
-    m_dv_cutflow = new TH1D( "m_dv_cutflow", "Reco dv cutflow", 12,0,12);
-
-    m_dv_M = new TH1F("dv_M","All DV mass in GeV",200,0.,2000.);
-    m_dv_dimuon_M = new TH1F("dv_dimuon_M","Dimuon DV mass in GeV",8, m_dv_dimuon_M_bins );
-    m_dv_dimuon_R = new TH1F("dv_dimuon_R","R of dimuon dv [mm]",50,0.,300.);
-    m_dv_dimuon_R_low = new TH1F("dv_dimuon_R_low","R of dimuon dv [mm], low",50,0.,50.);
-    m_dv_dimuon_z = new TH1F("dv_dimuon_z","z of dimuon dv [mm]",100,-1000.,1000.);
-    m_dv_dimuon_l = new TH1F("dv_dimuon_l","l of dimuon dv [mm]",100,0.,1000.);
-    m_dv_dimuon_R_M = new TH2F("dv_dimuon_R_M","Dimuon DV position R vs M", 50,0,300,200,0,2000);
-
-    // muon kinematics distribution
-    m_signal_muon_pt = new TH1F("signal_muon_pt","Signal muon pT",50,0.,1000.);
-    m_signal_muon_pt_low = new TH1F("signal_muon_pt_low","Signal muon low pT",50,0.,100.);
-    m_signal_muon_eta = new TH1F("signal_muon_eta","Signal muon eta",50,-3.0,3.0);
-    m_signal_muon_phi = new TH1F("signal_muon_phi","Signal muon phi",50,-M_PI,M_PI);
-    m_signal_muon_d0 = new TH1F("signal_muon_d0","Signal muon d0",50,-300,300);
-    m_signal_muon_z0 = new TH1F("signal_muon_z0","Signal muon z0",50,-1000,1000);
-
-    m_signal_muon_pt_min = new TH1F("signal_muon_pt_min","Signal muon pt_min",50,0.,1000.);
-    m_signal_muon_pt_min_low = new TH1F("signal_muon_pt_min_low","Signal muon low pt_min",50,0.,100.);
-    m_signal_muon_pt_max = new TH1F("signal_muon_pt_max","Signal muon pt_max",50,0.,1000.);
-    m_signal_muon_pt_max_low = new TH1F("signal_muon_pt_max_low","Signal muon low pt_max",50,0.,100.);
-
-    // cosmic veto
-    m_signal_muon_DeltaR = new TH1F("signal_muon_DeltaR","Signal muon Delta R",100, 0., 5.);
-    m_signal_muon_DeltaR_low = new TH1F("signal_muon_DeltaR_low","Signal muon Delta R low",100, 0., 1);
-    m_signal_muon_Rcos = new TH1F("signal_muon_Rcos","Signal muon Rcos",50, 0., 5.);
-    m_signal_muon_Rcos_low = new TH1F("signal_muon_Rcos_low","Signal muon Rcos low",25, 0., 0.1);
-
-    // only for MC
-    m_dv_dimuon_M_matched = new TH1F("dv_dimuon_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
-    m_dv_dimuon_R_matched = new TH1F("dv_dimuon_R_matched","R of matched dimuon dv [mm]",50,0.,300.);
-    m_dv_dimuon_R_M_matched = new TH2F("dv_dimuon_R_M_matched","matched dimuon DV position R vs M", 50,0,300,200,0,2000);
-    m_chi2_ndof = new TH1F("chi2_ndof", "chi^2 / ndof", 100, 0, 10);
-    m_chi2_ndof_nocosmic = new TH1F("chi2_ndof_nocosmic", "chi^2 / ndof", 100, 0, 10);
-
-
-    // pT > 60 cut plots
-    m_dv_dimuon60_M = new TH1F("dv_dimuon60_M","Dimuon DV mass in GeV",5, m_dv_dimuon_M_bins );
-    m_dv_dimuon60_R = new TH1F("dv_dimuon60_R","R of dimuon dv [mm]",50,0.,300.);
-    m_dv_dimuon60_R_low = new TH1F("dv_dimuon60_R_low","R of dimuon dv [mm], low",100,0.,10.);
-    m_dv_dimuon60_z = new TH1F("dv_dimuon60_z","z of dimuon dv [mm]",100,-1000.,1000.);
-    m_dv_dimuon60_l = new TH1F("dv_dimuon60_l","l of dimuon dv [mm]",100,0.,1000.);
-    m_signal_muon60_pt = new TH1F("signal_muon60_pt","Signal muon pT",50,0.,1000.);
-    m_signal_muon60_pt_low = new TH1F("signal_muon60_pt_low","Signal muon low pT",50,0.,100.);
-    m_signal_muon60_eta = new TH1F("signal_muon60_eta","Signal muon eta",50,-3.0,3.0);
-    m_signal_muon60_phi = new TH1F("signal_muon60_phi","Signal muon phi",50,-M_PI,M_PI);
-    m_signal_muon60_d0 = new TH1F("signal_muon60_d0","Signal muon d0",50,-300,300);
-    m_signal_muon60_z0 = new TH1F("signal_muon60_z0","Signal muon z0",50,-1000,1000);
-    m_signal_muon60_pt_min = new TH1F("signal_muon60_pt_min","Signal muon pt_min",50,0.,1000.);
-    m_signal_muon60_pt_min_low = new TH1F("signal_muon60_pt_min_low","Signal muon low pt_min",50,0.,100.);
-    m_signal_muon60_pt_max = new TH1F("signal_muon60_pt_max","Signal muon pt_max",50,0.,1000.);
-    m_signal_muon60_pt_max_low = new TH1F("signal_muon60_pt_max_low","Signal muon low pt_max",50,0.,100.);
-    m_signal_muon60_DeltaR = new TH1F("signal_muon60_DeltaR","Signal muon Delta R",100, 0., 5.);
-    m_signal_muon60_DeltaR_low = new TH1F("signal_muon60_DeltaR_low","Signal muon Delta R low",100, 0., 1);
-    m_signal_muon60_Rcos = new TH1F("signal_muon60_Rcos","Signal muon Rcos",100, 0., 5.);
-    m_signal_muon60_Rcos_low = new TH1F("signal_muon60_Rcos_low","Signal muon Rcos low",100, 0., 0.5);
-
-
-
-    // registor for output
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/dv_cutflow", m_dv_cutflow) );
     CHECK( histSvc->regHist("/DV/event_cutflow", m_event_cutflow) );
 
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_M", m_dv_M) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_dimuon_M", m_dv_dimuon_M) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_dimuon_R", m_dv_dimuon_R) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_dimuon_R_low", m_dv_dimuon_R_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_dimuon_z", m_dv_dimuon_z) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_dimuon_l", m_dv_dimuon_l) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/reco_dv_R_M", m_dv_dimuon_R_M) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/chi2_ndof", m_chi2_ndof) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/chi2_ndof_nocosmic", m_chi2_ndof_nocosmic) );
+    //--------------------------------------------------------
+    // mumu
+    //--------------------------------------------------------
+
+    Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
+    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
+    m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV",8, m_dv_mumu_M_bins );
+    m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
+    m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
+    m_dv_mumu_z = new TH1F("dv_mumu_z","z of dimuon dv [mm]",100,-1000.,1000.);
+    m_dv_mumu_l = new TH1F("dv_mumu_l","l of dimuon dv [mm]",100,0.,1000.);
+    m_dv_mumu_R_M = new TH2F("dv_mumu_R_M","Dimuon DV position R vs M", 50,0,300,200,0,2000);
 
     // muon kinematics distribution
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt", m_signal_muon_pt) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt_low", m_signal_muon_pt_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt_min", m_signal_muon_pt_min) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt_min_low", m_signal_muon_pt_min_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt_max", m_signal_muon_pt_max) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_pt_max_low", m_signal_muon_pt_max_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_eta", m_signal_muon_eta) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_phi", m_signal_muon_phi) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_d0", m_signal_muon_d0) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/signal_muon_z0", m_signal_muon_z0) );
+    m_dv_mumu_mu_pt = new TH1F("dv_mumu_mu_pt","Signal muon pT",50,0.,1000.);
+    m_dv_mumu_mu_pt_low = new TH1F("dv_mumu_mu_pt_low","Signal muon low pT",50,0.,100.);
+    m_dv_mumu_mu_eta = new TH1F("dv_mumu_mu_eta","Signal muon eta",50,-3.0,3.0);
+    m_dv_mumu_mu_phi = new TH1F("dv_mumu_mu_phi","Signal muon phi",50,-M_PI,M_PI);
+    m_dv_mumu_mu_d0 = new TH1F("dv_mumu_mu_d0","Signal muon d0",50,-300,300);
+    m_dv_mumu_mu_z0 = new TH1F("dv_mumu_mu_z0","Signal muon z0",50,-1000,1000);
+    //m_dv_mumu_mu_pt_min = new TH1F("dv_mumu_mu_pt_min","Signal muon pt_min",50,0.,1000.);
+    //m_dv_mumu_mu_pt_min_low = new TH1F("dv_mumu_mu_pt_min_low","Signal muon low pt_min",50,0.,100.);
+    //m_dv_mumu_mu_pt_max = new TH1F("dv_mumu_mu_pt_max","Signal muon pt_max",50,0.,1000.);
+    //m_dv_mumu_mu_pt_max_low = new TH1F("dv_mumu_mu_pt_max_low","Signal muon low pt_max",50,0.,100.);
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/signal_muon_DeltaR", m_signal_muon_DeltaR) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/signal_muon_DeltaR_low", m_signal_muon_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/signal_muon_Rcos", m_signal_muon_Rcos) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/signal_muon_Rcos_low", m_signal_muon_Rcos_low) );
+    m_dv_mumu_DeltaR = new TH1F("dv_mumu_mu_DeltaR","Signal muon Delta R",100, 0., 5.);
+    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_mu_DeltaR_low","Signal muon Delta R low",100, 0., 1);
+    m_dv_mumu_Rcos = new TH1F("dv_mumu_mu_Rcos","Signal muon Rcos",50, 0., 5.);
+    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_mu_Rcos_low","Signal muon Rcos low",25, 0., 0.1);
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/truth-matched/reco_dv_dimuon_M", m_dv_dimuon_M_matched) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/truth-matched/reco_dv_dimuon_R", m_dv_dimuon_R_matched) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/truth-matched/reco_dv_R_M", m_dv_dimuon_R_M_matched) );
+    m_dv_mumu_M_matched = new TH1F("dv_mumu_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
+    m_dv_mumu_R_matched = new TH1F("dv_mumu_R_matched","R of matched dimuon dv [mm]",50,0.,300.);
+    m_dv_mumu_R_M_matched = new TH2F("dv_mumu_R_M_matched","matched dimuon DV position R vs M", 50,0,300,200,0,2000);
+    m_dv_mumu_chi2_ndof = new TH1F("dv_mumu_chi2_ndof", "chi^2 / ndof (mumu)", 100, 0, 10);
 
-    // pT > 60 cut plots
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/pt60/reco_dv_dimuon60_M", m_dv_dimuon60_M) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/pt60/reco_dv_dimuon60_R", m_dv_dimuon60_R) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/pt60/reco_dv_dimuon60_R_low", m_dv_dimuon60_R_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/pt60/reco_dv_dimuon60_z", m_dv_dimuon60_z) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/pt60/reco_dv_dimuon60_l", m_dv_dimuon60_l) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_pt", m_signal_muon60_pt) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_pt_low", m_signal_muon60_pt_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_pt_min", m_signal_muon60_pt_min) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_pt_min_low", m_signal_muon60_pt_min_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_pt_max", m_signal_muon60_pt_max) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_pt_max_low", m_signal_muon60_pt_max_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_eta", m_signal_muon60_eta) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_phi", m_signal_muon60_phi) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_d0", m_signal_muon60_d0) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/muon/pt60/signal_muon60_z0", m_signal_muon60_z0) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_DeltaR", m_signal_muon60_DeltaR) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_DeltaR_low", m_signal_muon60_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_Rcos", m_signal_muon60_Rcos) );
-    CHECK( histSvc->regHist("/DV/SecondaryVertex/cosmicVeto/pt60/signal_muon60_Rcos_low", m_signal_muon60_Rcos_low) );
+    // registor for output
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_M", m_dv_mumu_M) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R", m_dv_mumu_R) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_l", m_dv_mumu_l) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R_M", m_dv_mumu_R_M) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_chi2_ndof", m_dv_mumu_chi2_ndof) );
 
+    // muon kinematics distribution
+    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt", m_dv_mumu_mu_pt) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_low", m_dv_mumu_mu_pt_low) );
+    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_min", m_dv_mumu_mu_pt_min) );
+    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_min_low", m_dv_mumu_mu_pt_min_low) );
+    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_max", m_dv_mumu_mu_pt_max) );
+    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_max_low", m_dv_mumu_mu_pt_max_low) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_eta", m_dv_mumu_mu_eta) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_phi", m_dv_mumu_mu_phi) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_d0", m_dv_mumu_mu_d0) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_z0", m_dv_mumu_mu_z0) );
+
+    // cosmic veto
+    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR", m_dv_mumu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR_low", m_dv_mumu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_Rcos", m_dv_mumu_Rcos) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_Rcos_low", m_dv_mumu_Rcos_low) );
+
+    // only for MC
+    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_M", m_dv_mumu_M_matched) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R", m_dv_mumu_R_matched) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R_M", m_dv_mumu_R_M_matched) );
+
+    //--------------------------------------------------------
+    // ee
+    //--------------------------------------------------------
+
+    Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
+    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 11,0,11);
+    m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",8, m_dv_ee_M_bins );
+    m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",50,0.,300.);
+    m_dv_ee_R_low = new TH1F("dv_ee_R_low","R of ee dv [mm], low",50,0.,50.);
+    m_dv_ee_z = new TH1F("dv_ee_z","z of ee dv [mm]",100,-1000.,1000.);
+    m_dv_ee_l = new TH1F("dv_ee_l","l of ee dv [mm]",100,0.,1000.);
+    m_dv_ee_R_M = new TH2F("dv_ee_R_M","ee DV position R vs M", 50,0,300,200,0,2000);
+
+    // muon kinematics distribution
+    m_dv_ee_e_pt = new TH1F("dv_ee_e_pt","Signal electron pT",50,0.,1000.);
+    m_dv_ee_e_pt_low = new TH1F("dv_ee_e_pt_low","Signal electron low pT",50,0.,100.);
+    m_dv_ee_e_eta = new TH1F("dv_ee_e_eta","Signal electron eta",50,-3.0,3.0);
+    m_dv_ee_e_phi = new TH1F("dv_ee_e_phi","Signal electron phi",50,-M_PI,M_PI);
+    m_dv_ee_e_d0 = new TH1F("dv_ee_e_d0","Signal electron d0",50,-300,300);
+    m_dv_ee_e_z0 = new TH1F("dv_ee_e_z0","Signal electron z0",50,-1000,1000);
+    //m_dv_ee_e_pt_min = new TH1F("dv_ee_e_pt_min","Signal electron pt_min",50,0.,1000.);
+    //m_dv_ee_e_pt_min_low = new TH1F("dv_ee_e_pt_min_low","Signal electron low pt_min",50,0.,100.);
+    //m_dv_ee_e_pt_max = new TH1F("dv_ee_e_pt_max","Signal electron pt_max",50,0.,1000.);
+    //m_dv_ee_e_pt_max_low = new TH1F("dv_ee_e_pt_max_low","Signal electron low pt_max",50,0.,100.);
+
+    // cosmic veto
+    m_dv_ee_DeltaR = new TH1F("dv_ee_DeltaR","Signal ee Delta R",100, 0., 5.);
+    m_dv_ee_DeltaR_low = new TH1F("dv_ee_DeltaR_low","Signal ee Delta R low",100, 0., 1);
+    m_dv_ee_Rcos = new TH1F("dv_ee_Rcos","Signal ee Rcos",50, 0., 5.);
+    m_dv_ee_Rcos_low = new TH1F("dv_ee_Rcos_low","Signal ee Rcos low",25, 0., 0.1);
+
+    // only for MC
+    m_dv_ee_M_matched = new TH1F("dv_ee_M_matched","matched ee DV mass in GeV",200,0.,2000.);
+    m_dv_ee_R_matched = new TH1F("dv_ee_R_matched","R of matched ee dv [mm]",50,0.,300.);
+    m_dv_ee_R_M_matched = new TH2F("dv_ee_R_M_matched","matched ee DV position R vs M", 50,0,300,200,0,2000);
+    m_dv_ee_chi2_ndof = new TH1F("dv_ee_chi2_ndof", "chi^2 / ndof (ee)", 100, 0, 10);
+
+    // registor for output
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_cf", m_dv_ee_cf) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_M", m_dv_ee_M) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R", m_dv_ee_R) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R_low", m_dv_ee_R_low) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_z", m_dv_ee_z) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_l", m_dv_ee_l) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R_M", m_dv_ee_R_M) );
+    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_chi2_ndof", m_dv_ee_chi2_ndof) );
+
+    // electron kinematics distribution
+    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt", m_dv_ee_e_pt) );
+    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_low", m_dv_ee_e_pt_low) );
+    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_min", m_dv_ee_e_pt_min) );
+    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_min_low", m_dv_ee_e_pt_min_low) );
+    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_max", m_dv_ee_e_pt_max) );
+    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_max_low", m_dv_ee_e_pt_max_low) );
+    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_eta", m_dv_ee_e_eta) );
+    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_phi", m_dv_ee_e_phi) );
+    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_d0", m_dv_ee_e_d0) );
+    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_z0", m_dv_ee_e_z0) );
+
+    // cosmic veto
+    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_DeltaR", m_dv_ee_DeltaR) );
+    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_DeltaR_low", m_dv_ee_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_Rcos", m_dv_ee_Rcos) );
+    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_Rcos_low", m_dv_ee_Rcos_low) );
+
+    // only for MC
+    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_M", m_dv_ee_M_matched) );
+    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R", m_dv_ee_R_matched) );
+    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R_M", m_dv_ee_R_M_matched) );
+
+    //--------------------------------------------------------
+    // emu
+    //--------------------------------------------------------
+
+    Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
+    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 11,0,11);
+    m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",8, m_dv_emu_M_bins );
+    m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",50,0.,300.);
+    m_dv_emu_R_low = new TH1F("dv_emu_R_low","R of emu dv [mm], low",50,0.,50.);
+    m_dv_emu_z = new TH1F("dv_emu_z","z of emu dv [mm]",100,-1000.,1000.);
+    m_dv_emu_l = new TH1F("dv_emu_l","l of emu dv [mm]",100,0.,1000.);
+    m_dv_emu_R_M = new TH2F("dv_emu_R_M","emu DV position R vs M", 50,0,300,200,0,2000);
+
+    // muon kinematics distribution
+    m_dv_emu_e_pt = new TH1F("dv_emu_e_pt","Signal electron pT",50,0.,1000.);
+    m_dv_emu_e_pt_low = new TH1F("dv_emu_e_pt_low","Signal electron low pT",50,0.,100.);
+    m_dv_emu_e_eta = new TH1F("dv_emu_e_eta","Signal electron eta",50,-3.0,3.0);
+    m_dv_emu_e_phi = new TH1F("dv_emu_e_phi","Signal electron phi",50,-M_PI,M_PI);
+    m_dv_emu_e_d0 = new TH1F("dv_emu_e_d0","Signal electron d0",50,-300,300);
+    m_dv_emu_e_z0 = new TH1F("dv_emu_e_z0","Signal electron z0",50,-1000,1000);
+    //m_dv_emu_e_pt_min = new TH1F("dv_emu_e_pt_min","Signal electron pt_min",50,0.,1000.);
+    //m_dv_emu_e_pt_min_low = new TH1F("dv_emu_e_pt_min_low","Signal electron low pt_min",50,0.,100.);
+    //m_dv_emu_e_pt_max = new TH1F("dv_emu_e_pt_max","Signal electron pt_max",50,0.,1000.);
+    //m_dv_emu_e_pt_max_low = new TH1F("dv_emu_e_pt_max_low","Signal electron low pt_max",50,0.,100.);
+
+    m_dv_emu_mu_pt = new TH1F("dv_emu_mu_pt","Signal electron pT",50,0.,1000.);
+    m_dv_emu_mu_pt_low = new TH1F("dv_emu_mu_pt_low","Signal electron low pT",50,0.,100.);
+    m_dv_emu_mu_eta = new TH1F("dv_emu_mu_eta","Signal electron eta",50,-3.0,3.0);
+    m_dv_emu_mu_phi = new TH1F("dv_emu_mu_phi","Signal electron phi",50,-M_PI,M_PI);
+    m_dv_emu_mu_d0 = new TH1F("dv_emu_mu_d0","Signal electron d0",50,-300,300);
+    m_dv_emu_mu_z0 = new TH1F("dv_emu_mu_z0","Signal electron z0",50,-1000,1000);
+    //m_dv_emu_mu_pt_min = new TH1F("dv_emu_mu_pt_min","Signal electron pt_min",50,0.,1000.);
+    //m_dv_emu_mu_pt_min_low = new TH1F("dv_emu_mu_pt_min_low","Signal electron low pt_min",50,0.,100.);
+    //m_dv_emu_mu_pt_max = new TH1F("dv_emu_mu_pt_max","Signal electron pt_max",50,0.,1000.);
+    //m_dv_emu_mu_pt_max_low = new TH1F("dv_emu_mu_pt_max_low","Signal electron low pt_max",50,0.,100.);
+
+    // cosmic veto
+    m_dv_emu_DeltaR = new TH1F("dv_emu_DeltaR","Signal emu Delta R",100, 0., 5.);
+    m_dv_emu_DeltaR_low = new TH1F("dv_emu_DeltaR_low","Signal emu Delta R low",100, 0., 1);
+    m_dv_emu_Rcos = new TH1F("dv_emu_Rcos","Signal emu Rcos",50, 0., 5.);
+    m_dv_emu_Rcos_low = new TH1F("dv_emu_Rcos_low","Signal emu Rcos low",25, 0., 0.1);
+
+    // only for MC
+    m_dv_emu_M_matched = new TH1F("dv_emu_M_matched","matched emu DV mass in GeV",200,0.,2000.);
+    m_dv_emu_R_matched = new TH1F("dv_emu_R_matched","R of matched emu dv [mm]",50,0.,300.);
+    m_dv_emu_R_M_matched = new TH2F("dv_emu_R_M_matched","matched emu DV position R vs M", 50,0,300,200,0,2000);
+    m_dv_emu_chi2_ndof = new TH1F("dv_emu_chi2_ndof", "chi^2 / ndof (emu)", 100, 0, 10);
+
+    // registor for output
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_cf", m_dv_emu_cf) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_M", m_dv_emu_M) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R", m_dv_emu_R) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R_low", m_dv_emu_R_low) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_z", m_dv_emu_z) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_l", m_dv_emu_l) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R_M", m_dv_emu_R_M) );
+    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_chi2_ndof", m_dv_emu_chi2_ndof) );
+
+    // electron kinematics distribution
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt", m_dv_emu_e_pt) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_low", m_dv_emu_e_pt_low) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_min", m_dv_emu_e_pt_min) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_min_low", m_dv_emu_e_pt_min_low) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_max", m_dv_emu_e_pt_max) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_max_low", m_dv_emu_e_pt_max_low) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_eta", m_dv_emu_e_eta) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_phi", m_dv_emu_e_phi) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_d0", m_dv_emu_e_d0) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_z0", m_dv_emu_e_z0) );
+
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt", m_dv_emu_mu_pt) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_low", m_dv_emu_mu_pt_low) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_min", m_dv_emu_mu_pt_min) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_min_low", m_dv_emu_mu_pt_min_low) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_max", m_dv_emu_mu_pt_max) );
+    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_max_low", m_dv_emu_mu_pt_max_low) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_eta", m_dv_emu_mu_eta) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_phi", m_dv_emu_mu_phi) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_d0", m_dv_emu_mu_d0) );
+    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_z0", m_dv_emu_mu_z0) );
+
+    // cosmic veto
+    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_DeltaR", m_dv_emu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_DeltaR_low", m_dv_emu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_Rcos", m_dv_emu_Rcos) );
+    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_Rcos_low", m_dv_emu_Rcos_low) );
+
+    // only for MC
+    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_M", m_dv_emu_M_matched) );
+    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R", m_dv_emu_R_matched) );
+    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R_M", m_dv_emu_R_M_matched) );
 
   return StatusCode::SUCCESS;
 }
@@ -224,7 +335,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // trigger check
     if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
-
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -259,145 +369,255 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     // perform lepton matching
     for(auto dv: *dvc_copy.first) {
-        //m_dvutils->ApplyMuonMatching(*dv, *muc_copy.first);
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
     }
 
-    // cut flow
+    //------------------------------
+    // dv cut flow
+    //------------------------------
     for(auto dv: *dvc_copy.first) {
-        ATH_MSG_DEBUG("DEBUG: DV loop, dv = " << dv);
 
         // access invariant mass
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
 
-        // collect muons from this dv
-        auto dv_muc = m_dilepdvc->GetMu(*dv);
+        // collect leptons from this dv
+        auto dv_muc = m_accMu(*dv);
+        auto dv_elc = m_accEl(*dv);
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
 
-        // fill all dv
-        m_dv_M->Fill(dv_mass);               // all dv
+        // muon selection tool
+        m_leptool->MuonSelection(*dv);
 
-        //----------------------------------------
+        // remove bad electrons
+        m_leptool->BadClusterRemoval(*dv);
+
+        // kinematic cut
+        m_leptool->ElectronKinematicCut(*dv);
+
+        // Electron identification
+        m_leptool->ElectronID(*dv);
+
         // counting all dv's
-        //----------------------------------------
-        m_dv_cutflow->Fill("DV", 1);
+        m_dv_mumu_cf->Fill("DV", 1);
+        m_dv_ee_cf->Fill("DV", 1);
+        m_dv_emu_cf->Fill("DV", 1);
 
-        //----------------------------------------
-        // require dv to have 2 muons
-        //----------------------------------------
-        if (dv_muc->size() != 2) continue;
-        m_dv_cutflow->Fill("#mu#mu", 1);
+        // find decay channel of dv
+        std::string channel = m_dvutils->DecayChannel(*dv);
 
-        //----------------------------------------
-        // Trigger matching
-        //----------------------------------------
-        if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
-        m_dv_cutflow->Fill("Trig. Matching", 1);
+        ATH_MSG_INFO("DEBUG: channel = " << channel);
 
-        //----------------------------------------
-        // combined muon
-        //----------------------------------------
-        if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
-        m_dv_cutflow->Fill("CombinedMuon", 1);
+        if (channel == "mumu") {
 
-        //----------------------------------------
-        // vertex fit quality
-        //----------------------------------------
-        m_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
-        if(!m_dvc->PassChisqCut(*dv)) continue;
-        m_dv_cutflow->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+            // mumu pair
+            m_dv_mumu_cf->Fill("#mu#mu", 1);
 
-        //----------------------------------------
-        // minimum distance from pv (from 0 for MC)
-        //----------------------------------------
-        if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-        m_dv_cutflow->Fill("Disp. > 2 mm", 1);
+            // Trigger matching
+            //if (!m_dvutils->TriggerMatching(*dv_muc,*dv_elc)) break;
+            m_dilepdvc->DoTriggerMatching(*dv);
+            if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            m_dv_mumu_cf->Fill("Trig. Matching", 1);
 
-        //----------------------------------------
-        // charge requirements
-        //----------------------------------------
-        if(!m_dvc->PassChargeRequirement(*dv)) continue;
-        m_dv_cutflow->Fill("#mu^{+}#mu^{-}", 1);
+            // vertex fit quality
+            m_dv_mumu_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+            if(!m_dvc->PassChisqCut(*dv)) break;
+            m_dv_mumu_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-        //----------------------------------------
-        // disabled module
-        //----------------------------------------
-        if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
-        m_dv_cutflow->Fill("DisabledModule", 1);
+            // minimum distance from pv (from 0 for MC)
+            if(!m_dvc->PassDistCut(*dv, *pvc)) break;
+            m_dv_mumu_cf->Fill("Disp. > 2 mm", 1);
 
-        //----------------------------------------
-        // DESD filter
-        //----------------------------------------
-        m_dilepdvc->DoTriggerMatching(*dv);
-        if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
-        m_dv_cutflow->Fill("PassDESDMatching", 1);
+            // charge requirements
+            if(!m_dvc->PassChargeRequirement(*dv)) break;
+            m_dv_mumu_cf->Fill("#mu^{+}#mu^{-}", 1);
 
-        //----------------------------------------
-        // cosmic veto
-        //----------------------------------------
-        if(!PassCosmicVeto(*dv_muc)) continue;
-        m_dv_cutflow->Fill("R_{CR} > 0.04", 1);
+            // disabled module
+            if(!m_dvc->PassDisabledModuleVeto(*dv)) break;
+            m_dv_mumu_cf->Fill("DisabledModule", 1);
 
-        //----------------------------------------
-        // filling additional histograms 
-        m_chi2_ndof_nocosmic->Fill (dv->chiSquared() / dv->numberDoF() );
-        plot_dv60(*dv, *pv);
-        plot_muon60_kinematics(*dv_muc);
+            // DESD filter
+            //m_dilepdvc->DoTriggerMatching(*dv);
+            //if(!m_dilepdvc->PassDESDMatching(*dv)) break;
+            //m_dv_mumu_cf->Fill("PassDESDMatching", 1);
 
-        ATH_MSG_INFO("Found DV before cosmic veto with mass = " << dv_mass << ", runNumber = "
-        << evtInfo->runNumber() << ", eventNumber = "
-        << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
-        //----------------------------------------
+            // cosmic veto
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) break;
+            m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
 
-        //----------------------------------------
-        // delta R 
-        //----------------------------------------
-        float deltaR_min = 0.5;
-        if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
-        m_dv_cutflow->Fill("#DeltaR > 0.5", 1);
-
-        //----------------------------------------
-        // investigating pT cut
-        //----------------------------------------
-        //if(m_dvutils->getMinPT(*dv_muc) < 20.) continue;
-        //m_dv_cutflow->Fill("p_{T}^{#mu} > 20 GeV", 1);
-
+            // delta R 
+            float deltaR_min = 0.5;
+            if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) break;
+            m_dv_mumu_cf->Fill("#DeltaR > 0.5", 1);
     
-        //----------------------------------------
-        // end of cut flow. Now plotting
-        //----------------------------------------
-        ATH_MSG_INFO("Found DV with mass = " << dv_mass << ", runNumber = "
-        << evtInfo->runNumber() << ", eventNumber = "
-        << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+            // end of cut flow. Now plotting
+            ATH_MSG_INFO("Found mumu with mass = " << dv_mass << ", runNumber = "
+            << evtInfo->runNumber() << ", eventNumber = "
+            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
 
-        // plot dv distributions
-        plot_dv(*dv, *pv);
+            // plot dv distributions
+            plot_dv(*dv, *pv, channel);
 
-        // plot muon kinematics
-        plot_muon_kinematics(*dv_muc);
+            // plot muon kinematics
+            plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-        // only for MC: find truth dv matched to this dv
-        if (isMC) {
-            // find truth dv matched to this dv
-            const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+            // only for MC: find truth dv matched to this dv
+            if (isMC) {
+                // find truth dv matched to this dv
+                const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
 
-            if (tru_v == nullptr) continue;
-            m_dv_cutflow->Fill("Truth-matched", 1);
+                if (tru_v == nullptr) break;
+                m_dv_mumu_cf->Fill("Truth-matched", 1);
 
-            // fill matched dimuon vertex
-            float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-            m_dv_dimuon_M_matched->Fill(dv_mass);                          // dimuon mass
-            m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
-            m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
-        } // end of isMC
+                // fill matched dimuon vertex
+                float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+                m_dv_mumu_M_matched->Fill(dv_mass);                          // dimuon mass
+                m_dv_mumu_R_matched->Fill(dv_R);                                // R in [mm]
+                m_dv_mumu_R_M_matched->Fill(dv_R, dv_mass);
+            } // end of isMC
+        } // end of mumu
 
+        if (channel == "ee") {
 
+            // ee pair
+            m_dv_ee_cf->Fill("ee", 1);
 
+            // Trigger matching
+            //if (!m_dvutils->TriggerMatching(*dv_muc,*dv_elc)) break;
+            m_dilepdvc->DoTriggerMatching(*dv);
+            if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            m_dv_ee_cf->Fill("Trig. Matching", 1);
+
+            // vertex fit quality
+            m_dv_ee_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+            if(!m_dvc->PassChisqCut(*dv)) break;
+            m_dv_ee_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+            // minimum distance from pv (from 0 for MC)
+            if(!m_dvc->PassDistCut(*dv, *pvc)) break;
+            m_dv_ee_cf->Fill("Disp. > 2 mm", 1);
+
+            // charge requirements
+            if(!m_dvc->PassChargeRequirement(*dv)) break;
+            m_dv_ee_cf->Fill("e^{+}e^{-}", 1);
+
+            // disabled module
+            if(!m_dvc->PassDisabledModuleVeto(*dv)) break;
+            m_dv_ee_cf->Fill("DisabledModule", 1);
+
+            //// DESD filter
+            //m_dilepdvc->DoTriggerMatching(*dv);
+            //if(!m_dilepdvc->PassDESDMatching(*dv)) break;
+            //m_dv_ee_cf->Fill("PassDESDMatching", 1);
+
+            // cosmic veto
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) break;
+            m_dv_ee_cf->Fill("R_{CR} > 0.04", 1);
+
+            // delta R 
+            float deltaR_min = 0.5;
+            if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) break;
+            m_dv_ee_cf->Fill("#DeltaR > 0.5", 1);
+    
+            // end of cut flow. Now plotting
+            ATH_MSG_INFO("Found ee with mass = " << dv_mass << ", runNumber = "
+            << evtInfo->runNumber() << ", eventNumber = "
+            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+
+            // plot dv distributions
+            plot_dv(*dv, *pv, channel);
+
+            // plot muon kinematics
+            plot_signal_tp(*dv_muc, *dv_elc, channel);
+
+            //// only for MC: find truth dv matched to this dv
+            //if (isMC) {
+            //    // find truth dv matched to this dv
+            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+
+            //    if (tru_v == nullptr) break;
+            //    m_dv_ee_cf->Fill("Truth-matched", 1);
+
+            //    // fill matched dimuon vertex
+            //    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+            //    m_dv_ee_M_matched->Fill(dv_mass);                          // dimuon mass
+            //    m_dv_ee_R_matched->Fill(dv_R);                                // R in [mm]
+            //    m_dv_ee_R_M_matched->Fill(dv_R, dv_mass);
+            //} // end of isMC
+        } // end of ee
+
+        if (channel == "emu") {
+
+            // emu pair
+            m_dv_emu_cf->Fill("e#mu", 1);
+
+            // Trigger matching
+            //if (!m_dvutils->TriggerMatching(*dv_muc,*dv_elc)) break;
+            m_dilepdvc->DoTriggerMatching(*dv);
+            if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            m_dv_emu_cf->Fill("Trig. Matching", 1);
+
+            // vertex fit quality
+            m_dv_emu_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+            if(!m_dvc->PassChisqCut(*dv)) break;
+            m_dv_emu_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+            // minimum distance from pv (from 0 for MC)
+            if(!m_dvc->PassDistCut(*dv, *pvc)) break;
+            m_dv_emu_cf->Fill("Disp. > 2 mm", 1);
+
+            // charge requirements
+            if(!m_dvc->PassChargeRequirement(*dv)) break;
+            m_dv_emu_cf->Fill("e^{+}#mu^{-}, e^{-}#mu^{+}", 1);
+
+            // disabled module
+            if(!m_dvc->PassDisabledModuleVeto(*dv)) break;
+            m_dv_emu_cf->Fill("DisabledModule", 1);
+
+            //// DESD filter
+            //m_dilepdvc->DoTriggerMatching(*dv);
+            //if(!m_dilepdvc->PassDESDMatching(*dv)) break;
+            //m_dv_emu_cf->Fill("PassDESDMatching", 1);
+
+            // cosmic veto
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) break;
+            m_dv_emu_cf->Fill("R_{CR} > 0.04", 1);
+
+            // delta R 
+            float deltaR_min = 0.5;
+            if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) break;
+            m_dv_emu_cf->Fill("#DeltaR > 0.5", 1);
+    
+            // end of cut flow. Now plotting
+            ATH_MSG_INFO("Found emu with mass = " << dv_mass << ", runNumber = "
+            << evtInfo->runNumber() << ", eventNumber = "
+            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+
+            // plot dv distributions
+            plot_dv(*dv, *pv, channel);
+
+            // plot muon kinematics
+            plot_signal_tp(*dv_muc, *dv_elc, channel);
+
+            //// only for MC: find truth dv matched to this dv
+            //if (isMC) {
+            //    // find truth dv matched to this dv
+            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+
+            //    if (tru_v == nullptr) break;
+            //    m_dv_emu_cf->Fill("Truth-matched", 1);
+
+            //    // fill matched dimuon vertex
+            //    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+            //    m_dv_emu_M_matched->Fill(dv_mass);                          // dimuon mass
+            //    m_dv_emu_R_matched->Fill(dv_R);                                // R in [mm]
+            //    m_dv_emu_R_M_matched->Fill(dv_R, dv_mass);
+            //} // end of isMC
+        } // end of emu
 
     } // end of dv loop
-    
+
     return StatusCode::SUCCESS;
 }
 
@@ -406,80 +626,125 @@ StatusCode DisplacedDimuonAnalysisAlg::beginInputFile() {
   return StatusCode::SUCCESS;
 }
 
-bool DisplacedDimuonAnalysisAlg::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc) {
+bool DisplacedDimuonAnalysisAlg::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
     ATH_MSG_DEBUG ("Plotting cosmic veto" << name() << "...");
 
     bool PassCosmicVeto = true;
 
     float Rcos_min = 0.04;
     float deltaR_min = 0.5;
-    float deltaPhiMinusPi = m_dvutils->getDeltaPhiMinusPi(dv_muc);
-    float sumEta = m_dvutils->getSumEta(dv_muc);
+    float deltaPhiMinusPi = m_costool->getDeltaPhiMinusPi(dv_muc, dv_elc, channel);
+    float sumEta = m_costool->getSumEta(dv_muc, dv_elc, channel);
 
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
-    float deltaR = m_dvutils->getDeltaR(dv_muc);
+    float deltaR = m_costool->getDeltaR(dv_muc, dv_elc, channel);
 
-    bool PassedpTcut = false;
-    if (m_dvutils->getMinPT(dv_muc) > 60.) PassedpTcut = true;
+    if (channel == "mumu"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_mumu_Rcos->Fill(Rcos);
+            m_dv_mumu_Rcos_low->Fill(Rcos);
+        }
 
-
-    // plot Rcos after applying deltaR < deltaR_min
-    if (deltaR > deltaR_min){
-        m_signal_muon_Rcos->Fill(Rcos);
-        m_signal_muon_Rcos_low->Fill(Rcos);
-
-        if (PassedpTcut){
-            m_signal_muon60_Rcos->Fill(Rcos);
-            m_signal_muon60_Rcos_low->Fill(Rcos);
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_mumu_DeltaR->Fill(deltaR);
+            m_dv_mumu_DeltaR_low->Fill(deltaR);
         }
     }
 
-    // plot delta R after applying Rcos < Rcos_min
-    if (Rcos > Rcos_min){
-        m_signal_muon_DeltaR->Fill(deltaR);
-        m_signal_muon_DeltaR_low->Fill(deltaR);
+    if (channel == "ee"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_ee_Rcos->Fill(Rcos);
+            m_dv_ee_Rcos_low->Fill(Rcos);
+        }
 
-        if (PassedpTcut){
-            m_signal_muon60_DeltaR->Fill(deltaR); // angular difference between two muons
-            m_signal_muon60_DeltaR_low->Fill(deltaR); // angular difference between two muons
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_ee_DeltaR->Fill(deltaR);
+            m_dv_ee_DeltaR_low->Fill(deltaR);
         }
     }
 
-    // set flag
-    //if ((Rcos < Rcos_min) or (deltaR < deltaR_min)) PassCosmicVeto = false;
+    if (channel == "emu"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_emu_Rcos->Fill(Rcos);
+            m_dv_emu_Rcos_low->Fill(Rcos);
+        }
+
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_emu_DeltaR->Fill(deltaR);
+            m_dv_emu_DeltaR_low->Fill(deltaR);
+        }
+    }
+
     if (Rcos < Rcos_min) PassCosmicVeto = false;
 
     return PassCosmicVeto;
 }
 
 
-void DisplacedDimuonAnalysisAlg::plot_muon_kinematics(const DataVector<xAOD::Muon> dv_muc) {
-    ATH_MSG_DEBUG ("Plotting muon kinematics" << name() << "...");
+void DisplacedDimuonAnalysisAlg::plot_signal_tp(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
 
-    // plot muon pT
-    for(auto mu: dv_muc){
+    if (channel == "mumu"){
+        // plot muon distribution
+        for(auto mu: dv_muc){
+            m_dv_mumu_mu_pt->Fill(mu->pt() / 1000.); // GeV
+            m_dv_mumu_mu_pt_low->Fill(mu->pt() / 1000.); // GeV
+            m_dv_mumu_mu_eta->Fill(mu->eta());
+            m_dv_mumu_mu_phi->Fill(mu->phi());
+            m_dv_mumu_mu_d0->Fill(mu->primaryTrackParticle()->d0());
+            m_dv_mumu_mu_z0->Fill(mu->primaryTrackParticle()->z0());
+        }
 
-        m_signal_muon_pt->Fill(mu->pt() / 1000.); // GeV
-        m_signal_muon_pt_low->Fill(mu->pt() / 1000.); // GeV
-        m_signal_muon_eta->Fill(mu->eta());
-        m_signal_muon_phi->Fill(mu->phi());
-        m_signal_muon_d0->Fill(mu->primaryTrackParticle()->d0());
-        m_signal_muon_z0->Fill(mu->primaryTrackParticle()->z0());
+        //// plot the lowest pT of two muons
+        //float max_muon_pt = m_dvutils->getMaxPT(dv_muc);
+        //float min_muon_pt = m_dvutils->getMinPT(dv_muc);
+        //m_dv_mumu_mu_pt_max->Fill(max_muon_pt);
+        //m_dv_mumu_mu_pt_max_low->Fill(max_muon_pt);
+        //m_dv_mumu_mu_pt_min->Fill(min_muon_pt);
+        //m_dv_mumu_mu_pt_min_low->Fill(min_muon_pt);
     }
 
-    // plot the lowest pT of two muons
-    float max_muon_pt = m_dvutils->getMaxPT(dv_muc);
-    float min_muon_pt = m_dvutils->getMinPT(dv_muc);
-    m_signal_muon_pt_max->Fill(max_muon_pt);
-    m_signal_muon_pt_max_low->Fill(max_muon_pt);
-    m_signal_muon_pt_min->Fill(min_muon_pt);
-    m_signal_muon_pt_min_low->Fill(min_muon_pt);
+    if (channel == "ee"){
+        // plot muon distribution
+        for(auto el: dv_elc){
+            m_dv_ee_e_pt->Fill(el->pt() / 1000.); // GeV
+            m_dv_ee_e_pt_low->Fill(el->pt() / 1000.); // GeV
+            m_dv_ee_e_eta->Fill(el->eta());
+            m_dv_ee_e_phi->Fill(el->phi());
+            m_dv_ee_e_d0->Fill(el->trackParticle()->d0());
+            m_dv_ee_e_z0->Fill(el->trackParticle()->z0());
+        }
+    }
+
+    if (channel == "emu"){
+        // plot muon distribution
+        for(auto mu: dv_muc){
+            m_dv_emu_mu_pt->Fill(mu->pt() / 1000.); // GeV
+            m_dv_emu_mu_pt_low->Fill(mu->pt() / 1000.); // GeV
+            m_dv_emu_mu_eta->Fill(mu->eta());
+            m_dv_emu_mu_phi->Fill(mu->phi());
+            m_dv_emu_mu_d0->Fill(mu->primaryTrackParticle()->d0());
+            m_dv_emu_mu_z0->Fill(mu->primaryTrackParticle()->z0());
+        }
+        for(auto el: dv_elc){
+            m_dv_emu_e_pt->Fill(el->pt() / 1000.); // GeV
+            m_dv_emu_e_pt_low->Fill(el->pt() / 1000.); // GeV
+            m_dv_emu_e_eta->Fill(el->eta());
+            m_dv_emu_e_phi->Fill(el->phi());
+            m_dv_emu_e_d0->Fill(el->trackParticle()->d0());
+            m_dv_emu_e_z0->Fill(el->trackParticle()->z0());
+        }
+    }
 
     return;
 }
 
-void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
-    ATH_MSG_DEBUG ("Plotting dv distribution" << name() << "...");
+void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::string channel) {
 
     // access invariant mass
     float dv_mass = std::fabs(m_accMass(dv)) / 1000.; // in MeV
@@ -489,67 +754,35 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
     float dv_z = m_dvutils->getz( dv, pv );                 // z in [mm]
     float dv_l = m_dvutils->getr( dv, pv );                 // r in [mm]
 
-    m_dv_dimuon_M->Fill(dv_mass);                             // dimuon mass
-    m_dv_dimuon_R->Fill(dv_R);                                
-    m_dv_dimuon_R_low->Fill(dv_R);                                
-    m_dv_dimuon_z->Fill(dv_z);                                
-    m_dv_dimuon_l->Fill(dv_l);                                
-    m_dv_dimuon_R_M->Fill(dv_R, dv_mass);
-
-
-    return;
-}
-
-
-
-void DisplacedDimuonAnalysisAlg::plot_muon60_kinematics(const DataVector<xAOD::Muon> dv_muc) {
-    ATH_MSG_DEBUG ("Plotting muon kinematics" << name() << "...");
-
-    // plot muon pT
-    for(auto mu: dv_muc){
-
-        m_signal_muon60_pt->Fill(mu->pt() / 1000.); // GeV
-        m_signal_muon60_pt_low->Fill(mu->pt() / 1000.); // GeV
-        m_signal_muon60_eta->Fill(mu->eta());
-        m_signal_muon60_phi->Fill(mu->phi());
-        m_signal_muon60_d0->Fill(mu->primaryTrackParticle()->d0());
-        m_signal_muon60_z0->Fill(mu->primaryTrackParticle()->z0());
+    if (channel == "mumu"){
+        m_dv_mumu_M->Fill(dv_mass);                             // dimuon mass
+        m_dv_mumu_R->Fill(dv_R);                                
+        m_dv_mumu_R_low->Fill(dv_R);                                
+        m_dv_mumu_z->Fill(dv_z);                                
+        m_dv_mumu_l->Fill(dv_l);                                
+        m_dv_mumu_R_M->Fill(dv_R, dv_mass);
     }
 
-    // plot the lowest pT of two muons
-    float max_muon60_pt = m_dvutils->getMaxPT(dv_muc);
-    float min_muon60_pt = m_dvutils->getMinPT(dv_muc);
-    m_signal_muon60_pt_max->Fill(max_muon60_pt);
-    m_signal_muon60_pt_max_low->Fill(max_muon60_pt);
-    m_signal_muon60_pt_min->Fill(min_muon60_pt);
-    m_signal_muon60_pt_min_low->Fill(min_muon60_pt);
+    if (channel == "ee"){
+        m_dv_ee_M->Fill(dv_mass);                             // dimuon mass
+        m_dv_ee_R->Fill(dv_R);                                
+        m_dv_ee_R_low->Fill(dv_R);                                
+        m_dv_ee_z->Fill(dv_z);                                
+        m_dv_ee_l->Fill(dv_l);                                
+        m_dv_ee_R_M->Fill(dv_R, dv_mass);
+    }
 
-
-    return;
-}
-
-void DisplacedDimuonAnalysisAlg::plot_dv60(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
-    ATH_MSG_DEBUG ("Plotting dv distribution" << name() << "...");
-
-    // access invariant mass
-    float dv_mass = std::fabs(m_accMass(dv)) / 1000.; // in MeV
-
-    // fill dimuon vertex
-    float dv_R = m_dvutils->getR( dv, pv );                 // R in [mm]
-    float dv_z = m_dvutils->getz( dv, pv );                 // z in [mm]
-    float dv_l = m_dvutils->getr( dv, pv );                 // r in [mm]
-
-    m_dv_dimuon60_M->Fill(dv_mass);                             // dimuon mass
-    m_dv_dimuon60_R->Fill(dv_R);                                
-    m_dv_dimuon60_R_low->Fill(dv_R);                                
-    m_dv_dimuon60_z->Fill(dv_z);                                
-    m_dv_dimuon60_l->Fill(dv_l);                                
-
+    if (channel == "emu"){
+        m_dv_emu_M->Fill(dv_mass);                             // dimuon mass
+        m_dv_emu_R->Fill(dv_R);                                
+        m_dv_emu_R_low->Fill(dv_R);                                
+        m_dv_emu_z->Fill(dv_z);                                
+        m_dv_emu_l->Fill(dv_l);                                
+        m_dv_emu_R_M->Fill(dv_R, dv_mass);
+    }
 
     return;
 }
-
-
 
 
 

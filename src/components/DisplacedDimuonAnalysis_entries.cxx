@@ -3,9 +3,13 @@
 
 #include "../DisplacedDimuonAnalysisAlg.h"
 #include "../DisplacedDimuonAnalysis/DVUtils.h"
+#include "../DisplacedDimuonAnalysis/LeptonSelectionTools.h"
+#include "../DisplacedDimuonAnalysis/CosmicTools.h"
 
 DECLARE_ALGORITHM_FACTORY( DisplacedDimuonAnalysisAlg )
 DECLARE_TOOL_FACTORY( DVUtils )
+DECLARE_TOOL_FACTORY( LeptonSelectionTools )
+DECLARE_TOOL_FACTORY( CosmicTools )
 
 
 #include "../MuonEfficiency.h"

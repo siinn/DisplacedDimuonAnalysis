@@ -13,11 +13,13 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "cmath"
 #include <algorithm>    // to find min and max
+#include <string>
 
 DVUtils::DVUtils( const std::string& type,const std::string& name, const IInterface* parent) :
 AthAlgTool( type, name, parent ),
 m_accTr("recoTrackLink"),
-m_accMu("DV_Muons"),
+m_accMu("DDL_Muons"),
+m_accEl("DDL_Electrons"),
 m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
 m_mc("DDL::MuonCuts/DiLepMuonCuts"),
 m_tmt("Trig::MatchingTool/MyMatchingTool")
@@ -45,6 +47,25 @@ StatusCode DVUtils::finalize() {
 //-------------------------------------------------------------
 // DV tools
 //-------------------------------------------------------------
+
+// find decay channel of DV
+std::string DVUtils::DecayChannel(xAOD::Vertex& dv) {
+
+    std::string decayChannel = "";
+
+    auto dv_muc = m_accMu(dv);
+    auto dv_elc = m_accEl(dv);
+
+    if ((dv_muc->size() == 2) and (dv_elc->size() == 0)) decayChannel = "mumu";
+    if ((dv_muc->size() == 0) and (dv_elc->size() == 2)) decayChannel = "ee";
+    if ((dv_muc->size() == 1) and (dv_elc->size() == 1)) decayChannel = "emu";
+
+    ATH_MSG_INFO("DEBUG: channel = " << decayChannel);
+
+    return decayChannel;
+
+}
+
 
 // calculate R of dv
 float DVUtils::getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
@@ -98,47 +119,6 @@ float DVUtils::getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 
 }
 
-// apply muon matching and decorate dv with muon
-//void DVUtils::ApplyMuonMatching(xAOD::Vertex& dv, xAOD::MuonContainer& muc) {
-//
-//  
-//    ATH_MSG_INFO("DEBUG: 1"); 
-//    // create containers
-//    auto dv_muc = std::make_shared<xAOD::MuonContainer>(SG::VIEW_ELEMENTS);
-//    m_accMu(dv) = dv_muc;
-//    ATH_MSG_INFO("DEBUG: 2"); 
-//
-//    // muon matching via pointer comparison
-//    for(auto trl: dv.trackParticleLinks()) {
-//        ATH_MSG_INFO("DEBUG: 3"); 
-//
-//        //bool recoTrackLink = (*trl)->auxdata<ElementLink<xAOD::TrackParticleContainer> >("recoTrackLink");
-//        //if (!recoTrackLink) continue;
-//
-//        const xAOD::TrackParticle* tr = *(m_accTr(**trl));
-//        ATH_MSG_INFO("DEBUG: 3.1, tr = *(m_accTr(**trl)) = " << tr); 
-//
-//        ATH_MSG_INFO("DEBUG: 4"); 
-//        for(auto mu: muc) {
-//            ATH_MSG_INFO("DEBUG: 5"); 
-//
-//            // retrieve ID track from muon
-//            auto mu_idtr = m_mc->GetTrack(*mu);
-//            ATH_MSG_INFO("DEBUG: 5.1, getTrack(*mu) = mm_idtr = " << mu_idtr); 
-//            ATH_MSG_INFO("DEBUG: 6.1, is mu_idtr == tr? "); 
-//
-//            if(mu_idtr == nullptr) continue;
-//            if(mu_idtr == tr) {
-//                dv_muc->push_back(mu);
-//                ATH_MSG_INFO("DEBUG: 6.2, YES"); 
-//            }
-//            ATH_MSG_INFO("DEBUG: 6.3, NO"); 
-//
-//
-//        } // end of muon loop
-//    } // end of dv trackparticle link
-//} // end of ApplyMuonMatching
-
 
 // match dv to signal truth
 const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc ) {
@@ -186,14 +166,24 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc
 }
 
 // trigger matching. check if one muon of DV is matched to trigger
-bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc) {
+bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc) {
 
     bool pass = false;
-
+    
+    // check if any muon matches to trigger
     for(auto mu: dv_muc){
         ATH_MSG_DEBUG("Trigger matched = " << m_tmt->match(*mu,"HLT_mu60_0eta105_msonly"));
         if (m_tmt->match(*mu,"HLT_mu60_0eta105_msonly")) pass = true;
     }
+
+    // check if any electron matches to trigger
+    ATH_MSG_INFO("Before trigger matching electrons, pass = " << pass);
+    for(auto el: dv_elc){
+        ATH_MSG_INFO("checking trigger.. HLT_g140_loose = " << m_tmt->match(*el,"HLT_g140_loose"));
+        ATH_MSG_INFO("checking trigger.. HLT_2g50_loose = " << m_tmt->match(*el,"HLT_2g50_loose"));
+        if ((m_tmt->match(*el,"HLT_g140_loose")) or (m_tmt->match(*el,"HLT_2g50_loose"))) pass = true;
+    }
+    ATH_MSG_INFO("After trigger matching electrons, pass = " << pass);
     return pass;
 }
 

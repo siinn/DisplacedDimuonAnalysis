@@ -6,7 +6,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODMuon/MuonContainer.h"
-#include "xAODMuon/MuonAuxContainer.h"
+//#include "xAODMuon/MuonAuxContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include <string>
 
 
 static const InterfaceID IID_IDVUtils("IDVUtils", 1, 0);
@@ -26,6 +28,9 @@ class IDVUtils: virtual public IAlgTool {
         virtual float getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
         virtual float getz(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
         virtual float getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
+
+        // get decay channel
+        virtual std::string DecayChannel(xAOD::Vertex& dv) = 0;
 
         // reco dv is matched to signal truth dv
         virtual const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc) = 0;
@@ -65,7 +70,7 @@ class IDVUtils: virtual public IAlgTool {
         virtual float getDelta_pT(const DataVector<xAOD::Muon> dv_muc) = 0;
 
         // check if one muon of DV is matched to trigger
-        virtual bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc) = 0;
+        virtual bool TriggerMatching(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc) = 0;
 
         // check if two muons are combined muons
         virtual bool IsCombinedMuon(const DataVector<xAOD::Muon> dv_muc) = 0;
