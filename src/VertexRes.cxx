@@ -108,22 +108,22 @@ StatusCode VertexRes::execute() {
         auto dv_muc = m_dilepdvc->GetMu(*dv);
 
         // find truth dv matched to this dv
-        const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+        //const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
 
-        if (tru_v == nullptr) continue;
+        //if (tru_v == nullptr) continue;
 
-        // calculate R from PV, and mass
-        float dv_R = m_dvutils->getR( *dv, *pv );              // R in [mm]
-        float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
+        //// calculate R from PV, and mass
+        //float dv_R = m_dvutils->getR( *dv, *pv );              // R in [mm]
+        //float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
 
-        // access invariant mass
-        float tru_v_mass = m_dvutils->TruthMass(tru_v) / 1000.; // in MeV
+        //// access invariant mass
+        //float tru_v_mass = m_dvutils->TruthMass(tru_v) / 1000.; // in MeV
 
-        m_dv_dimuon_res_R->Fill ( (dv_R - tru_v->perp()) );
-        m_dv_dimuon_res_M->Fill ( (dv_mass - tru_v_mass) );
+        //m_dv_dimuon_res_R->Fill ( (dv_R - tru_v->perp()) );
+        //m_dv_dimuon_res_M->Fill ( (dv_mass - tru_v_mass) );
 
-        ATH_MSG_DEBUG( "Found truth-matched DV, DV_mass = " << dv_mass <<  ", R = " << dv_R );
-        ATH_MSG_DEBUG( "Truth DV, truth mass = " << tru_v_mass << ", R = " << tru_v->perp() );
+        //ATH_MSG_DEBUG( "Found truth-matched DV, DV_mass = " << dv_mass <<  ", R = " << dv_R );
+        //ATH_MSG_DEBUG( "Truth DV, truth mass = " << tru_v_mass << ", R = " << tru_v->perp() );
 
 
     } // end of dv loop

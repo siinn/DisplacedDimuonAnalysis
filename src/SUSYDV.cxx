@@ -437,19 +437,19 @@ StatusCode SUSYDV::execute() {
         plot_muon_kinematics(*dv_muc);
 
         // only for MC: find truth dv matched to this dv
-        if (isMC) {
-            // find truth dv matched to this dv
-            const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+        //if (isMC) {
+        //    // find truth dv matched to this dv
+        //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
 
-            if (tru_v == nullptr) continue;
-            m_dv_cutflow->Fill("Truth-matched", 1);
+        //    if (tru_v == nullptr) continue;
+        //    m_dv_cutflow->Fill("Truth-matched", 1);
 
-            // fill matched dimuon vertex
-            float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-            m_dv_dimuon_M_matched->Fill(dv_mass);                          // dimuon mass
-            m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
-            m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
-        } // end of isMC
+        //    // fill matched dimuon vertex
+        //    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+        //    m_dv_dimuon_M_matched->Fill(dv_mass);                          // dimuon mass
+        //    m_dv_dimuon_R_matched->Fill(dv_R);                                // R in [mm]
+        //    m_dv_dimuon_R_M_matched->Fill(dv_R, dv_mass);
+        //} // end of isMC
     } // end of dv loop
     return StatusCode::SUCCESS;
 }

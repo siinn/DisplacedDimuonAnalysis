@@ -11,6 +11,8 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODCore/ShallowCopy.h"
 #include "xAODBase/IParticleHelpers.h"
+#include "xAODEgamma/EgammaTruthxAODHelpers.h"
+#include "xAODTruth/xAODTruthHelpers.h"
 #include "cmath"
 #include <algorithm>    // to find min and max
 #include <string>
@@ -59,8 +61,6 @@ std::string DVUtils::DecayChannel(xAOD::Vertex& dv) {
     if ((dv_muc->size() == 2) and (dv_elc->size() == 0)) decayChannel = "mumu";
     if ((dv_muc->size() == 0) and (dv_elc->size() == 2)) decayChannel = "ee";
     if ((dv_muc->size() == 1) and (dv_elc->size() == 1)) decayChannel = "emu";
-
-    ATH_MSG_INFO("DEBUG: channel = " << decayChannel);
 
     return decayChannel;
 
@@ -121,7 +121,65 @@ float DVUtils::getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 
 
 // match dv to signal truth
-const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc ) {
+const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
+
+    // retrieve truth vertex container
+    const xAOD::TruthVertexContainer* tru_vc = nullptr;
+    evtStore()->retrieve( tru_vc, "TruthVertices");
+
+    // debug
+    //if (channel == "emu") {
+    //    ATH_MSG_INFO("(emu) this emu dv has " << dv_muc.size() << " muons, " << dv_elc.size() << " electrons");
+    //}
+
+    // loop over the truth vertex container
+    for (auto tru_v: *tru_vc){
+
+        // select signal dv
+        if ( !(isSignalVertex(tru_v)) ) continue;
+
+        // access signal muons
+        const xAOD::TruthParticle* tp0 = FindFinalState(tru_v->outgoingParticle(0));
+        const xAOD::TruthParticle* tp1 = FindFinalState(tru_v->outgoingParticle(1));
+
+        // set flag
+        bool tp0_match = false;
+        bool tp1_match = false;
+
+        for(auto mu: dv_muc){
+            const xAOD::TruthParticle* matched_truth_muon = 0;
+            // access link to matched truth muon
+            if(mu->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink")) {
+                ElementLink<xAOD::TruthParticleContainer> link = mu->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
+                // check if the link is valid
+                if(link.isValid()) {
+                    matched_truth_muon = *link;
+                    // return true if at least one truthlink of reco muon matches with given truth
+                    if ((matched_truth_muon->barcode() == tp0->barcode()) and (std::abs(tp0->pdgId()) == 13)) tp0_match = true;
+                    if ((matched_truth_muon->barcode() == tp1->barcode()) and (std::abs(tp1->pdgId()) == 13)) tp1_match = true;
+                } 
+            } 
+        } 
+
+        for(auto el: dv_elc){
+            const xAOD::TruthParticle* matched_truth_electron = xAOD::TruthHelpers::getTruthParticle(*el);
+
+            // access link to matched truth electron
+            if (matched_truth_electron != nullptr) {
+                // return true if at least one truthlink of reco muon matches with given truth
+                if ((matched_truth_electron->barcode() == tp0->barcode()) and (std::abs(tp0->pdgId()) == 11)) tp0_match = true;
+                if ((matched_truth_electron->barcode() == tp1->barcode()) and (std::abs(tp1->pdgId()) == 11)) tp1_match = true;
+            } 
+        } 
+
+        // if we have two muons matched, this truth dv is matched to given dv
+        if (tp0_match and tp1_match) return tru_v;
+
+    } // end of tru_vc
+    return nullptr; // return null if there is no match (reco dv is not matched to truth)
+}
+
+const xAOD::TruthVertex* DVUtils::IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv) {
 
     // retrieve truth vertex container
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
@@ -134,15 +192,26 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc
         if ( !(isSignalVertex(tru_v)) ) continue;
 
         // access signal muons
-        const xAOD::TruthParticle* truth_child0 = FindFinalState(tru_v->outgoingParticle(0));
-        const xAOD::TruthParticle* truth_child1 = FindFinalState(tru_v->outgoingParticle(1));
+        const xAOD::TruthParticle* tp0 = FindFinalState(tru_v->outgoingParticle(0));
+        const xAOD::TruthParticle* tp1 = FindFinalState(tru_v->outgoingParticle(1));
 
         // set flag
-        bool muon_match0 = false;
-        bool muon_match1 = false;
+        bool tp0_match = false;
+        bool tp1_match = false;
+        bool pos_match = false;
+
+        // set maximum deviation in position
+        float R_err_max = 0.2;
+        float z_err_max = 0.4;
+
+        float R_err = tru_v->perp() - dv.position().perp();
+        float z_err = tru_v->z() - dv.position().z();
+
+        // flag if dv position matches with truth vertex position
+        if ((R_err < R_err_max) and (z_err < z_err_max)) pos_match = true;
 
         for(auto mu: dv_muc){
-            const xAOD::TruthParticle* matched_truth_muon=0;
+            const xAOD::TruthParticle* matched_truth_muon = 0;
             // access link to matched truth muon
             if(mu->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink")) {
                 ElementLink<xAOD::TruthParticleContainer> link = mu->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
@@ -150,19 +219,28 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc
                 if(link.isValid()) {
                     matched_truth_muon = *link;
                     // return true if at least one truthlink of reco muon matches with given truth
-                    if (matched_truth_muon->barcode() == truth_child0->barcode()) muon_match0 = true;
-                    if (matched_truth_muon->barcode() == truth_child1->barcode()) muon_match1 = true;
-                } // end of link.isValid
-            } // end of if mu->isAvailable
-        } // end of muon container
+                    if ((matched_truth_muon->barcode() == tp0->barcode()) and (std::abs(tp0->pdgId()) == 13)) tp0_match = true;
+                    if ((matched_truth_muon->barcode() == tp1->barcode()) and (std::abs(tp1->pdgId()) == 13)) tp1_match = true;
+                } 
+            } 
+        } 
+
+        for(auto el: dv_elc){
+            const xAOD::TruthParticle* matched_truth_electron = xAOD::TruthHelpers::getTruthParticle(*el);
+
+            // access link to matched truth electron
+            if (matched_truth_electron != nullptr) {
+                // return true if at least one truthlink of reco muon matches with given truth
+                if ((matched_truth_electron->barcode() == tp0->barcode()) and (std::abs(tp0->pdgId()) == 11)) tp0_match = true;
+                if ((matched_truth_electron->barcode() == tp1->barcode()) and (std::abs(tp1->pdgId()) == 11)) tp1_match = true;
+            } 
+        } 
 
         // if we have two muons matched, this truth dv is matched to given dv
-        if (muon_match0 and muon_match1) return tru_v;
+        if ((tp0_match or tp1_match) and (pos_match)) return tru_v;
 
     } // end of tru_vc
-
-    // return null if there is no match (reco dv is not matched to truth)
-    return nullptr;
+    return nullptr; // return null if there is no match (reco dv is not matched to truth)
 }
 
 // trigger matching. check if one muon of DV is matched to trigger

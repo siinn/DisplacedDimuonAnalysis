@@ -21,6 +21,7 @@ use TrigDecisionTool            TrigDecisionTool-*              Trigger/TrigAnal
 
 # DV
 use DDLBase                     DDLBase-*                       
+use DDLCombBkg                  DDLCombBkg-*                       
 
 # xAOD
 use xAODTracking                xAODTracking-*                  Event/xAOD

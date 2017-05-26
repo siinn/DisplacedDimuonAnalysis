@@ -105,6 +105,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mumu_M_matched; //!
             TH1F* m_dv_mumu_R_matched; //!
             TH2F* m_dv_mumu_R_M_matched; //!
+            TH1F* m_dv_mumu_eta_matched; //!
 
         //----------------------------------
         // ee plots
@@ -144,6 +145,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_ee_M_matched; //!
             TH1F* m_dv_ee_R_matched; //!
             TH2F* m_dv_ee_R_M_matched; //!
+            TH1F* m_dv_ee_eta_matched; //!
 
         //----------------------------------
         // emu plots
@@ -194,6 +196,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_M_matched; //!
             TH1F* m_dv_emu_R_matched; //!
             TH2F* m_dv_emu_R_M_matched; //!
+            TH1F* m_dv_emu_eta_matched; //!
     
 }; 
 

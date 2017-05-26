@@ -68,7 +68,7 @@ StatusCode TruthPlots::initialize() {
 
     // signal Z'
     m_zp_pt = new TH1F("m_zp_pt", "Z' pt distribution", 50, 0, 1000);
-    m_zp_eta = new TH1F("m_zp_eta", "Z' eta distribution", 50, -3.0, 3.0);
+    m_zp_eta = new TH1F("m_zp_eta", "Z' eta distribution", 40, -4.0, 4.0);
     m_zp_phi = new TH1F("m_zp_phi", "Z' phi distribution", 50, -M_PI, M_PI);
     m_zp_m = new TH1F("m_zp_m", "Z' m distribution", 750, 0, 1500); // GeV
     m_zp_pdgId = new TH1F("m_zp_pdgId", "signal zp pdgId", 35, 0, 35);

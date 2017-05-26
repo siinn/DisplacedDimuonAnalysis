@@ -77,7 +77,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
+    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 11,0,11);
     m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV",8, m_dv_mumu_M_bins );
     m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
@@ -108,6 +108,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_mumu_R_matched = new TH1F("dv_mumu_R_matched","R of matched dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_M_matched = new TH2F("dv_mumu_R_M_matched","matched dimuon DV position R vs M", 50,0,300,200,0,2000);
     m_dv_mumu_chi2_ndof = new TH1F("dv_mumu_chi2_ndof", "chi^2 / ndof (mumu)", 100, 0, 10);
+    m_dv_mumu_eta_matched = new TH1F("dv_mumu_eta_matched","eta of dimuon dv",40,-4.,4.);
 
     // registor for output
     CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
@@ -141,13 +142,14 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_M", m_dv_mumu_M_matched) );
     CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R", m_dv_mumu_R_matched) );
     CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R_M", m_dv_mumu_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/truth_dv_zp_eta", m_dv_mumu_eta_matched) );
 
     //--------------------------------------------------------
     // ee
     //--------------------------------------------------------
 
     Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 11,0,11);
+    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 12,0,12);
     m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",8, m_dv_ee_M_bins );
     m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",50,0.,300.);
     m_dv_ee_R_low = new TH1F("dv_ee_R_low","R of ee dv [mm], low",50,0.,50.);
@@ -177,6 +179,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_ee_M_matched = new TH1F("dv_ee_M_matched","matched ee DV mass in GeV",200,0.,2000.);
     m_dv_ee_R_matched = new TH1F("dv_ee_R_matched","R of matched ee dv [mm]",50,0.,300.);
     m_dv_ee_R_M_matched = new TH2F("dv_ee_R_M_matched","matched ee DV position R vs M", 50,0,300,200,0,2000);
+    m_dv_ee_eta_matched = new TH1F("dv_ee_eta_matched","eta of ee dv",100,-4.,4.);
     m_dv_ee_chi2_ndof = new TH1F("dv_ee_chi2_ndof", "chi^2 / ndof (ee)", 100, 0, 10);
 
     // registor for output
@@ -211,13 +214,14 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_M", m_dv_ee_M_matched) );
     CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R", m_dv_ee_R_matched) );
     CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R_M", m_dv_ee_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/truth_dv_zp_eta", m_dv_ee_eta_matched) );
 
     //--------------------------------------------------------
     // emu
     //--------------------------------------------------------
 
     Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 11,0,11);
+    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 12,0,12);
     m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",8, m_dv_emu_M_bins );
     m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",50,0.,300.);
     m_dv_emu_R_low = new TH1F("dv_emu_R_low","R of emu dv [mm], low",50,0.,50.);
@@ -258,6 +262,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_M_matched = new TH1F("dv_emu_M_matched","matched emu DV mass in GeV",200,0.,2000.);
     m_dv_emu_R_matched = new TH1F("dv_emu_R_matched","R of matched emu dv [mm]",50,0.,300.);
     m_dv_emu_R_M_matched = new TH2F("dv_emu_R_M_matched","matched emu DV position R vs M", 50,0,300,200,0,2000);
+    m_dv_emu_eta_matched = new TH1F("dv_emu_eta_matched","eta of emu dv",100,-4.,4.);
     m_dv_emu_chi2_ndof = new TH1F("dv_emu_chi2_ndof", "chi^2 / ndof (emu)", 100, 0, 10);
 
     // registor for output
@@ -303,6 +308,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_M", m_dv_emu_M_matched) );
     CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R", m_dv_emu_R_matched) );
     CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R_M", m_dv_emu_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/truth_dv_zp_eta", m_dv_emu_eta_matched) );
 
   return StatusCode::SUCCESS;
 }
@@ -407,8 +413,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
 
-        ATH_MSG_INFO("DEBUG: channel = " << channel);
-
         if (channel == "mumu") {
 
             // mumu pair
@@ -465,16 +469,23 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // only for MC: find truth dv matched to this dv
             if (isMC) {
                 // find truth dv matched to this dv
-                const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+                const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
+                if (tru_v_loose != nullptr) {
+                    m_dv_mumu_cf->Fill("Matched (Loose)", 1);
+                }
 
-                if (tru_v == nullptr) break;
-                m_dv_mumu_cf->Fill("Truth-matched", 1);
+                const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
+                if (tru_v != nullptr) {
+                    m_dv_mumu_cf->Fill("Matched (Tight)", 1);
 
-                // fill matched dimuon vertex
-                float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-                m_dv_mumu_M_matched->Fill(dv_mass);                          // dimuon mass
-                m_dv_mumu_R_matched->Fill(dv_R);                                // R in [mm]
-                m_dv_mumu_R_M_matched->Fill(dv_R, dv_mass);
+                    // fill matched dimuon vertex
+                    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+                    m_dv_mumu_M_matched->Fill(dv_mass);                          // dimuon mass
+                    m_dv_mumu_R_matched->Fill(dv_R);                                // R in [mm]
+                    m_dv_mumu_R_M_matched->Fill(dv_R, dv_mass);
+                    m_dv_mumu_eta_matched->Fill(tru_v->incomingParticle(0)->eta());
+                }
+
             } // end of isMC
         } // end of mumu
 
@@ -506,6 +517,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dvc->PassDisabledModuleVeto(*dv)) break;
             m_dv_ee_cf->Fill("DisabledModule", 1);
 
+            // material veto
+            if(!m_dvc->PassMaterialVeto(*dv)) break;
+            m_dv_ee_cf->Fill("MaterialVeto", 1);
+
             //// DESD filter
             //m_dilepdvc->DoTriggerMatching(*dv);
             //if(!m_dilepdvc->PassDESDMatching(*dv)) break;
@@ -531,20 +546,20 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // plot muon kinematics
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-            //// only for MC: find truth dv matched to this dv
-            //if (isMC) {
-            //    // find truth dv matched to this dv
-            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+            // only for MC: find truth dv matched to this dv
+            if (isMC) {
+                // find truth dv matched to this dv
+                const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
+                if (tru_v_loose != nullptr) {
+                    m_dv_ee_cf->Fill("Matched (Loose)", 1);
+                }
 
-            //    if (tru_v == nullptr) break;
-            //    m_dv_ee_cf->Fill("Truth-matched", 1);
+                const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
+                if (tru_v != nullptr) {
+                    m_dv_ee_cf->Fill("Matched (Tight)", 1);
+                }
+            } // end of MC
 
-            //    // fill matched dimuon vertex
-            //    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-            //    m_dv_ee_M_matched->Fill(dv_mass);                          // dimuon mass
-            //    m_dv_ee_R_matched->Fill(dv_R);                                // R in [mm]
-            //    m_dv_ee_R_M_matched->Fill(dv_R, dv_mass);
-            //} // end of isMC
         } // end of ee
 
         if (channel == "emu") {
@@ -575,6 +590,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dvc->PassDisabledModuleVeto(*dv)) break;
             m_dv_emu_cf->Fill("DisabledModule", 1);
 
+            // material veto
+            if(!m_dvc->PassMaterialVeto(*dv)) break;
+            m_dv_emu_cf->Fill("MaterialVeto", 1);
+
             //// DESD filter
             //m_dilepdvc->DoTriggerMatching(*dv);
             //if(!m_dilepdvc->PassDESDMatching(*dv)) break;
@@ -600,20 +619,20 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // plot muon kinematics
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-            //// only for MC: find truth dv matched to this dv
-            //if (isMC) {
-            //    // find truth dv matched to this dv
-            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+            // only for MC: find truth dv matched to this dv
+            if (isMC) {
+                // find truth dv matched to this dv
+                const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
+                if (tru_v_loose != nullptr) {
+                    m_dv_emu_cf->Fill("Matched (Loose)", 1);
+                }
 
-            //    if (tru_v == nullptr) break;
-            //    m_dv_emu_cf->Fill("Truth-matched", 1);
+                const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
+                if (tru_v != nullptr) {
+                    m_dv_emu_cf->Fill("Matched (Tight)", 1);
+                }
+            } // end of MC
 
-            //    // fill matched dimuon vertex
-            //    float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-            //    m_dv_emu_M_matched->Fill(dv_mass);                          // dimuon mass
-            //    m_dv_emu_R_matched->Fill(dv_R);                                // R in [mm]
-            //    m_dv_emu_R_M_matched->Fill(dv_R, dv_mass);
-            //} // end of isMC
         } // end of emu
 
     } // end of dv loop

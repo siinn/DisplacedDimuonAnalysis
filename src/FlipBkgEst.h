@@ -1,5 +1,5 @@
-#ifndef DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H
-#define DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H 1
+#ifndef DISPLACEDDIMUONANALYSIS_FLIPBKGEST_H
+#define DISPLACEDDIMUONANALYSIS_FLIPBKGEST_H 1
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
 
@@ -18,6 +18,7 @@
 #include "DDLBase/IDiLepDVCuts.h"
 #include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
+//#include "DDLCombBkg/IVertexing.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -30,21 +31,22 @@
 // Trigger decision tool
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
-class DVEfficiency: public ::AthAnalysisAlgorithm { 
+
+class FlipBkgEst: public ::AthAnalysisAlgorithm { 
     public: 
-        DVEfficiency( const std::string& name, ISvcLocator* pSvcLocator );
-        virtual ~DVEfficiency(); 
+        FlipBkgEst( const std::string& name, ISvcLocator* pSvcLocator );
+        virtual ~FlipBkgEst(); 
         
         virtual StatusCode  initialize();
         virtual StatusCode  execute();
         virtual StatusCode  finalize();
         
+        virtual StatusCode beginInputFile();
+
         virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
-        
-        
-        
+    
     private: 
-        // tool for muon matching to dv
+        // setting tools
         ToolHandle<DDL::IEventCuts> m_evtc; //!
         ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
         ToolHandle<DDL::IDVCuts> m_dvc;
@@ -55,40 +57,17 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;
-        
+        //ToolHandle<DDL::IDispVertexer> m_vertexer;
+
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
 
-        // efficiency as a function of track parameters
-        TProfile* m_dv_eff_eta; //! 
-        TProfile* m_dv_eff_phi; //! 
-        TProfile* m_dv_eff_mass; //! 
-        TProfile* m_dv_eff_R; //! 
-        TProfile* m_dv_eff_d0; //! 
-        
-        // efficiency as a function of Z' parameters
-        TProfile* m_dv_eff_zp_eta; //! 
-        TProfile* m_dv_eff_zp_pt; //! 
+        // histograms
+        TH1D* m_n_mu; //!
+        TH1D* m_n_elc; //!
 
-        // efficiency map
-        //TEfficiency* m_dv_eff_map_pt_eta; //! 
-        TProfile2D* m_dv_eff_map_pt_eta; //! 
-        TH2F* m_dv_eff_map_entry_pt_eta; //! 
-        
-        // invariant mass of all signal truth vertex
-        TH1F* m_dv_mass; //!
-
-        // difference between truth and reco DV
-        TH1F* m_dv_R_err_tight; //!
-        TH1F* m_dv_z_err_tight; //!
-        TH1F* m_dv_m_err_tight; //!
-    
-        TH1F* m_dv_R_err_loose; //!
-        TH1F* m_dv_z_err_loose; //!
-        TH1F* m_dv_m_err_loose; //!
-    
 }; 
 
-#endif //> !DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H
+#endif //> !DISPLACEDDIMUONANALYSIS_FLIPBKGEST_H

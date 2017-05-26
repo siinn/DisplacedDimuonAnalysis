@@ -33,7 +33,9 @@ class IDVUtils: virtual public IAlgTool {
         virtual std::string DecayChannel(xAOD::Vertex& dv) = 0;
 
         // reco dv is matched to signal truth dv
-        virtual const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc) = 0;
+        virtual const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) = 0;
+        virtual const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv) = 0;
+
 
         //----------------------------------------
         // truth tools

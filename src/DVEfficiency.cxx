@@ -47,15 +47,20 @@ m_evtc("DDL::EventCuts/DiLepEventCuts"),
 m_dvc("DDL::DVCuts/DiLepBaseCuts"),
 m_cos("DDL::DiLepCosmics/DiLepCosmics"),
 m_dvutils("DVUtils"),
+m_leptool("LeptonSelectionTools"),
+m_costool("CosmicTools"),
 m_grlTool("GoodRunsListSelectionTool/GRLTool"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
 m_or("DDL::OverlapRemoval/OverlapRemoval"),
-//m_decorate_truv("reconstructed"),
+m_accMu("DDL_Muons"),
+m_accEl("DDL_Electrons"),
 m_accMass("mass")
 {
     // initialize tools
     declareProperty("DiLepDVCuts", m_dilepdvc);
     declareProperty("DVUtils", m_dvutils);
+    declareProperty("LeptonSelectionTool", m_leptool);
+    declareProperty("CosmicTool", m_costool);
     declareProperty("DiLepEventCuts", m_evtc);
     declareProperty("DiLepBaseCuts", m_dvc);
     declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
@@ -86,23 +91,47 @@ StatusCode DVEfficiency::initialize() {
     m_dv_eff_R = new TProfile( "m_dv_eff_R", "DV reconstruction efficiency vs R", 100, 0, 400); // mm
     m_dv_eff_d0 = new TProfile( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 100, 0, 400); // mm
 
+    // efficiency map (Z' pt and eta)
+    //m_dv_eff_map_pt_eta = new TEfficiency("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 50, 0., 1000., 50, -3.0, 3.0); // GeV
+    m_dv_eff_map_pt_eta = new TProfile2D("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+    m_dv_eff_map_entry_pt_eta = new TH2F("m_dv_eff_map_entry_pt_eta", "DV reconstruction efficiency map (entry), pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+
     // efficiency as a function of Z' parameters
     m_dv_eff_zp_eta = new TProfile("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 50, -3.0, 3.0);
     m_dv_eff_zp_pt = new TProfile("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 50, 0, 1000); // GeV
+
+    // error on reco DV
+    m_dv_R_err_tight = new TH1F("dv_R_err_tight","Error on R of DV, tight [mm]",200,-1.,1.);
+    m_dv_z_err_tight = new TH1F("dv_z_err_tight","Error on z of DV, tight [mm]",200,-1.,1.);
+    m_dv_m_err_tight = new TH1F("dv_m_err_tight","Error on m of DV, tight [GeV]",200,-1.,1.);
+
+    m_dv_R_err_loose = new TH1F("dv_R_err_loose","Error on R of DV, loose [mm]",200,-1.,1.);
+    m_dv_z_err_loose = new TH1F("dv_z_err_loose","Error on z of DV, loose [mm]",200,-1.,1.);
+    m_dv_m_err_loose = new TH1F("dv_m_err_loose","Error on m of DV, loose [GeV]",200,-1.,1.);
  
 
     // output
-    CHECK( histSvc->regHist("/DV/TruthVertex/dv_mass", m_dv_mass) );
+    CHECK( histSvc->regHist("/DV/truth/dv_mass", m_dv_mass) );
 
     // efficiency plots
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_eta", m_dv_eff_eta) );
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_phi", m_dv_eff_phi) );
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_mass", m_dv_eff_mass) );
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_R", m_dv_eff_R) );
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/dv/dv_eff_d0", m_dv_eff_d0) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_eta", m_dv_eff_eta) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_phi", m_dv_eff_phi) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_mass", m_dv_eff_mass) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_R", m_dv_eff_R) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_d0", m_dv_eff_d0) );
 
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/zp/dv_eff_zp_eta", m_dv_eff_zp_eta) );
-    CHECK( histSvc->regHist("/DV/TruthVertex/efficiency/zp/dv_eff_zp_pt", m_dv_eff_zp_pt) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_eta", m_dv_eff_zp_eta) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_pt", m_dv_eff_zp_pt) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta", m_dv_eff_map_pt_eta) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_entry_pt_eta", m_dv_eff_map_entry_pt_eta) );
+
+
+    CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_R_err", m_dv_R_err_tight) );
+    CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_z_err", m_dv_z_err_tight) );
+    CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_m_err", m_dv_m_err_tight) );
+    CHECK( histSvc->regHist("/DV/truth/err/dv/loose/dv_R_err", m_dv_R_err_loose) );
+    CHECK( histSvc->regHist("/DV/truth/err/dv/loose/dv_z_err", m_dv_z_err_loose) );
+    CHECK( histSvc->regHist("/DV/truth/err/dv/loose/dv_m_err", m_dv_m_err_loose) );
 
     return StatusCode::SUCCESS;
 }
@@ -172,74 +201,95 @@ StatusCode DVEfficiency::execute() {
     for(auto dv: *dvc_copy.first) {
 
         // access invariant mass
-        float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
+        float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in GeV
 
-        // collect muons from this dv
-        auto dv_muc = m_dilepdvc->GetMu(*dv);
+        // collect leptons from this dv
+        auto dv_muc = m_accMu(*dv);
+        auto dv_elc = m_accEl(*dv);
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
 
-        //----------------------------------------
-        // require dv to have 2 muons
-        //----------------------------------------
-        if (dv_muc->size() != 2) continue;
+        // muon selection tool
+        m_leptool->MuonSelection(*dv);
 
-        //----------------------------------------
+        // remove bad electrons
+        m_leptool->BadClusterRemoval(*dv);
+
+        // kinematic cut
+        m_leptool->ElectronKinematicCut(*dv);
+
+        // Electron identification
+        m_leptool->ElectronID(*dv);
+
+        // find decay channel of dv
+        std::string channel = m_dvutils->DecayChannel(*dv);
+
+        // only select mumu, ee, or emu
+        if (!((channel == "mumu") or (channel == "emu") or (channel == "ee"))) continue;
+
         // Trigger matching
-        //----------------------------------------
-        //if (!m_dvutils->TriggerMatching(*dv_muc)) continue;
+        m_dilepdvc->DoTriggerMatching(*dv);
+        if(!m_dilepdvc->PassTriggerMatching(*dv)) continue;
 
-        //----------------------------------------
-        // combined muon
-        //----------------------------------------
-        if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
-
-        //----------------------------------------
         // vertex fit quality
-        //----------------------------------------
         if(!m_dvc->PassChisqCut(*dv)) continue;
 
-        //----------------------------------------
         // minimum distance from pv (from 0 for MC)
-        //----------------------------------------
-        //if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
 
-        //----------------------------------------
         // charge requirements
-        //----------------------------------------
         if(!m_dvc->PassChargeRequirement(*dv)) continue;
 
-        //----------------------------------------
         // disabled module
-        //----------------------------------------
         if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
 
-        //----------------------------------------
+        if ((channel == "emu") or (channel == "ee")) {
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        }
+
         // DESD filter
-        //----------------------------------------
-        m_dilepdvc->DoTriggerMatching(*dv);
-        if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
+        //if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
 
-        //----------------------------------------
         // cosmic veto
-        //----------------------------------------
-        if(!PassCosmicVeto(*dv_muc)) continue;
+        if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
 
-        //----------------------------------------
         // delta R 
-        //----------------------------------------
         float deltaR_min = 0.5;
-        if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
+        if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) break;
 
         if (isMC) {
             // find truth dv matched to this dv
-            const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc);
+            const xAOD::TruthVertex* tru_v_tight = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
+            const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
 
-            if (tru_v == nullptr) continue;
+            if (tru_v_tight != nullptr) {
 
-            // flag this truth vertex as reconstructed
-            tru_v->auxdecor<int>("reconstructed") = 1;
+                // flag this truth vertex as reconstructed
+                //tru_v_tight->auxdecor<int>("reconstructed") = 1;
+
+                // fill error
+                float R_err = tru_v_tight->perp() - (*dv).position().perp();
+                float z_err = tru_v_tight->z() - (*dv).position().z();
+                float m_err = (m_dvutils->TruthMass(tru_v_tight) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_tight); // GeV
+                m_dv_R_err_tight->Fill(R_err);    // in mm
+                m_dv_z_err_tight->Fill(z_err);    // in mm
+                m_dv_m_err_tight->Fill(m_err);    // in mm
+            }
+
+            if (tru_v_loose != nullptr) {
+
+                // flag this truth vertex as reconstructed
+                tru_v_loose->auxdecor<int>("reconstructed") = 1;
+
+                // fill error
+                float R_err = tru_v_loose->perp() - (*dv).position().perp();
+                float z_err = tru_v_loose->z() - (*dv).position().z();
+                float m_err = (m_dvutils->TruthMass(tru_v_loose) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_loose); // GeV
+                m_dv_R_err_loose->Fill(R_err);    // in mm
+                m_dv_z_err_loose->Fill(z_err);    // in mm
+                m_dv_m_err_loose->Fill(m_err);    // in mm
+            }
 
         } // end of isMC
     } // end of dv loop
@@ -282,21 +332,27 @@ StatusCode DVEfficiency::execute() {
         m_dv_eff_zp_eta->Fill(zp_eta, dv_matched);
         m_dv_eff_zp_pt->Fill(zp_pt / 1000., dv_matched);
 
+        // fill efficiency map
+        m_dv_eff_map_pt_eta->Fill(zp_pt / 1000., zp_eta, dv_matched);
+        if (dv_matched) m_dv_eff_map_entry_pt_eta->Fill(zp_pt / 1000., zp_eta);
+
     } // end of efficiency loop
 
 
     return StatusCode::SUCCESS;
 }
 
-bool DVEfficiency::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc) {
+bool DVEfficiency::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
 
     bool PassCosmicVeto = true;
 
     float Rcos_min = 0.04;
-    float deltaPhiMinusPi = m_dvutils->getDeltaPhiMinusPi(dv_muc);
-    float sumEta = m_dvutils->getSumEta(dv_muc);
+    float deltaR_min = 0.5;
+    float deltaPhiMinusPi = m_costool->getDeltaPhiMinusPi(dv_muc, dv_elc, channel);
+    float sumEta = m_costool->getSumEta(dv_muc, dv_elc, channel);
 
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
+    float deltaR = m_costool->getDeltaR(dv_muc, dv_elc, channel);
 
     if (Rcos < Rcos_min) PassCosmicVeto = false;
 

@@ -42,7 +42,8 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         std::string DecayChannel(xAOD::Vertex& dv);
 
         // reco dv is matched to signal truth dv
-        const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc);
+        const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
+        const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv);
 
         // truth tools --------------------------
 
