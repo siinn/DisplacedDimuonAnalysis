@@ -12,7 +12,6 @@
 #include "AsgTools/ToolHandle.h"
 
 // DV
-#include "DVAnalyses/AlgBase.h"
 #include "DDLBase/IEventCuts.h"
 #include "DDLBase/IDVCuts.h"
 #include "DDLBase/IDiLepDVCuts.h"

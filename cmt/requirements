@@ -27,7 +27,13 @@ use DDLCombBkg                  DDLCombBkg-*
 use xAODTracking                xAODTracking-*                  Event/xAOD
 use xAODTruth                   xAODTruth-*                     Event/xAOD
 use xAODMuon                    xAODMuon-*                      Event/xAOD
+use xAODEgamma                  xAODEgamma-*                    Event/xAOD
 use xAODBase                    xAODBase-*                      Event/xAOD
+
+use ElectronPhotonSelectorTools ElectronPhotonSelectorTools-*   PhysicsAnalysis/ElectronPhotonID
+use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
+use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
+
 
 #-------------------------------------------------------
 # private
@@ -58,7 +64,6 @@ use DVCuts                      DVCuts-*                        DV_xAODAnalysis
 use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
 use MuonPerformanceHistUtils    MuonPerformanceHistUtils-*      PhysicsAnalysis/MuonID/MuonPerformanceAnalysis
 use MuonEfficiencyCorrections   MuonEfficiencyCorrections-*     PhysicsAnalysis/MuonID/MuonIDAnalysis 
-use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
 
 use AtlasROOT                   AtlasROOT-*                     External
 

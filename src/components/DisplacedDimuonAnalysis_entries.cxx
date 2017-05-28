@@ -31,10 +31,6 @@ DECLARE_ALGORITHM_FACTORY( VertexRes )
 #include "../TruthPlots.h"
 DECLARE_ALGORITHM_FACTORY( TruthPlots )
 
-
-#include "../LumiCalc.h"
-DECLARE_ALGORITHM_FACTORY( LumiCalc )
-
 #include "../MuonPlots.h"
 DECLARE_ALGORITHM_FACTORY( MuonPlots )
 
