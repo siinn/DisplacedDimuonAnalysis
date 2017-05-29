@@ -325,6 +325,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
+    bool trig_passed = false;
+
     m_event_cutflow->Fill("AllEvents", 1);
 
     // GRL
@@ -335,9 +337,15 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("EvtCleaning (Data)", 1);
 
+    if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
+    if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
+    if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
+
     // trigger check
-    if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
+    //if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
+    if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
+    ATH_MSG_INFO("Trig debug: The event passed");
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
