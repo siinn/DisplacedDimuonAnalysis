@@ -345,7 +345,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     //if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
     if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
-    ATH_MSG_INFO("Trig debug: The event passed");
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
