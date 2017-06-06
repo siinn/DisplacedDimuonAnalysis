@@ -9,8 +9,8 @@ import AthenaPoolCnvSvc.ReadAthenaPool
 from AthenaCommon.GlobalFlags import globalflags
 import glob   
 
-#theApp.EvtMax = -1
-theApp.EvtMax = 200
+theApp.EvtMax = -1
+#theApp.EvtMax = 200
 
 #--------------------------------------------
 # DAOD_SUSY15 data
@@ -26,22 +26,33 @@ theApp.EvtMax = 200
 # Signal MC samples
 #--------------------------------------------
 
-# ee test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/DAOD_SUSY15.DAOD_SUSY15.ee.pool.root')
 # emu test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/DAOD_SUSY15.DAOD_SUSY15.emu.pool.root')
+#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/emu/DAOD_SUSY15.emu.*.root')
+# ee test
+#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee/DAOD_SUSY15.ee.*.root')
 
 # SUSY15, official
 #svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301911.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301912.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t250.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301913.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t500.recon.DAOD_RPVLL.e4125_s2698_r8788.r14_EXT0/*.root')
-svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301914.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m500t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
+#svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301914.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m500t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301915.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m500t250.recon.DAOD_RPVLL.e4125_s2698_r8788.r11_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301916.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m500t500.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301917.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m1000t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r13_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301918.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m1000t250.recon.DAOD_RPVLL.e4125_s2698_r8788.r14_EXT0/*.root')
 #svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301919.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m1000t500.recon.DAOD_RPVLL.e4125_s2698_r8788.r13_EXT0/*.root')
 
+#--------------------------------------------
+# Signal MC samples (no skim)
+#--------------------------------------------
+# mumu test
+#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/mumu_noskim/DAOD_SUSY15.mumu.*.root')
+
+# emu test
+#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/emu_noskim/DAOD_SUSY15.emu.*.root')
+
+# ee test
+svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee_noskim/DAOD_SUSY15.ee.*.root')
 
 #--------------------------------------------
 # Background samples
@@ -83,7 +94,7 @@ algseq += CfgMgr.DisplacedDimuonAnalysisAlg()
 #algseq += CfgMgr.MuonPlots()
 
 # MC sample only
-#algseq += CfgMgr.DVEfficiency()
+algseq += CfgMgr.DVEfficiency()
 #algseq += CfgMgr.MuonEfficiency()
 #algseq += CfgMgr.TruthPlots()
 #algseq += CfgMgr.VertexRes()
@@ -101,6 +112,7 @@ svcMgr.MessageSvc.defaultLimit = 9999
 # histogram output service
 if not hasattr(svcMgr, 'THistSvc'): svcMgr += CfgMgr.THistSvc()
 svcMgr.THistSvc.Output += ["DV DATAFILE='output.root' OPT='RECREATE'"]
+svcMgr.THistSvc.OutputLevel = INFO
 
 # DVCuts tool
 ToolSvc += CfgMgr.DDL__DVCuts("DiLepBaseCuts")
@@ -124,6 +136,7 @@ ToolSvc.GRLTool.OutputLevel = INFO
 # Muon selection tool
 ToolSvc += CfgMgr.CP__MuonSelectionTool("MuonSelectionTool")
 ToolSvc.MuonSelectionTool.MaxEta = 2.7
+# 0 = tight, 1 = medium, 2 = loose, 3 = very loose
 ToolSvc.MuonSelectionTool.MuQuality = 2
 ToolSvc.MuonSelectionTool.OutputLevel = INFO
 
@@ -131,16 +144,23 @@ ToolSvc.MuonSelectionTool.OutputLevel = INFO
 ToolSvc += CfgMgr.CP__MuonCalibrationAndSmearingTool("MuonCorrectionTool")
 ToolSvc.MuonCorrectionTool.Year = "Data16"
 ToolSvc.MuonCorrectionTool.Release = "Recs2016_15_07"
-ToolSvc.MuonCorrectionTool.SagittaCorr = True
+#ToolSvc.MuonCorrectionTool.SagittaCorr = True
 ToolSvc.MuonCorrectionTool.OutputLevel = INFO
 
 # Electron Likelihood tool
 confDir = "ElectronPhotonSelectorTools/offline/mc15_20160512/"
 ToolSvc += CfgMgr.AsgElectronLikelihoodTool("ElectronLikelihoodTool")
-#ToolSvc.ElectronLikelihoodTool.ConfigFile= confDir+"ElectronLikelihoodLooseOfflineConfig2016_Smooth_NoD0.conf"
-ToolSvc.ElectronLikelihoodTool.WorkingPoint= "MediumLHElectron"
+ToolSvc.ElectronLikelihoodTool.ConfigFile= confDir+"ElectronLikelihoodLooseOfflineConfig2016_Smooth_NoD0.conf"
+#ToolSvc.ElectronLikelihoodTool.WorkingPoint= "LooseLHElectron"
+#ToolSvc.ElectronLikelihoodTool.WorkingPoint= "MediumLHElectron"
 #ToolSvc.ElectronLikelihoodTool.WorkingPoint= "TightLHElectron"
 ToolSvc.ElectronLikelihoodTool.OutputLevel = INFO
+
+# Trigger decision tool
+## set up trigger decision tool
+from TrigDecisionTool.TrigDecisionToolConf import Trig__TrigDecisionTool
+ToolSvc += Trig__TrigDecisionTool( "TrigDecisionTool" )
+ToolSvc.TrigDecisionTool.OutputLevel = INFO
 
 
 #---------------------------------------------------------------

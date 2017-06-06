@@ -31,6 +31,7 @@
 // plots 
 #include "TProfile.h"
 #include "TProfile2D.h"
+#include "TH2D.h"
 #include "cmath"
 #include "vector"
 
@@ -82,20 +83,23 @@ StatusCode DVEfficiency::initialize() {
     m_dv_mass = new TH1F( "m_dv_mass", "Invariant mass of all signal vertex", 50, 0, 1500 ); // GeV
 
     // efficiency plots
-    m_dv_eff_eta = new TProfile( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 50, -4.0, 4.0);
-    m_dv_eff_phi = new TProfile( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 50, -M_PI, M_PI);
-    m_dv_eff_mass = new TProfile( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 150, 0, 1500); // GeV
-    m_dv_eff_R = new TProfile( "m_dv_eff_R", "DV reconstruction efficiency vs R", 100, 0, 400); // mm
-    m_dv_eff_d0 = new TProfile( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 100, 0, 400); // mm
-
-    // efficiency map (Z' pt and eta)
-    //m_dv_eff_map_pt_eta = new TEfficiency("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 50, 0., 1000., 50, -3.0, 3.0); // GeV
-    m_dv_eff_map_pt_eta = new TProfile2D("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
-    m_dv_eff_map_entry_pt_eta = new TH2F("m_dv_eff_map_entry_pt_eta", "DV reconstruction efficiency map (entry), pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+    m_dv_eff_eta = new TEfficiency( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 50, -4.0, 4.0);
+    m_dv_eff_phi = new TEfficiency( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 50, -M_PI, M_PI);
+    m_dv_eff_mass = new TEfficiency( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 150, 0, 1500); // GeV
+    m_dv_eff_R = new TEfficiency( "m_dv_eff_R", "DV reconstruction efficiency vs R", 100, 0, 400); // mm
+    m_dv_eff_d0 = new TEfficiency( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 100, 0, 400); // mm
 
     // efficiency as a function of Z' parameters
-    m_dv_eff_zp_eta = new TProfile("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 50, -3.0, 3.0);
-    m_dv_eff_zp_pt = new TProfile("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 50, 0, 1000); // GeV
+    m_dv_eff_zp_eta = new TEfficiency("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 25, -3.0, 3.0);
+    m_dv_eff_zp_beta = new TEfficiency("m_dv_eff_zp_beta", "DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
+    m_dv_eff_zp_pt = new TEfficiency("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 25, 0, 500); // GeV
+
+    // efficiency map (Z' pt and eta)
+    m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+    m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+    //m_dv_eff_map_pt_eta = new TEfficiency("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+
 
     // error on reco DV
     m_dv_R_err_tight = new TH1F("dv_R_err_tight","Error on R of DV, tight [mm]",200,-1.,1.);
@@ -111,16 +115,19 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regHist("/DV/truth/dv_mass", m_dv_mass) );
 
     // efficiency plots
-    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_eta", m_dv_eff_eta) );
-    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_phi", m_dv_eff_phi) );
-    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_mass", m_dv_eff_mass) );
-    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_R", m_dv_eff_R) );
-    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_d0", m_dv_eff_d0) );
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_eta", reinterpret_cast<TGraph*>(m_dv_eff_eta)));
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_phi", reinterpret_cast<TGraph*>(m_dv_eff_phi)));
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_mass",reinterpret_cast<TGraph*>(m_dv_eff_mass)));
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_R",reinterpret_cast<TGraph*>(m_dv_eff_R)) );
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_d0",reinterpret_cast<TGraph*>(m_dv_eff_d0)) );
 
-    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_eta", m_dv_eff_zp_eta) );
-    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_pt", m_dv_eff_zp_pt) );
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_eta",reinterpret_cast<TGraph*>(m_dv_eff_zp_eta)) );
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_beta",reinterpret_cast<TGraph*>(m_dv_eff_zp_beta)) );
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_pt",reinterpret_cast<TGraph*>(m_dv_eff_zp_pt)) );
+
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta", m_dv_eff_map_pt_eta) );
-    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_entry_pt_eta", m_dv_eff_map_entry_pt_eta) );
+    ////CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta", reinterpret_cast<TH2*>(m_dv_eff_map_pt_eta)) );
+
 
 
     CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_R_err", m_dv_R_err_tight) );
@@ -135,6 +142,8 @@ StatusCode DVEfficiency::initialize() {
 
 StatusCode DVEfficiency::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
+
+    m_dv_eff_map_pt_eta->Divide(m_dv_eff_map_pt_eta_num, m_dv_eff_map_pt_eta_den,1,1, "cp");
     
     return StatusCode::SUCCESS;
 }
@@ -148,15 +157,6 @@ StatusCode DVEfficiency::execute() {
 
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
-
-    // GRL
-    if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
-
-    // event cleaning
-    if(!m_evtc->PassEventCleaning(*evtInfo)) return StatusCode::SUCCESS;
-
-    // trigger check
-    if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -193,6 +193,9 @@ StatusCode DVEfficiency::execute() {
     for(auto dv: *dvc_copy.first) {
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
     }
+
+    // set global flag
+    bool dv_matched = false;
 
     // cut flow
     for(auto dv: *dvc_copy.first) {
@@ -255,6 +258,9 @@ StatusCode DVEfficiency::execute() {
         float deltaR_min = 0.5;
         if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) break;
 
+        // mark this event as reconstructed
+        dv_matched = true;
+
         if (isMC) {
             // find truth dv matched to this dv
             const xAOD::TruthVertex* tru_v_tight = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
@@ -292,6 +298,15 @@ StatusCode DVEfficiency::execute() {
     } // end of dv loop
 
 
+    // GRL
+    if (!isMC and !m_grlTool->passRunLB(*evtInfo)) dv_matched = false;
+
+    // event cleaning
+    if(!m_evtc->PassEventCleaning(*evtInfo)) dv_matched = false;
+
+    // trigger check
+    if(!m_evtc->PassTrigger()) dv_matched = false;
+
     //-----------------------------------------------------------------
     // end of cut flow                                                -
     // below is for dv reconstruction efficiency                      -
@@ -307,31 +322,37 @@ StatusCode DVEfficiency::execute() {
         // only selecting signal truth
         if (!m_dvutils->isSignalVertex(tru_v)) continue;
 
+        // -------- replace this with global dv_matched -------------
         // create accessor for reconstruction flag
-        static SG::AuxElement::ConstAccessor<int> acc_tru_v("reconstructed");
-        bool dv_matched = acc_tru_v.isAvailable(*tru_v);
+        //static SG::AuxElement::ConstAccessor<int> acc_tru_v("reconstructed");
+        //bool dv_matched = acc_tru_v.isAvailable(*tru_v);
 
         // fill truth signal vertex mass
         float DVMass = m_dvutils->TruthMass(tru_v) / 1000.;
         m_dv_mass->Fill(DVMass);
      
         // fill efficiency plots
-        m_dv_eff_eta->Fill( tru_v->eta(), dv_matched);
-        m_dv_eff_phi->Fill( tru_v->phi(), dv_matched);
-        m_dv_eff_mass->Fill( DVMass, dv_matched);
-        m_dv_eff_R->Fill( tru_v->perp() , dv_matched);
-        m_dv_eff_d0->Fill( m_dvutils->GetMaxd0(tru_v), dv_matched );
+        m_dv_eff_eta->Fill(dv_matched, tru_v->eta());
+        m_dv_eff_phi->Fill(dv_matched, tru_v->phi());
+        m_dv_eff_mass->Fill(dv_matched, DVMass);
+        m_dv_eff_R->Fill(dv_matched, tru_v->perp());
+        m_dv_eff_d0->Fill(dv_matched,m_dvutils->GetMaxd0(tru_v));
 
         // efficiency as a function of Z'
         float zp_eta = tru_v->incomingParticle(0)->eta();
         float zp_pt = tru_v->incomingParticle(0)->pt();
+        float zp_m = tru_v->incomingParticle(0)->m();
+        float zp_e = tru_v->incomingParticle(0)->e();
+        float zp_beta = sqrt(1 - (zp_m/zp_e)*(zp_m/zp_e));
 
-        m_dv_eff_zp_eta->Fill(zp_eta, dv_matched);
-        m_dv_eff_zp_pt->Fill(zp_pt / 1000., dv_matched);
+        m_dv_eff_zp_eta->Fill(dv_matched, zp_eta);
+        m_dv_eff_zp_beta->Fill(dv_matched, zp_beta);
+        m_dv_eff_zp_pt->Fill(dv_matched, zp_pt / 1000.);
 
         // fill efficiency map
-        m_dv_eff_map_pt_eta->Fill(zp_pt / 1000., zp_eta, dv_matched);
-        if (dv_matched) m_dv_eff_map_entry_pt_eta->Fill(zp_pt / 1000., zp_eta);
+        m_dv_eff_map_pt_eta_den->Fill(zp_pt / 1000., zp_eta);
+        if (dv_matched) m_dv_eff_map_pt_eta_num->Fill(zp_pt / 1000., zp_eta); 
+
 
     } // end of efficiency loop
 

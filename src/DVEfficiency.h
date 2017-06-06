@@ -29,6 +29,9 @@
 // Trigger decision tool
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
+// TEfficiency
+#include "TEfficiency.h"
+
 class DVEfficiency: public ::AthAnalysisAlgorithm { 
     public: 
         DVEfficiency( const std::string& name, ISvcLocator* pSvcLocator );
@@ -61,20 +64,22 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
 
         // efficiency as a function of track parameters
-        TProfile* m_dv_eff_eta; //! 
-        TProfile* m_dv_eff_phi; //! 
-        TProfile* m_dv_eff_mass; //! 
-        TProfile* m_dv_eff_R; //! 
-        TProfile* m_dv_eff_d0; //! 
+        TEfficiency* m_dv_eff_eta; //! 
+        TEfficiency* m_dv_eff_phi; //! 
+        TEfficiency* m_dv_eff_mass; //! 
+        TEfficiency* m_dv_eff_R; //! 
+        TEfficiency* m_dv_eff_d0; //! 
         
         // efficiency as a function of Z' parameters
-        TProfile* m_dv_eff_zp_eta; //! 
-        TProfile* m_dv_eff_zp_pt; //! 
+        TEfficiency* m_dv_eff_zp_eta; //! 
+        TEfficiency* m_dv_eff_zp_beta; //! 
+        TEfficiency* m_dv_eff_zp_pt; //! 
 
         // efficiency map
+        TH2F* m_dv_eff_map_pt_eta_num; //! 
+        TH2F* m_dv_eff_map_pt_eta_den; //! 
+        TH2F* m_dv_eff_map_pt_eta; //! 
         //TEfficiency* m_dv_eff_map_pt_eta; //! 
-        TProfile2D* m_dv_eff_map_pt_eta; //! 
-        TH2F* m_dv_eff_map_entry_pt_eta; //! 
         
         // invariant mass of all signal truth vertex
         TH1F* m_dv_mass; //!
