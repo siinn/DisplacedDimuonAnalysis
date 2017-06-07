@@ -10,7 +10,7 @@ from AthenaCommon.GlobalFlags import globalflags
 import glob   
 
 theApp.EvtMax = -1
-#theApp.EvtMax = 200
+#theApp.EvtMax = 20
 
 #--------------------------------------------
 # DAOD_SUSY15 data
@@ -46,13 +46,13 @@ theApp.EvtMax = -1
 # Signal MC samples (no skim)
 #--------------------------------------------
 # mumu test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/mumu_noskim/DAOD_SUSY15.mumu.*.root')
+svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/mumu_noskim/DAOD_SUSY15.mumu.*.root')
 
 # emu test
 #svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/emu_noskim/DAOD_SUSY15.emu.*.root')
 
 # ee test
-svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee_noskim/DAOD_SUSY15.ee.*.root')
+#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee_noskim/DAOD_SUSY15.ee.*.root')
 
 #--------------------------------------------
 # Background samples
@@ -112,7 +112,8 @@ svcMgr.MessageSvc.defaultLimit = 9999
 # histogram output service
 if not hasattr(svcMgr, 'THistSvc'): svcMgr += CfgMgr.THistSvc()
 svcMgr.THistSvc.Output += ["DV DATAFILE='output.root' OPT='RECREATE'"]
-svcMgr.THistSvc.OutputLevel = INFO
+#svcMgr.THistSvc.OutputLevel = INFO
+svcMgr.THistSvc.OutputLevel = DEBUG
 
 # DVCuts tool
 ToolSvc += CfgMgr.DDL__DVCuts("DiLepBaseCuts")

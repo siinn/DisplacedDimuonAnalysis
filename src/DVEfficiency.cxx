@@ -143,7 +143,7 @@ StatusCode DVEfficiency::initialize() {
 StatusCode DVEfficiency::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
 
-    m_dv_eff_map_pt_eta->Divide(m_dv_eff_map_pt_eta_num, m_dv_eff_map_pt_eta_den,1,1, "cp");
+    m_dv_eff_map_pt_eta->Divide(m_dv_eff_map_pt_eta_num, m_dv_eff_map_pt_eta_den,1,1, "b");
     
     return StatusCode::SUCCESS;
 }
