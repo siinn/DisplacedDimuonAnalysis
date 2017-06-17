@@ -25,15 +25,19 @@ class LeptonSelectionTools : public AthAlgTool, virtual public ILeptonSelectionT
 
         // Remove electrons from bad cluster 
         void BadClusterRemoval(xAOD::Vertex& dv);
+        bool BadClusterRemoval(xAOD::Electron& el);
 
         // Kenematic cut
         void ElectronKinematicCut(xAOD::Vertex& dv);
+        bool ElectronKinematicCut(xAOD::Electron& el);
 
         // Electron ID
         void ElectronID(xAOD::Vertex& dv);
+        bool ElectronID(xAOD::Electron& el);
 
         // Muon selection
         void MuonSelection(xAOD::Vertex& dv);
+        bool MuonSelection(xAOD::Muon& mu);
 
         // accessor
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
