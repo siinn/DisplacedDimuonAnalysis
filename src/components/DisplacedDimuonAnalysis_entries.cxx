@@ -12,8 +12,8 @@ DECLARE_TOOL_FACTORY( LeptonSelectionTools )
 DECLARE_TOOL_FACTORY( CosmicTools )
 
 
-#include "../MuonEfficiency.h"
-DECLARE_ALGORITHM_FACTORY( MuonEfficiency )
+#include "../LeptonEfficiency.h"
+DECLARE_ALGORITHM_FACTORY( LeptonEfficiency )
 
 
 #include "../DVEfficiency.h"
@@ -51,7 +51,7 @@ DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis )
   DECLARE_ALGORITHM( VertexRes );
   DECLARE_ALGORITHM( LRTValidation );
   DECLARE_ALGORITHM( DVEfficiency );
-  DECLARE_ALGORITHM( MuonEfficiency );
+  DECLARE_ALGORITHM( LeptonEfficiency );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )
   DECLARE_TOOL( DVUtils )
 }

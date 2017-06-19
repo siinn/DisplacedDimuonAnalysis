@@ -36,6 +36,7 @@ m_leptool("LeptonSelectionTools"),
 m_costool("CosmicTools"),
 m_grlTool("GoodRunsListSelectionTool/GRLTool"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
+m_tmt("Trig::MatchingTool/TrigMatchingTool"),
 m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
@@ -50,6 +51,7 @@ m_accMass("mass")
     declareProperty("DiLepBaseCuts", m_dvc);
     declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
     declareProperty("TrigDecisionTool", m_tdt);
+    declareProperty("TrigMatchingTool", m_tmt);
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
 
@@ -275,10 +277,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // electron kinematics distribution
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt", m_dv_emu_e_pt) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_low", m_dv_emu_e_pt_low) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_min", m_dv_emu_e_pt_min) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_min_low", m_dv_emu_e_pt_min_low) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_max", m_dv_emu_e_pt_max) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_max_low", m_dv_emu_e_pt_max_low) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_eta", m_dv_emu_e_eta) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_phi", m_dv_emu_e_phi) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_d0", m_dv_emu_e_d0) );
@@ -286,10 +284,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt", m_dv_emu_mu_pt) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_low", m_dv_emu_mu_pt_low) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_min", m_dv_emu_mu_pt_min) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_min_low", m_dv_emu_mu_pt_min_low) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_max", m_dv_emu_mu_pt_max) );
-    //CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_max_low", m_dv_emu_mu_pt_max_low) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_eta", m_dv_emu_mu_eta) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_phi", m_dv_emu_mu_phi) );
     CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_d0", m_dv_emu_mu_d0) );
@@ -325,6 +319,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
+    //bool trig_passed = true;
     bool trig_passed = false;
 
     m_event_cutflow->Fill("AllEvents", 1);
@@ -340,6 +335,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
     if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
+    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     // trigger check
     //if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
@@ -400,6 +396,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         // muon selection tool
         m_leptool->MuonSelection(*dv);
 
+        // old method: only require combined muon
+        //if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
+
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
 
@@ -423,9 +422,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("#mu#mu", 1);
 
             // Trigger matching
-            //if (!m_dvutils->TriggerMatching(*dv_muc,*dv_elc)) break;
-            m_dilepdvc->DoTriggerMatching(*dv);
-            if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            if(!m_dvutils->TrigMatching(*dv)) break;
             m_dv_mumu_cf->Fill("Trig. Matching", 1);
 
             // vertex fit quality
@@ -502,9 +499,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("ee", 1);
 
             // Trigger matching
-            //if (!m_dvutils->TriggerMatching(*dv_muc,*dv_elc)) break;
-            m_dilepdvc->DoTriggerMatching(*dv);
-            if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            //m_dilepdvc->DoTriggerMatching(*dv);
+            //if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            if(!m_dvutils->TrigMatching(*dv)) break;
             m_dv_ee_cf->Fill("Trig. Matching", 1);
 
             // vertex fit quality
@@ -575,9 +572,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("e#mu", 1);
 
             // Trigger matching
-            //if (!m_dvutils->TriggerMatching(*dv_muc,*dv_elc)) break;
-            m_dilepdvc->DoTriggerMatching(*dv);
-            if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            //m_dilepdvc->DoTriggerMatching(*dv);
+            //if(!m_dilepdvc->PassTriggerMatching(*dv)) break;
+            if(!m_dvutils->TrigMatching(*dv)) break;
             m_dv_emu_cf->Fill("Trig. Matching", 1);
 
             // vertex fit quality

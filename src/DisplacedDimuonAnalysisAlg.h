@@ -28,6 +28,7 @@
 
 // Trigger decision tool
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "TriggerMatchingTool/IMatchingTool.h"
 
 class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm { 
     public: 
@@ -58,6 +59,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;
+        ToolHandle<Trig::IMatchingTool> m_tmt; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

@@ -9,11 +9,13 @@
 #include "IDVUtils.h"
 
 // trigger matching tool
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 
 // from DV framework
 #include "DDLBase/IMuonCuts.h"
 #include "DDLBase/IDiLepDVCuts.h"
+#include "DDLBase/ITrigMatch.h"
 
 #include "xAODTracking/Vertex.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -41,14 +43,18 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         // get decay channel
         std::string DecayChannel(xAOD::Vertex& dv);
 
+        // trig matching
+        bool TrigMatching(xAOD::Vertex& dv);
+
         // reco dv is matched to signal truth dv
         const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv);
 
         // truth tools --------------------------
 
-        // reco match using dR method
+        // reco match using id track barcode
         bool IsReconstructedAsMuon(const xAOD::TruthParticle* tp);
+        bool IsReconstructedAsElectron(const xAOD::TruthParticle* tp);
 
         // reco match using dR method
         bool IsReconstructedAsIDTrack(const xAOD::TruthParticle& tp);
@@ -117,6 +123,8 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         ToolHandle<DDL::IMuonCuts> m_mc; //!
         ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc; //!
         ToolHandle<Trig::IMatchingTool> m_tmt;
+        ToolHandle<DDL::ITrigMatch> m_trig;
+        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
 
 
 };

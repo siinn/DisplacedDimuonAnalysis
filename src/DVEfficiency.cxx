@@ -213,6 +213,9 @@ StatusCode DVEfficiency::execute() {
         // muon selection tool
         m_leptool->MuonSelection(*dv);
 
+        // old method: only require combined muon
+        //if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
+
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
 
@@ -305,7 +308,13 @@ StatusCode DVEfficiency::execute() {
     if(!m_evtc->PassEventCleaning(*evtInfo)) dv_matched = false;
 
     // trigger check
-    if(!m_evtc->PassTrigger()) dv_matched = false;
+    //if(!m_evtc->PassTrigger()) dv_matched = false;
+    bool trig_passed = false;
+    if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
+    if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
+    if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
+    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
+    if(!trig_passed) dv_matched = false;
 
     //-----------------------------------------------------------------
     // end of cut flow                                                -

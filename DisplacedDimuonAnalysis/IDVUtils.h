@@ -32,6 +32,9 @@ class IDVUtils: virtual public IAlgTool {
         // get decay channel
         virtual std::string DecayChannel(xAOD::Vertex& dv) = 0;
 
+        // trig matching
+        virtual bool TrigMatching(xAOD::Vertex& dv) = 0;
+
         // reco dv is matched to signal truth dv
         virtual const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) = 0;
         virtual const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv) = 0;
@@ -41,8 +44,9 @@ class IDVUtils: virtual public IAlgTool {
         // truth tools
         //----------------------------------------
 
-        // reco match using dR method
+        // reco match using id track barcode
         virtual bool IsReconstructedAsMuon(const xAOD::TruthParticle* tp) = 0;
+        virtual bool IsReconstructedAsElectron(const xAOD::TruthParticle* tp) = 0;
         // reco match using dR method
         virtual bool IsReconstructedAsIDTrack(const xAOD::TruthParticle& tp) = 0;
 

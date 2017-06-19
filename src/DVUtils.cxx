@@ -24,12 +24,16 @@ m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
 m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
 m_mc("DDL::MuonCuts/DiLepMuonCuts"),
-m_tmt("Trig::MatchingTool/MyMatchingTool")
+m_trig("DDL::TrigMatch/TrigMatch"),
+m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
+m_tmt("Trig::MatchingTool/TrigMatchingTool")
 {
     declareInterface<IDVUtils>(this);
     declareProperty("MuonCut", m_mc);
     declareProperty("DiLepDVCuts", m_dilepdvc);
-    declareProperty("TriggerMatchingTool", m_tmt);
+    declareProperty("TrigMatch", m_trig);
+    declareProperty("TrigDecisionTool", m_tdt);
+    declareProperty("TrigMatchingTool", m_tmt);
 
 }
 
@@ -64,6 +68,60 @@ std::string DVUtils::DecayChannel(xAOD::Vertex& dv) {
 
     return decayChannel;
 
+}
+
+
+// trig matching
+bool DVUtils::TrigMatching(xAOD::Vertex& dv) {
+
+    // find which channel we are evaluating
+    std::string channel = DecayChannel(dv);
+
+    // access leptons
+    auto dv_muc = m_accMu(dv);
+    auto dv_elc = m_accEl(dv);
+
+    // set flag
+    bool pass = false;
+
+    std::vector<const xAOD::IParticle*> lep_trigCheck;
+
+    if (channel == "mumu"){
+        for(auto mu: *dv_muc){
+            // clear before evaluate and add muon
+            lep_trigCheck.clear();
+            lep_trigCheck.push_back(mu);
+
+            // evaluate trigger
+            if(m_tmt->match(lep_trigCheck,"HLT_mu60_0eta105_msonly")) pass = true;
+        }
+    }
+    if (channel == "ee"){
+        for(auto el: *dv_elc){
+            // evaluate trigger
+            if(m_trig->Match(*el, "HLT_g140_loose")) pass = true;
+            if(m_trig->Match(*el, "HLT_2g50_loose")) pass = true;
+            if(m_trig->Match(*el, "HLT_2g60_loose_L12EM15VH")) pass = true;
+        }
+    }
+    if (channel == "emu"){
+        for(auto mu: *dv_muc){
+            // clear before evaluate and add muon
+            lep_trigCheck.clear();
+            lep_trigCheck.push_back(mu);
+
+            // evaluate trigger
+            if(m_tmt->match(lep_trigCheck,"HLT_mu60_0eta105_msonly")) pass = true;
+        }
+        for(auto el: *dv_elc){
+            // evaluate trigger
+            if(m_trig->Match(*el, "HLT_g140_loose")) pass = true;
+            if(m_trig->Match(*el, "HLT_2g50_loose")) pass = true;
+            if(m_trig->Match(*el, "HLT_2g60_loose_L12EM15VH")) pass = true;
+        }
+    }
+
+    return pass;
 }
 
 
@@ -259,7 +317,7 @@ bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc, const DataVec
     for(auto el: dv_elc){
         ATH_MSG_INFO("checking trigger.. HLT_g140_loose = " << m_tmt->match(*el,"HLT_g140_loose"));
         ATH_MSG_INFO("checking trigger.. HLT_2g50_loose = " << m_tmt->match(*el,"HLT_2g50_loose"));
-        if ((m_tmt->match(*el,"HLT_g140_loose")) or (m_tmt->match(*el,"HLT_2g50_loose"))) pass = true;
+        if ((m_tmt->match(*el,"HLT_g140_loose")) or (m_tmt->match(*el,"HLT_2g50_loose")) or (m_tmt->match(*el,"HLT_2g60_loose_L12EM15VH"))) pass = true;
     }
     ATH_MSG_INFO("After trigger matching electrons, pass = " << pass);
     return pass;
@@ -437,7 +495,9 @@ const xAOD::TruthParticle* DVUtils::FindFinalState(const xAOD::TruthParticle* tp
             ATH_MSG_DEBUG("More than 1 outgoing particle. nChildren = " << ftp->nChildren() );
             for (unsigned int i = 0; i < ftp->nChildren(); i++ ) {
                 ATH_MSG_DEBUG("children " << i << ": status = " << ftp->child(i)->status() << ", pdgid = " << ftp->child(i)->pdgId() );
-                if (ftp->child(i)->absPdgId() == 13) {
+
+                // choose the one with same pdgId to avoid bremsstrahlung
+                if (ftp->child(i)->absPdgId() == ftp->absPdgId()) {
                     ftp = ftp->child(i);
                 }
             } 
@@ -454,7 +514,7 @@ const xAOD::TruthParticle* DVUtils::FindFinalState(const xAOD::TruthParticle* tp
 } // end of FindFinalState
 
 //-------------------------------------------------------------
-// Muon tools
+// Lepton efficiency tools
 //-------------------------------------------------------------
 
 
@@ -464,6 +524,10 @@ bool DVUtils::IsReconstructedAsMuon(const xAOD::TruthParticle* tp) {
     // retrieve muon container
     const xAOD::MuonContainer* muc = nullptr;
     CHECK( evtStore()->retrieve( muc, "Muons" ) );
+
+    // truncate barcode
+    int barcode = tp->barcode();
+    if (barcode > 1e6) barcode = barcode - 1e6;
 
     // loop over muon container, looking for matched reco muon
     for(auto mu: *muc) {
@@ -475,13 +539,147 @@ bool DVUtils::IsReconstructedAsMuon(const xAOD::TruthParticle* tp) {
             if(link.isValid()) {
                 matched_truth_muon = *link;
                 // return true if at least one truthlink of reco muon matches with given truth
-                if (matched_truth_muon->barcode() == tp->barcode()) return true;
+                if (matched_truth_muon->barcode() == barcode) return true;
+                else ATH_MSG_DEBUG("MUON: matched-truth barcode = "
+                    << matched_truth_muon->barcode()
+                    << ", tp barcode = "
+                    << barcode
+                    );
             } // end of link.isValid
         } // end of if mu->isAvailable
     } // end of loop over muon container
 
     return false;
 
+}
+
+// check if truth particle is reconstructed as Electron
+bool DVUtils::IsReconstructedAsElectron(const xAOD::TruthParticle* tp) {
+
+    // retrieve Electron container
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ) );
+
+    const xAOD::ElectronContainer* elc_HLT = nullptr;
+    CHECK( evtStore()->retrieve( elc_HLT, "HLT_xAOD__ElectronContainer_egamma_Electrons" ) );
+
+    int barcode = tp->barcode();
+    if (barcode > 1e6) barcode = barcode - 1e6;
+
+    ATH_MSG_DEBUG("----- matching for truth elc barcode = "
+            << tp->barcode()
+            << ", truncated = "
+            << barcode
+            << ", pt = "
+            << tp->pt() / 1000. // GeV
+            << ", eta = "
+            << tp->eta()
+            << ", phi = "
+            << tp->phi()
+            );
+
+    ATH_MSG_DEBUG("HLT_xAOD__ElectronContainer_egamma_Electrons size = "
+                << elc_HLT->size()
+                );
+
+    const xAOD::Electron* reco_elc = xAOD::EgammaHelpers::getRecoElectron(tp);
+    //ATH_MSG_DEBUG("reco_elc = " << reco_elc);
+    if (reco_elc){
+        ATH_MSG_DEBUG("found match for reco electron = " 
+            << reco_elc
+            << ", reco_elcc pt = "
+            << reco_elc->pt() / 1000.
+            );
+    }
+
+    // loop over Electron container, looking for matched reco Electron
+    for(auto el: *elc) {
+        ATH_MSG_DEBUG("electron  = "
+                << el
+                << ", pt = "
+                << el->pt() / 1000. // GeV
+                << ", eta = "
+                << el->eta()
+                << ", phi = "
+                << el->phi()
+                );
+        const xAOD::TruthParticle* matched_truth_electron = xAOD::TruthHelpers::getTruthParticle(*el);
+        if (matched_truth_electron){
+                ATH_MSG_DEBUG("matched truth for electron = " 
+                    << matched_truth_electron
+                    << ", pt = "
+                    << matched_truth_electron->pt() / 1000.
+                    << ", eta = "
+                    << matched_truth_electron->eta()
+                    << ", phi = "
+                    << matched_truth_electron->phi()
+                    << ", barcode = " 
+                    << matched_truth_electron->barcode()
+                    );
+            if (matched_truth_electron->barcode() == barcode) {
+                ATH_MSG_DEBUG("found match for electron = " 
+                    << el
+                    << ", elc pt = "
+                    << el->pt() / 1000.
+                    << ", eta = "
+                    << el->eta()
+                    << ", phi = "
+                    << el->phi()
+                    << ", matched-truth = "
+                    << matched_truth_electron
+                    << ", barcode = " 
+                    << matched_truth_electron->barcode()
+                    );
+                return true;
+            }
+        }
+    }
+
+    // loop over Electron container, looking for matched reco Electron
+    for(auto el: *elc_HLT) {
+        ATH_MSG_DEBUG("HLT: electron  = "
+                << el
+                << ", pt = "
+                << el->pt() / 1000. // GeV
+                << ", eta = "
+                << el->eta()
+                << ", phi = "
+                << el->phi()
+                );
+        const xAOD::TruthParticle* matched_truth_electron = xAOD::TruthHelpers::getTruthParticle(*el);
+        if (matched_truth_electron){
+                ATH_MSG_DEBUG("HLT: matched truth for electron = " 
+                    << matched_truth_electron
+                    << ", pt = "
+                    << matched_truth_electron->pt() / 1000.
+                    << ", eta = "
+                    << matched_truth_electron->eta()
+                    << ", phi = "
+                    << matched_truth_electron->phi()
+                    << ", barcode = " 
+                    << matched_truth_electron->barcode()
+                    );
+            if (matched_truth_electron->barcode() == barcode) {
+                ATH_MSG_DEBUG("HLT: found match for electron = " 
+                    << el
+                    << ", elc_HLT pt = "
+                    << el->pt() / 1000.
+                    << ", eta = "
+                    << el->eta()
+                    << ", phi = "
+                    << el->phi()
+                    << ", matched-truth = "
+                    << matched_truth_electron
+                    << ", barcode = " 
+                    << matched_truth_electron->barcode()
+                    );
+                return true;
+            }
+        }
+    }
+
+
+    return false;
 }
 
 //-------------------------------------------------------------
@@ -596,15 +794,37 @@ bool DVUtils::IsReconstructedAsIDTrack(const xAOD::TruthParticle& tp) {
 
 // check if truth particle is signal muon from (Z')
 bool DVUtils::isSignal (const xAOD::TruthParticle* p) {
-    if ( (p->status() ==1) and (p->absPdgId() == 13) and (p->barcode() < 200000) ){
-        const xAOD::TruthParticle *parent = p;
-        do {
-            parent = parent->parent();
-            if (parent->absPdgId() == 32) {
-                return true;
-            }
-        } while (parent->parent() != NULL );
-    } // end of muon
+
+
+    // not reliable due to bremsstrahlung
+    // start from signal vertex and use FindFinalState
+
+
+
+
+    //if ( (p->status() ==1)
+    //and ( (p->absPdgId() == 13) or (p->absPdgId() == 11))
+    //and (p->barcode() < 200000) ){
+    //    ATH_MSG_INFO("DEBUG: inside isSignal, electron barcode = "
+    //                << p->barcode()
+    //                );
+    //    const xAOD::TruthParticle *parent = p;
+    //    do {
+    //        // move to parent particle
+    //        parent = parent->parent();
+    //        if (parent == NULL) {
+    //            ATH_MSG_INFO("DEBUG: (fail) this electron has no parent");
+    //            return false;
+    //        }
+    //        ATH_MSG_INFO("DEBUG: this electron has a parent");
+    //        if (parent->absPdgId() == 32) {
+    //            ATH_MSG_INFO("DEBUG: (pass) this electron " << parent->barcode() << " has a parent and is Z'");
+    //            return true;
+    //            ATH_MSG_INFO("DEBUG: (pass) this electron has a parent and is Z': return true?");
+    //        }
+    //    } while (parent->parent() != NULL );
+    //ATH_MSG_INFO("DEBUG: (fail) this electron " << parent->barcode() << " has no parent");
+    //} // end of muon
     return false;
 
 } // end of isSignal
@@ -687,7 +907,7 @@ bool DVUtils::isLargeD0Track (const xAOD::TrackParticle* tp) {
 
 // track selection for validation
 bool DVUtils::TrackSelection (const xAOD::TrackParticle* tp) {
-    float maxEta = 2.5;
+    float maxEta = 2.7;
     float minPt = 1000;
     if ( (tp->pt()>1e-7 ? (fabs(tp->eta()) < maxEta) : false) &&  \
          (tp->pt() > minPt) ) return true;
@@ -695,7 +915,7 @@ bool DVUtils::TrackSelection (const xAOD::TrackParticle* tp) {
 } // end of TrackSelection
 
 bool DVUtils::TrackSelection (const xAOD::TruthParticle* tp) {
-    float maxEta = 2.5;
+    float maxEta = 2.7;
     float minPt = 1000;
     if (!(tp->status() == 1)) return false;
     if (!(tp->isCharged())) return false;
