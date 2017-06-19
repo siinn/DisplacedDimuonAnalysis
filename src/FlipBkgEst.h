@@ -11,13 +11,18 @@
 // EDM
 #include "AsgTools/ToolHandle.h"
 
+// xAOD
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/VertexContainer.h"
+
 // DV
 #include "DDLBase/IEventCuts.h"
 #include "DDLBase/IDVCuts.h"
 #include "DDLBase/IDiLepDVCuts.h"
 #include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
-//#include "DDLCombBkg/IVertexing.h"
+#include "DDLCombBkg/IVertexing.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -42,7 +47,11 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         
         virtual StatusCode beginInputFile();
 
-        virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
+        virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+
+        virtual void PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv, std::string channel);
+        virtual void PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv, std::string channel);
     
     private: 
         // setting tools
@@ -56,17 +65,48 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;
-        //ToolHandle<DDL::IDispVertexer> m_vertexer;
+        ToolHandle<DDL::IDispVertexer> m_vertexer;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
+        SG::AuxElement::Accessor<TLorentzVector> m_acc_p4;
 
         // histograms
         TH1D* m_n_mu; //!
         TH1D* m_n_elc; //!
 
+        TH1D* m_n_mu_sel; //!
+        TH1D* m_n_elc_sel; //!
+
+        TH1D* m_mumu_cf_input; //!
+        TH1D* m_mumu_cf_noflip; //!
+        TH1D* m_mumu_cf_flip; //!
+
+        TH1D* m_emu_cf_input; //!
+        TH1D* m_emu_cf_noflip; //!
+        TH1D* m_emu_cf_flip; //!
+
+        TH1D* m_ee_cf_input; //!
+        TH1D* m_ee_cf_noflip; //!
+        TH1D* m_ee_cf_flip; //!
+
+        // vertex distribution
+        TH1F* m_mumu_noflip_R; //!
+        TH1F* m_mumu_noflip_z; //!
+        TH1F* m_mumu_flip_R; //!
+        TH1F* m_mumu_flip_z; //!
+
+        TH1F* m_ee_noflip_R; //!
+        TH1F* m_ee_noflip_z; //!
+        TH1F* m_ee_flip_R; //!
+        TH1F* m_ee_flip_z; //!
+
+        TH1F* m_emu_noflip_R; //!
+        TH1F* m_emu_noflip_z; //!
+        TH1F* m_emu_flip_R; //!
+        TH1F* m_emu_flip_z; //!
 }; 
 
 #endif //> !DISPLACEDDIMUONANALYSIS_FLIPBKGEST_H

@@ -1,6 +1,7 @@
 // DisplacedDimuonAnalysis includes
 #include "DisplacedDimuonAnalysis/LeptonSelectionTools.h"
 #include "xAODEgamma/ElectronxAODHelpers.h" 
+#include "xAODMuon/MuonContainer.h"
 #include "ElectronPhotonSelectorTools/IAsgElectronLikelihoodTool.h"
 #include "cmath"
 
@@ -41,6 +42,12 @@ void LeptonSelectionTools::BadClusterRemoval(xAOD::Vertex& dv) {
     }
 }
 
+bool LeptonSelectionTools::BadClusterRemoval(xAOD::Electron& el) {
+    bool pass = true;
+    if(!(el).isGoodOQ(xAOD::EgammaParameters::BADCLUSELECTRON)) pass = false;
+    return pass;
+}
+
 void LeptonSelectionTools::ElectronKinematicCut(xAOD::Vertex& dv) {
 
     auto dv_elc = m_accEl(dv);
@@ -49,6 +56,12 @@ void LeptonSelectionTools::ElectronKinematicCut(xAOD::Vertex& dv) {
         if( ((*el)->pt() < 7000) or (fabs((*el)->caloCluster()->etaBE(2)) > 2.47) ) dv_elc->erase(el);
         else ++el;
     }
+}
+
+bool LeptonSelectionTools::ElectronKinematicCut(xAOD::Electron& el) {
+    bool pass = true;
+    if( ((el).pt() < 7000) or (fabs((el).caloCluster()->etaBE(2)) > 2.47) ) pass = false;
+    return pass;
 }
 
 void LeptonSelectionTools::ElectronID(xAOD::Vertex& dv) {
@@ -61,6 +74,12 @@ void LeptonSelectionTools::ElectronID(xAOD::Vertex& dv) {
     }
 }
 
+bool LeptonSelectionTools::ElectronID(xAOD::Electron& el) {
+    bool pass = true;
+    if(!(m_LooseLH->accept(el))) pass = false;
+    return pass;
+}
+
 void LeptonSelectionTools::MuonSelection(xAOD::Vertex& dv) {
 
     auto dv_muc = m_accMu(dv);
@@ -71,5 +90,12 @@ void LeptonSelectionTools::MuonSelection(xAOD::Vertex& dv) {
         else if(!(m_mst->accept(**mu))) dv_muc->erase(mu);
         else ++mu;
     }
+}
+
+bool LeptonSelectionTools::MuonSelection(xAOD::Muon& mu) {
+    bool pass = true;
+    if(!(m_mct->applyCorrection(mu))) pass = false;
+    if(!(m_mst->accept(mu))) pass = false;
+    return pass;
 }
 
