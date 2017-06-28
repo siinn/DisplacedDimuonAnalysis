@@ -21,7 +21,7 @@ use TrigDecisionTool            TrigDecisionTool-*              Trigger/TrigAnal
 
 # DV
 use DDLBase                     DDLBase-*                       
-use DDLCombBkg                  DDLCombBkg-*                       
+#use DDLCombBkg                  DDLCombBkg-*                       
 
 # xAOD
 use xAODTracking                xAODTracking-*                  Event/xAOD
@@ -56,9 +56,9 @@ use xAODCore                    xAODCore-*                      Event/xAOD
 use PathResolver                PathResolver-*                  Tools
 
 # DV
-use DVTools                     DVTools-*                       DV_xAODAnalysis
-use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis
-use DVCuts                      DVCuts-*                        DV_xAODAnalysis
+#use DVTools                     DVTools-*                       DV_xAODAnalysis
+#use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis
+#use DVCuts                      DVCuts-*                        DV_xAODAnalysis
 
 # muon
 use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
@@ -71,9 +71,9 @@ use AtlasROOT                   AtlasROOT-*                     External
 use  StoreGate                  StoreGate-*                     Control
 
 # luminosity calculation
-use xAODRootAccess              xAODRootAccess-*                Control
-use xAODLuminosity              xAODLuminosity-*                Event/xAOD
-use xAODLuminosity              xAODLuminosity-*                Event/xAOD
+#use xAODRootAccess              xAODRootAccess-*                Control
+#use xAODLuminosity              xAODLuminosity-*                Event/xAOD
+#use xAODLuminosity              xAODLuminosity-*                Event/xAOD
 
 end_private
 

@@ -394,10 +394,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         m_dilepdvc->ApplyOverlapRemoval(*dv);
 
         // muon selection tool
-        m_leptool->MuonSelection(*dv);
+        //m_leptool->MuonSelection(*dv);
 
         // old method: only require combined muon
-        //if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
+        if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
 
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
