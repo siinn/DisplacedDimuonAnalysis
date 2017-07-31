@@ -45,11 +45,13 @@ StatusCode LeptonEfficiency::initialize() {
     m_eff_mu_pt = new TProfile("m_eff_mu_pt", "Muon tracking efficiency vs pt", 50,0,800);
     m_eff_mu_R = new TProfile("m_eff_mu_R", "Muon tracking efficiency vs R", 50,0,400);
     m_eff_mu_d0 = new TProfile("m_eff_mu_d0", "Muon tracking efficiency vs d0", 50,0,400);
+    m_eff_mu_z0 = new TProfile("m_eff_mu_z0", "Muon tracking efficiency vs z0", 200,-1000,1000);
 
     m_eff_el_eta = new TProfile("m_eff_el_eta", "Electron tracking efficiency vs Z' eta", 50,-3.0,3.0);
     m_eff_el_pt = new TProfile("m_eff_el_pt", "Electron tracking efficiency vs pt", 50,0,800);
     m_eff_el_R = new TProfile("m_eff_el_R", "Electron tracking efficiency vs R", 50,0,400);
     m_eff_el_d0 = new TProfile("m_eff_el_d0", "Electron tracking efficiency vs d0", 50,0,400);
+    m_eff_el_z0 = new TProfile("m_eff_el_z0", "Electron tracking efficiency vs z0", 200,-1000,1000);
 
     // 2D efficiency
     m_eff_mu_pt_vs_prodVtxR_num = new TH2F("m_eff_mu_pt_vs_prodVtxR_num", "signal mu eff pt vs prodVtx R, num", 50, 0, 300, 50, 0, 1000); // GeV
@@ -77,11 +79,13 @@ StatusCode LeptonEfficiency::initialize() {
     CHECK( histSvc->regHist("/DV/muons/efficiency/eff_mu_pt", m_eff_mu_pt) );
     CHECK( histSvc->regHist("/DV/muons/efficiency/eff_mu_R", m_eff_mu_R) );
     CHECK( histSvc->regHist("/DV/muons/efficiency/eff_mu_d0", m_eff_mu_d0) );
+    CHECK( histSvc->regHist("/DV/muons/efficiency/eff_mu_z0", m_eff_mu_z0) );
 
     CHECK( histSvc->regHist("/DV/electrons/efficiency/eff_el_eta", m_eff_el_eta) );
     CHECK( histSvc->regHist("/DV/electrons/efficiency/eff_el_pt", m_eff_el_pt) );
     CHECK( histSvc->regHist("/DV/electrons/efficiency/eff_el_R", m_eff_el_R) );
     CHECK( histSvc->regHist("/DV/electrons/efficiency/eff_el_d0", m_eff_el_d0) );
+    CHECK( histSvc->regHist("/DV/electrons/efficiency/eff_el_z0", m_eff_el_z0) );
 
     // 2D efficiency
     CHECK( histSvc->regHist("/DV/muons/efficiency/eff_mu_pt_vs_prodVtxR", m_eff_mu_pt_vs_prodVtxR_num) );
@@ -137,8 +141,8 @@ StatusCode LeptonEfficiency::finalize() {
 StatusCode LeptonEfficiency::execute() {  
     ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-    // trigger filter for testing only
-    ////bool trig_passed = false;
+    // we don't want trigger filter for efficiency
+    //// trigger filter for testing only
     //bool trig_passed = false;
 
     //if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
@@ -146,7 +150,7 @@ StatusCode LeptonEfficiency::execute() {
     //if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
     //if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
-    //// trigger check
+    ////// trigger check
     //if(!trig_passed) return StatusCode::SUCCESS;
 
     // event count
@@ -163,7 +167,6 @@ StatusCode LeptonEfficiency::execute() {
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     CHECK( evtStore()->retrieve( tru_vc, "TruthVertices"));
 
-    // debug only ------------------------------------------
     // loop over the truth vertex container
     for (auto tru_v: *tru_vc){
         if (!m_dvutils->isSignalVertex(tru_v)) continue;
@@ -222,6 +225,12 @@ StatusCode LeptonEfficiency::execute() {
                         m_eff_el_eta_vs_d0_num->Fill(d0, signal_lep->eta() );
                     }
                 }
+                // efficiency vs z0
+                if (signal_lep->isAvailable<float>("z0") ) {
+
+                    float z0 = fabs(signal_lep->auxdata< float >("z0"));
+                    m_eff_el_z0->Fill( z0, reconstructed );
+                }
             }
 
             // signal muon
@@ -265,6 +274,12 @@ StatusCode LeptonEfficiency::execute() {
                         m_eff_mu_pt_vs_d0_num->Fill(d0, signal_lep->pt() / 1000.);
                         m_eff_mu_eta_vs_d0_num->Fill(d0, signal_lep->eta() );
                     }
+                }
+                // efficiency vs z0
+                if (signal_lep->isAvailable<float>("z0") ) {
+
+                    float z0 = fabs(signal_lep->auxdata< float >("z0"));
+                    m_eff_mu_z0->Fill( z0, reconstructed );
                 }
             }
         }

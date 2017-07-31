@@ -45,6 +45,10 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         virtual void plot_signal_tp(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         virtual void plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::string channel);
+
+        virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *dv);
     
     private:
 
@@ -101,6 +105,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mumu_DeltaR_low; //!
             TH1F* m_dv_mumu_Rcos; //!
             TH1F* m_dv_mumu_Rcos_low; //!
+            TH2F* m_dv_mumu_DeltaR_Rcos; //!
 
             // MC matching
             TH1F* m_dv_mumu_M_matched; //!
@@ -198,6 +203,29 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_R_matched; //!
             TH2F* m_dv_emu_R_M_matched; //!
             TH1F* m_dv_emu_eta_matched; //!
+
+        //----------------------------------
+        // lepton + track plots
+        //----------------------------------
+            TH1D* m_dv_mut_cf; //!
+            TH1D* m_dv_et_cf; //!
+
+        //----------------------------------
+        // trk-trk plots
+        //----------------------------------
+            TH1D* m_dv_idid_cf; //!
+            TH1F* m_dv_idid_M; //!
+            TH1F* m_dv_idid_z; //!
+            TH1F* m_dv_idid_R; //!
+            TH1F* m_dv_idid_l; //!
+            TH1F* m_dv_idid_chi2_ndof; //!
+            TH1F* m_dv_idid_deltaR; //!
+
+            int n_event_all = 0;
+            int n_vrtsec_all = 0;
+            int n_dvc_copy = 0;
+            int n_dv_all = 0;
+            int n_dv_passed_cut = 0;
     
 }; 
 

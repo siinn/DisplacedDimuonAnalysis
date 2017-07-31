@@ -42,11 +42,13 @@ class LeptonEfficiency: public ::AthAnalysisAlgorithm {
         TProfile* m_eff_mu_pt; //!
         TProfile* m_eff_mu_R; //!
         TProfile* m_eff_mu_d0; //!
+        TProfile* m_eff_mu_z0; //!
 
         TProfile* m_eff_el_eta; //!
         TProfile* m_eff_el_pt; //!
         TProfile* m_eff_el_R; //!
         TProfile* m_eff_el_d0; //!
+        TProfile* m_eff_el_z0; //!
 
         // 2D efficiency plots
         TH2F* m_eff_mu_pt_vs_prodVtxR_num; //!

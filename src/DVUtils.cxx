@@ -62,9 +62,12 @@ std::string DVUtils::DecayChannel(xAOD::Vertex& dv) {
     auto dv_muc = m_accMu(dv);
     auto dv_elc = m_accEl(dv);
 
-    if ((dv_muc->size() == 2) and (dv_elc->size() == 0)) decayChannel = "mumu";
-    if ((dv_muc->size() == 0) and (dv_elc->size() == 2)) decayChannel = "ee";
+    if (dv_muc->size() == 2) decayChannel = "mumu";
+    if (dv_elc->size() == 2) decayChannel = "ee";
     if ((dv_muc->size() == 1) and (dv_elc->size() == 1)) decayChannel = "emu";
+    if ((dv_muc->size() == 1) and (dv_elc->size() == 0)) decayChannel = "mut";
+    if ((dv_muc->size() == 0) and (dv_elc->size() == 1)) decayChannel = "et";
+    if ((dv_muc->size() == 0) and (dv_elc->size() == 0)) decayChannel = "trktrk";
 
     return decayChannel;
 
