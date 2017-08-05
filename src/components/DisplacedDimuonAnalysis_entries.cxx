@@ -38,8 +38,13 @@ DECLARE_ALGORITHM_FACTORY( MuonPlots )
 #include "../SUSYDV.h"
 DECLARE_ALGORITHM_FACTORY( SUSYDV )
 
+
+#include "../TrackingSystematics.h"
+DECLARE_ALGORITHM_FACTORY( TrackingSystematics )
+
 DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis ) 
 {
+  DECLARE_ALGORITHM( TrackingSystematics );
   DECLARE_ALGORITHM( SUSYDV );
   DECLARE_ALGORITHM( MuonPlots );
   DECLARE_ALGORITHM( TruthPlots );
