@@ -99,7 +99,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     // cosmic veto
     m_dv_mumu_DeltaR = new TH1F("dv_mumu_DeltaR","Signal muon Delta R",100, 0., 5.);
-    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",100, 0., 1);
+    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",50, 0., 1);
     m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",50, 0., 5.);
     m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",25, 0., 0.1);
     m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 500,0,5,100,0,5);

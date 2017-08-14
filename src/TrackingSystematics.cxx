@@ -95,7 +95,7 @@ StatusCode TrackingSystematics::initialize() {
     m_dv_idid_M_6 = new TH1F("dv_idid_M_6","K_{S} candidate mass in MeV (R_6)", 100,0,1000 );
 
 
-    m_dv_idid_ratio_R = new TH1F("dv_idid_ratio_R","K_{S} ratio plot (R_{i} / R_{0})", 8 ,m_dv_idid_M_bins);
+    m_dv_idid_ratio_R = new TH1F("dv_idid_ratio_R","K_{S} ratio plot (R_{i} / R_{0})",6,0,300);
 
     // Ks candidate from primary vertex
     //m_ks_pv_cf = new TH1D( "m_ks_pv_cf", "Reco dv idid cutflow", 12,0,12);
@@ -169,7 +169,7 @@ StatusCode TrackingSystematics::execute() {
     if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     // trigger check
-    //if(!trig_passed) return StatusCode::SUCCESS;
+    if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
 
     // retrieve lepton container
@@ -360,8 +360,8 @@ StatusCode TrackingSystematics::execute() {
         if (true) {
 
             float track_pt_min = 400;   // MeV
-            float mass_min = 300;   // MeV
-            float mass_max = 700;   // MeV
+            float mass_min = 350;   // MeV
+            float mass_max = 650;   // MeV
 
             // access tracks from vertex
             auto tpLinks = dv->trackParticleLinks();
@@ -397,11 +397,11 @@ StatusCode TrackingSystematics::execute() {
 
             // low mass veto
             if(dv_mass < mass_min) continue;
-            m_dv_idid_cf->Fill("m > 300 MeV", 1);
+            m_dv_idid_cf->Fill("m > 350 MeV", 1);
 
             // low mass veto
             if(dv_mass > mass_max) continue;
-            m_dv_idid_cf->Fill("m < 700 MeV", 1);
+            m_dv_idid_cf->Fill("m < 650 MeV", 1);
 
             // Ks candidate selection
             if(!PassKsSelection(*dv, *pv)) continue;
