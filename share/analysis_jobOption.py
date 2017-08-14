@@ -10,26 +10,18 @@ from AthenaCommon.GlobalFlags import globalflags
 import glob   
 
 theApp.EvtMax = -1
-#theApp.EvtMax = 20
+#theApp.EvtMax = 5000
 
 #--------------------------------------------
 # DAOD_SUSY15 data
 #--------------------------------------------
-# all 2016 data
-#svcMgr.EventSelector.InputCollections = glob.glob( "/n/atlas05/userdata/sche/data/DAOD_SUSY15/*/*.root.1" )
-
-# trigger filtered
-#svcMgr.EventSelector.InputCollections += glob.glob("/n/atlas05/userdata/sche/data/DAOD_SUSY15_FILTERED/user.sche.data16_13TeV.physics_Main.DAOD_RPVLL.r8669.trigfilter.r1_EXT0/*.root")
+# test only
+#svcMgr.EventSelector.InputCollections = glob.glob( "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/data_testonly/user.sche.data16_13TeV.physics_Main.DAOD_SUSY15.r8669_p2950.Lep_Filtered.r10_EXT0/*.root*" )
 
 
 #--------------------------------------------
 # Signal MC samples
 #--------------------------------------------
-
-# emu test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/emu/DAOD_SUSY15.emu.*.root')
-# ee test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee/DAOD_SUSY15.ee.*.root')
 
 # SUSY15, official
 #svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zprimemumu/user.sche.mc15_13TeV.301911.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t100.recon.DAOD_RPVLL.e4125_s2698_r8788.r12_EXT0/*.root')
@@ -48,11 +40,12 @@ theApp.EvtMax = -1
 # mumu test
 svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/mumu_noskim/DAOD_SUSY15.mumu.*.root')
 
-# emu test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/emu_noskim/DAOD_SUSY15.emu.*.root')
-
 # ee test
-#svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee_noskim/DAOD_SUSY15.ee.*.root')
+#svcMgr.EventSelector.InputCollections += glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/ee_noskim/DAOD_SUSY15.ee.*.root')
+
+# emu test
+#svcMgr.EventSelector.InputCollections += glob.glob('/n/atlas05/userdata/sche/20.7.8.7.SUSY15/output/emu_noskim/DAOD_SUSY15.emu.*.root')
+
 
 #--------------------------------------------
 # Background samples
@@ -65,18 +58,10 @@ svcMgr.EventSelector.InputCollections = glob.glob('/n/atlas05/userdata/sche/20.7
 #svcMgr.EventSelector.InputCollections = glob.glob("/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/background/user.sche.mc15_13TeV.361063.Sherpa_CT10_llll.recon.DAOD_SUSY15.e3836_s2608_s2183_r8788.r1_EXT0/*.root")
 
 # ttbar
-#svcMgr.EventSelector.InputCollections = glob.glob("/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/background/user.sche.mc15_13TeV.410252.Sherpa_221_NNPDF30NNLO_ttbar_dilepton_MEPS_NLO.recon.DAOD_SUSY15.e5450_s2726_r8788.r1_EXT0/*.root")
+#svcMgr.EventSelector.InputCollections += glob.glob("/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/background/user.sche.mc15_13TeV.410252.Sherpa_ttbar_dilepton_MEPS_NLO.recon.DAOD_SUSY15.e5450_s2726_r8788_p2949.lepfilter.r4_EXT0/user.sche.11532947.EXT0._00000*.DAOD_SUSY15.pool.root")
 
-
-#--------------------------------------------
-# LRT validatoin
-# r7, secondary pile-up truth, no vertexing
-#--------------------------------------------
-#svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/xAOD/zprimemumu/fulltruth/user.sche.LRT.r7.mc15_13TeV.301913.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t500.recon.ESD.e4821_s2698_r8028_AOD/*.root')
-
-# secondary pile-up truth, no vertexing, decorated
-#svcMgr.EventSelector.InputCollections = glob.glob( '/n/atlas05/userdata/sche/MC15/xAOD/zprimemumu/EXOT21/fulltruth/DAOD_EXOT21.fulltruth.output.root')
-# --------------------------------------------------------------
+# JW
+#svcMgr.EventSelector.InputCollections = glob.glob("/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/background/mc15_13TeV.361023.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ3W.merge.DAOD_SUSY15.e3668_s2576_s2132_r8788_p2877/*.root.*")
 
 # handler for the main sequence
 algseq = CfgMgr.AthSequencer("AthAlgSeq")
@@ -89,13 +74,13 @@ from DisplacedDimuonAnalysis.DisplacedDimuonAnalysisConf import DisplacedDimuonA
 
 # Data and MC
 algseq += CfgMgr.DisplacedDimuonAnalysisAlg()
-#algseq += CfgMgr.FlipBkgEst()
-#algseq += CfgMgr.SUSYDV()
+algseq += CfgMgr.TrackingSystematics()
+algseq += CfgMgr.CosmicBackground()
 #algseq += CfgMgr.MuonPlots()
 
 # MC sample only
-algseq += CfgMgr.DVEfficiency()
-#algseq += CfgMgr.MuonEfficiency()
+#algseq += CfgMgr.DVEfficiency()
+#algseq += CfgMgr.LeptonEfficiency()
 #algseq += CfgMgr.TruthPlots()
 #algseq += CfgMgr.VertexRes()
 
@@ -107,13 +92,13 @@ algseq += CfgMgr.DVEfficiency()
 #---------------------------------------------------------------
 svcMgr.MessageSvc.OutputLevel = INFO
 #svcMgr.MessageSvc.OutputLevel = DEBUG
-svcMgr.MessageSvc.defaultLimit = 9999
+svcMgr.MessageSvc.defaultLimit = 99990
 
 # histogram output service
 if not hasattr(svcMgr, 'THistSvc'): svcMgr += CfgMgr.THistSvc()
 svcMgr.THistSvc.Output += ["DV DATAFILE='output.root' OPT='RECREATE'"]
-#svcMgr.THistSvc.OutputLevel = INFO
-svcMgr.THistSvc.OutputLevel = DEBUG
+svcMgr.THistSvc.OutputLevel = INFO
+#svcMgr.THistSvc.OutputLevel = DEBUG
 
 # DVCuts tool
 ToolSvc += CfgMgr.DDL__DVCuts("DiLepBaseCuts")
@@ -125,11 +110,12 @@ ToolSvc.DiLepBaseCuts.MaterialMapFile = "materialMap3D_Run2_v2.1.1.root"
 ToolSvc += CfgMgr.DDL__EventCuts("DiLepEventCuts")
 ToolSvc.DiLepEventCuts.TriggerNames = [ "HLT_mu60_0eta105_msonly",
                                         "HLT_g140_loose",
-                                        "HLT_2g50_loose"
+                                        "HLT_2g50_loose",
+                                        "HLT_2g60_loose_L12EM15VH"
                                         ]
 
 # GoodRunsListSelectorTool
-vecStringGRL = '/n/atlas05/userdata/sche/2.4.21.DV_Analysis/DV_xAODAnalysis/DVAnalyses/data/data16_13TeV.periodAllYear_DetStatus-v83-pro20-15_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns_DAOD_RPVLL_r8669.xml'
+vecStringGRL = 'data16_13TeV.periodAllYear_DetStatus-v83-pro20-15_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns_DAOD_RPVLL_r8669.xml'
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool")
 ToolSvc.GRLTool.GoodRunsListVec=[vecStringGRL]
 ToolSvc.GRLTool.OutputLevel = INFO
