@@ -34,23 +34,14 @@ DECLARE_ALGORITHM_FACTORY( TruthPlots )
 #include "../MuonPlots.h"
 DECLARE_ALGORITHM_FACTORY( MuonPlots )
 
-
-#include "../SUSYDV.h"
-DECLARE_ALGORITHM_FACTORY( SUSYDV )
-
-
 #include "../TrackingSystematics.h"
 DECLARE_ALGORITHM_FACTORY( TrackingSystematics )
-
 
 #include "../CosmicBackground.h"
 DECLARE_ALGORITHM_FACTORY( CosmicBackground )
 
 DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis ) 
 {
-  DECLARE_ALGORITHM( CosmicBackground );
-  DECLARE_ALGORITHM( TrackingSystematics );
-  DECLARE_ALGORITHM( SUSYDV );
   DECLARE_ALGORITHM( MuonPlots );
   DECLARE_ALGORITHM( TruthPlots );
   DECLARE_ALGORITHM( VertexRes );
@@ -58,5 +49,7 @@ DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis )
   DECLARE_ALGORITHM( DVEfficiency );
   DECLARE_ALGORITHM( LeptonEfficiency );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )
+  DECLARE_ALGORITHM( TrackingSystematics )
+  DECLARE_ALGORITHM( CosmicBackground )
   DECLARE_TOOL( DVUtils )
 }
