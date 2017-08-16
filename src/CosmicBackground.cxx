@@ -156,7 +156,6 @@ StatusCode CosmicBackground::execute() {
     auto mu_sel_aux = new xAOD::TrackParticleAuxContainer();
     mu_sel->setStore(mu_sel_aux);
 
-    ATH_MSG_DEBUG("new event ============================");
 
     // vector to hold two leading muons
     std::vector<const xAOD::IParticle*> leading_muons;

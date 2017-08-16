@@ -75,7 +75,7 @@ from DisplacedDimuonAnalysis.DisplacedDimuonAnalysisConf import DisplacedDimuonA
 # Data and MC
 algseq += CfgMgr.DisplacedDimuonAnalysisAlg()
 algseq += CfgMgr.TrackingSystematics()
-algseq += CfgMgr.CosmicBackground()
+#algseq += CfgMgr.CosmicBackground()
 #algseq += CfgMgr.MuonPlots()
 
 # MC sample only

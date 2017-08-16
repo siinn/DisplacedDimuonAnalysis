@@ -304,6 +304,42 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV_loose(const DataVector<xAOD::Muon> 
     return nullptr; // return null if there is no match (reco dv is not matched to truth)
 }
 
+
+// get closest truth vertex
+const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv){
+    
+    double maxDistance = 0.7;
+    
+    double minDistance = std::numeric_limits<double>::max();
+    const xAOD::TruthVertex *tvClosest{0};
+    
+    // retrieve truth vertex container
+    const xAOD::TruthVertexContainer* tru_vc = nullptr;
+    evtStore()->retrieve( tru_vc, "TruthVertices");
+    
+    for (const auto tv : *tru_vc) {
+    
+        double distTvPv =
+        sqrt(
+        pow(tv->x() - rv->x(), 2) +
+        pow(tv->y() - rv->y(), 2) +
+        pow(tv->z() - rv->z(), 2));
+    
+        if (distTvPv < minDistance) {
+            minDistance = distTvPv;
+            tvClosest = tv;
+        }
+    }
+    
+    // return truth vertex only if distance < 1. mm
+    if (minDistance < maxDistance) {
+        ATH_MSG_DEBUG("truth vertex distance from reco vertex (closest) = " << minDistance );
+        return tvClosest;
+    }
+    else return nullptr;
+}
+
+
 // trigger matching. check if one muon of DV is matched to trigger
 bool DVUtils::TriggerMatching(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc) {
 

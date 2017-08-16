@@ -48,7 +48,9 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
 
         virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
         virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
-        virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *dv);
+
+        // cosmic background plots
+        virtual void FillCosmicBkg(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, std::string channel);
     
     private:
 
@@ -95,10 +97,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mumu_mu_phi; //!
             TH1F* m_dv_mumu_mu_d0; //!
             TH1F* m_dv_mumu_mu_z0; //!
-            //TH1F* m_dv_mumu_mu_pt_min; //!
-            //TH1F* m_dv_mumu_mu_pt_min_low; //!
-            //TH1F* m_dv_mumu_mu_pt_max; //!
-            //TH1F* m_dv_mumu_mu_pt_max_low; //!
 
             // cosmic veto
             TH1F* m_dv_mumu_DeltaR; //!
@@ -136,10 +134,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_ee_e_phi; //!
             TH1F* m_dv_ee_e_d0; //!
             TH1F* m_dv_ee_e_z0; //!
-            //TH1F* m_dv_ee_e_pt_min; //!
-            //TH1F* m_dv_ee_e_pt_min_low; //!
-            //TH1F* m_dv_ee_e_pt_max; //!
-            //TH1F* m_dv_ee_e_pt_max_low; //!
 
             // cosmic veto
             TH1F* m_dv_ee_DeltaR; //!
@@ -176,10 +170,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_e_phi; //!
             TH1F* m_dv_emu_e_d0; //!
             TH1F* m_dv_emu_e_z0; //!
-            //TH1F* m_dv_emu_e_pt_min; //!
-            //TH1F* m_dv_emu_e_pt_min_low; //!
-            //TH1F* m_dv_emu_e_pt_max; //!
-            //TH1F* m_dv_emu_e_pt_max_low; //!
 
             TH1F* m_dv_emu_mu_pt; //!
             TH1F* m_dv_emu_mu_pt_low; //!
@@ -187,10 +177,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_mu_phi; //!
             TH1F* m_dv_emu_mu_d0; //!
             TH1F* m_dv_emu_mu_z0; //!
-            //TH1F* m_dv_emu_mu_pt_min; //!
-            //TH1F* m_dv_emu_mu_pt_min_low; //!
-            //TH1F* m_dv_emu_mu_pt_max; //!
-            //TH1F* m_dv_emu_mu_pt_max_low; //!
 
             // cosmic veto
             TH1F* m_dv_emu_DeltaR; //!
@@ -219,7 +205,13 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_idid_R; //!
             TH1F* m_dv_idid_l; //!
             TH1F* m_dv_idid_chi2_ndof; //!
-            TH1F* m_dv_idid_deltaR; //!
+
+            // cosmic veto
+            TH1F* m_dv_idid_DeltaR; //!
+            TH1F* m_dv_idid_DeltaR_low; //!
+            TH1F* m_dv_idid_Rcos; //!
+            TH1F* m_dv_idid_Rcos_low; //!
+            TH2F* m_dv_idid_DeltaR_Rcos; //!
 
             int n_event_all = 0;
             int n_vrtsec_all = 0;

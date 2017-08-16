@@ -97,12 +97,6 @@ StatusCode TrackingSystematics::initialize() {
 
     m_dv_idid_ratio_R = new TH1F("dv_idid_ratio_R","K_{S} ratio plot (R_{i} / R_{0})",6,0,300);
 
-    // Ks candidate from primary vertex
-    //m_ks_pv_cf = new TH1D( "m_ks_pv_cf", "Reco dv idid cutflow", 12,0,12);
-    //m_ks_pv_M = new TH1F("m_ks_pv_M","K_{S} candidate mass in GeV", 100,0,1000 );
-    //m_ks_pv_R = new TH1F("m_ks_pv_R","K_{S} candidate R", 50,0,2);
-    //m_ks_pv_l = new TH1F("m_ks_pv_l","K_{S} candidate decay length", 100,0,200);
-
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_cf", m_dv_idid_cf) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_M", m_dv_idid_M) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_R", m_dv_idid_R) );
@@ -123,11 +117,43 @@ StatusCode TrackingSystematics::initialize() {
 
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_ratio_R", m_dv_idid_ratio_R) );
 
+    // truth-matched Ks and Z' comparison
+    m_Ks_r = new TH1F("dv_Ks_r","K_{S} candidate r", 60,0,300);
+    m_Ks_z = new TH1F("dv_Ks_z","K_{S} candidate z", 50,-1000,1000);
+    m_Ks_pt = new TH1F("dv_Ks_pt","K_{S} candidate pt", 50,0,500); // GeV
+    m_Ks_eta = new TH1F("dv_Ks_eta","K_{S} candidate eta", 60,-3,3); // GeV
+    m_Ks_DeltaR = new TH1F("dv_Ks_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_r", m_Ks_r) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_z", m_Ks_z) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_pt", m_Ks_pt) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_eta", m_Ks_eta) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_DeltaR", m_Ks_DeltaR) );
+
+    m_zp_r = new TH1F("dv_zp_r","K_{S} candidate r", 60,0,300);
+    m_zp_z = new TH1F("dv_zp_z","K_{S} candidate z", 50,-1000,1000);
+    m_zp_pt = new TH1F("dv_zp_pt","K_{S} candidate pt", 50,0,500); // GeV
+    m_zp_eta = new TH1F("dv_zp_eta","K_{S} candidate eta", 60,-3,3); // GeV
+    m_zp_DeltaR = new TH1F("dv_zp_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_r", m_zp_r) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_z", m_zp_z) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_pt", m_zp_pt) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_eta", m_zp_eta) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_DeltaR", m_zp_DeltaR) );
+
+    // Ks candidate from primary vertex
+    //m_ks_pv_cf = new TH1D( "m_ks_pv_cf", "Reco dv idid cutflow", 12,0,12);
+    //m_ks_pv_M = new TH1F("m_ks_pv_M","K_{S} candidate mass in GeV", 100,0,1000 );
+    //m_ks_pv_R = new TH1F("m_ks_pv_R","K_{S} candidate R", 50,0,2);
+    //m_ks_pv_l = new TH1F("m_ks_pv_l","K_{S} candidate decay length", 100,0,200);
+
     // Ks candidate from primary vertex
     //CHECK( histSvc->regHist("/DV/tracking_syst/ks_pv/ks_pv_cf", m_ks_pv_cf) );
     //CHECK( histSvc->regHist("/DV/tracking_syst/ks_pv/ks_pv_M", m_ks_pv_M) );
     //CHECK( histSvc->regHist("/DV/tracking_syst/ks_pv/ks_pv_R", m_ks_pv_R) );
     //CHECK( histSvc->regHist("/DV/tracking_syst/ks_pv/ks_pv_l", m_ks_pv_l) );
+
 
     return StatusCode::SUCCESS;
 }
@@ -317,22 +343,13 @@ StatusCode TrackingSystematics::execute() {
     //}
 
 
-    //------------------------------
-    // dv cut flow
-    //------------------------------
+    //=======================================================
+    // Ks cutflow
+    //=======================================================
     for(auto dv: *dvc_copy.first) {
 
         // perform lepton matching
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
-
-        // access invariant mass
-        //float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in GeV
-        float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
-        float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
-
-        // collect leptons from this dv
-        auto dv_muc = m_accMu(*dv);
-        auto dv_elc = m_accEl(*dv);
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
@@ -354,7 +371,37 @@ StatusCode TrackingSystematics::execute() {
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
-        //auto vxtype = m_dvc->GetType(*dv);
+
+        // access invariant mass, pt, eta
+        float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
+        float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
+
+        const TVector3 dv_pos(dv->x(), dv->y(), dv->z());
+        float dv_eta = dv_pos.PseudoRapidity();
+
+        // access tracks from vertex
+        auto tpLinks = dv->trackParticleLinks();
+        xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+        xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+
+        // define lorentz vector to calculate delta R
+        TLorentzVector tlv_tp0;
+        TLorentzVector tlv_tp1;
+
+        // set TLorentzVector of decay particles
+        tlv_tp0 = tp1.p4();
+        tlv_tp1 = tp2.p4();
+
+        float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+
+        // fill dimuon vertex
+        float dv_R = m_dvutils->getR( *dv, *pv ); // R in [mm]
+        float dv_z = m_dvutils->getz( *dv, *pv ); // z in [mm]
+        float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
+
+        // collect leptons from this dv
+        auto dv_muc = m_accMu(*dv);
+        auto dv_elc = m_accEl(*dv);
 
         //if (channel == "trktrk") {
         if (true) {
@@ -362,11 +409,6 @@ StatusCode TrackingSystematics::execute() {
             float track_pt_min = 400;   // MeV
             float mass_min = 350;   // MeV
             float mass_max = 650;   // MeV
-
-            // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // idid pair
             m_dv_idid_cf->Fill("Trk-Trk", 1);
@@ -415,20 +457,6 @@ StatusCode TrackingSystematics::execute() {
             // fill histogram
             //-----------------------------------
 
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tp1.p4();
-            tlv_tp1 = tp2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-
-            // fill dimuon vertex
-            float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-            float dv_z = m_dvutils->getz( *dv, *pv );                 // z in [mm]
-            float dv_l = m_dvutils->getr( *dv, *pv );                 // r in [mm]
-
             m_dv_idid_M->Fill(dv_mass);
             m_dv_idid_R->Fill(dv_R);
             m_dv_idid_z->Fill(dv_z);
@@ -452,7 +480,149 @@ StatusCode TrackingSystematics::execute() {
 
         }
 
-    }
+        // make histograms from truth-matched Ks
+        if (isMC){
+
+            // find closest truth vertex
+            const xAOD::TruthVertex *tru_matched = nullptr;
+            tru_matched = m_dvutils->getClosestTruthVertex(dv);
+
+            // check if the matched truth vertex is from Ks
+            if (tru_matched){
+                const xAOD::TruthParticle* parent = tru_matched->incomingParticle(0);
+                if (!(parent->absPdgId() ==310)) continue;
+
+                m_Ks_r->Fill(dv_R);
+                m_Ks_z->Fill(dv_z);
+                m_Ks_pt->Fill(dv_pt);
+                m_Ks_eta->Fill(dv_eta); 
+                m_Ks_DeltaR->Fill(deltaR); 
+
+            }
+        }
+    } // end of Ks loop
+
+
+    //=======================================================
+    // Z' DV cutflow
+    // Here, we make pt, eta, delta R, r of truth-matched Z'
+    //=======================================================
+    for(auto dv: *dvc_copy.first) {
+
+        // minimum delta R
+        float deltaR_min = 0.5;
+        
+        // mass cut
+        float mass_min = 3.;
+
+        // select only vertex with tracks
+        if(dv->trackParticleLinks().size() != 2) continue;
+
+        // perform lepton matching
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
+
+        // remove overlapping muon
+        m_dilepdvc->ApplyOverlapRemoval(*dv);
+
+        // remove bad electrons
+        m_leptool->BadClusterRemoval(*dv);
+
+        // kinematic cut
+        m_leptool->ElectronKinematicCut(*dv);
+
+        // Electron identification
+        m_leptool->ElectronID(*dv);
+
+        // muon selection tool
+        m_leptool->MuonSelection(*dv);
+
+        // find decay channel of dv
+        std::string channel = m_dvutils->DecayChannel(*dv);
+
+        // retrieve mass, pt and eta of DV
+        float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
+        float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
+
+        const TVector3 dv_pos(dv->x(), dv->y(), dv->z());
+        float dv_eta = dv_pos.PseudoRapidity();
+
+        // access tracks from vertex
+        auto tpLinks = dv->trackParticleLinks();
+
+        xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+        xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+
+        // define lorentz vector to calculate delta R
+        TLorentzVector tlv_tp0;
+        TLorentzVector tlv_tp1;
+
+        // set TLorentzVector of decay particles
+        tlv_tp0 = tp1.p4();
+        tlv_tp1 = tp2.p4();
+
+        float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+
+        // fill dimuon vertex
+        float dv_R = m_dvutils->getR( *dv, *pv ); // R in [mm]
+        float dv_z = m_dvutils->getz( *dv, *pv ); // z in [mm]
+        float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
+
+        // collect leptons from this dv
+        auto dv_muc = m_accMu(*dv);
+        auto dv_elc = m_accEl(*dv);
+
+
+        if ((channel == "mumu") or (channel == "emu") or (channel == "ee")) {
+
+            // Trigger matching
+            if(!m_dvutils->TrigMatching(*dv)) continue;
+
+            // vertex fit quality
+            if(!m_dvc->PassChisqCut(*dv)) continue;
+
+            // minimum distance from pv (from 0 for MC)
+            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+
+            // charge requirements
+            if(!m_dvc->PassChargeRequirement(*dv)) continue;
+
+            // disabled module
+            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+
+            // material veto
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+
+            // low mass veto
+            if(dv_mass < mass_min) continue;
+
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+
+            // delta R 
+            if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
+
+            // make histograms from truth-matched Ks
+            if(isMC){
+                // find closest truth vertex
+                const xAOD::TruthVertex *tru_matched = nullptr;
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+
+                // check if the matched truth vertex is from Z'
+                if (tru_matched){
+                    const xAOD::TruthParticle* parent = tru_matched->incomingParticle(0);
+                    if (!(parent->absPdgId() ==32)) continue;
+
+                    m_zp_r->Fill(dv_R);
+                    m_zp_z->Fill(dv_z);
+                    m_zp_pt->Fill(dv_pt);
+                    m_zp_eta->Fill(dv_eta); 
+                    m_zp_DeltaR->Fill(deltaR); 
+
+                }
+
+            }
+        }
+    } // end of Z' DV loop
 
     return StatusCode::SUCCESS;
 }

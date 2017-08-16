@@ -92,17 +92,13 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_mumu_mu_phi = new TH1F("dv_mumu_mu_phi","Signal muon phi",50,-M_PI,M_PI);
     m_dv_mumu_mu_d0 = new TH1F("dv_mumu_mu_d0","Signal muon d0",50,-300,300);
     m_dv_mumu_mu_z0 = new TH1F("dv_mumu_mu_z0","Signal muon z0",50,-1000,1000);
-    //m_dv_mumu_mu_pt_min = new TH1F("dv_mumu_mu_pt_min","Signal muon pt_min",50,0.,1000.);
-    //m_dv_mumu_mu_pt_min_low = new TH1F("dv_mumu_mu_pt_min_low","Signal muon low pt_min",50,0.,100.);
-    //m_dv_mumu_mu_pt_max = new TH1F("dv_mumu_mu_pt_max","Signal muon pt_max",50,0.,1000.);
-    //m_dv_mumu_mu_pt_max_low = new TH1F("dv_mumu_mu_pt_max_low","Signal muon low pt_max",50,0.,100.);
 
     // cosmic veto
     m_dv_mumu_DeltaR = new TH1F("dv_mumu_DeltaR","Signal muon Delta R",100, 0., 5.);
-    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",50, 0., 1);
-    m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",50, 0., 5.);
-    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",25, 0., 0.1);
-    m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 500,0,5,100,0,5);
+    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",20, 0., 1);
+    m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",25, 0., 5.);
+    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",20, 0., 0.8);
+    m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
 
     // only for MC
     m_dv_mumu_M_matched = new TH1F("dv_mumu_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
@@ -112,39 +108,35 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_mumu_eta_matched = new TH1F("dv_mumu_eta_matched","eta of dimuon dv",40,-4.,4.);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_M", m_dv_mumu_M) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R", m_dv_mumu_R) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_l", m_dv_mumu_l) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R_M", m_dv_mumu_R_M) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_chi2_ndof", m_dv_mumu_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_M", m_dv_mumu_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R", m_dv_mumu_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_l", m_dv_mumu_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_M", m_dv_mumu_R_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_chi2_ndof", m_dv_mumu_chi2_ndof) );
 
     // muon kinematics distribution
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt", m_dv_mumu_mu_pt) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_low", m_dv_mumu_mu_pt_low) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_min", m_dv_mumu_mu_pt_min) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_min_low", m_dv_mumu_mu_pt_min_low) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_max", m_dv_mumu_mu_pt_max) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_max_low", m_dv_mumu_mu_pt_max_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_eta", m_dv_mumu_mu_eta) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_phi", m_dv_mumu_mu_phi) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_d0", m_dv_mumu_mu_d0) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_z0", m_dv_mumu_mu_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_pt", m_dv_mumu_mu_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_pt_low", m_dv_mumu_mu_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_eta", m_dv_mumu_mu_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_phi", m_dv_mumu_mu_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_d0", m_dv_mumu_mu_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_z0", m_dv_mumu_mu_z0) );
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR", m_dv_mumu_DeltaR) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR_low", m_dv_mumu_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_Rcos", m_dv_mumu_Rcos) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_Rcos_low", m_dv_mumu_Rcos_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR_Rcos", m_dv_mumu_DeltaR_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_DeltaR", m_dv_mumu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_DeltaR_low", m_dv_mumu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_Rcos", m_dv_mumu_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_Rcos_low", m_dv_mumu_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_DeltaR_Rcos", m_dv_mumu_DeltaR_Rcos) );
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_M", m_dv_mumu_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R", m_dv_mumu_R_matched) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R_M", m_dv_mumu_R_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/truth_dv_zp_eta", m_dv_mumu_eta_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/reco_dv_mumu_M", m_dv_mumu_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/reco_dv_mumu_R", m_dv_mumu_R_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/reco_dv_mumu_R_M", m_dv_mumu_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/truth_dv_zp_eta", m_dv_mumu_eta_matched) );
 
     //--------------------------------------------------------
     // ee
@@ -166,10 +158,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_ee_e_phi = new TH1F("dv_ee_e_phi","Signal electron phi",50,-M_PI,M_PI);
     m_dv_ee_e_d0 = new TH1F("dv_ee_e_d0","Signal electron d0",50,-300,300);
     m_dv_ee_e_z0 = new TH1F("dv_ee_e_z0","Signal electron z0",50,-1000,1000);
-    //m_dv_ee_e_pt_min = new TH1F("dv_ee_e_pt_min","Signal electron pt_min",50,0.,1000.);
-    //m_dv_ee_e_pt_min_low = new TH1F("dv_ee_e_pt_min_low","Signal electron low pt_min",50,0.,100.);
-    //m_dv_ee_e_pt_max = new TH1F("dv_ee_e_pt_max","Signal electron pt_max",50,0.,1000.);
-    //m_dv_ee_e_pt_max_low = new TH1F("dv_ee_e_pt_max_low","Signal electron low pt_max",50,0.,100.);
 
     // cosmic veto
     m_dv_ee_DeltaR = new TH1F("dv_ee_DeltaR","Signal ee Delta R",100, 0., 5.);
@@ -185,38 +173,34 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_ee_chi2_ndof = new TH1F("dv_ee_chi2_ndof", "chi^2 / ndof (ee)", 100, 0, 10);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_cf", m_dv_ee_cf) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_M", m_dv_ee_M) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R", m_dv_ee_R) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R_low", m_dv_ee_R_low) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_z", m_dv_ee_z) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_l", m_dv_ee_l) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R_M", m_dv_ee_R_M) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_chi2_ndof", m_dv_ee_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_cf", m_dv_ee_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_M", m_dv_ee_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R", m_dv_ee_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R_low", m_dv_ee_R_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_z", m_dv_ee_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_l", m_dv_ee_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R_M", m_dv_ee_R_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_chi2_ndof", m_dv_ee_chi2_ndof) );
 
     // electron kinematics distribution
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt", m_dv_ee_e_pt) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_low", m_dv_ee_e_pt_low) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_min", m_dv_ee_e_pt_min) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_min_low", m_dv_ee_e_pt_min_low) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_max", m_dv_ee_e_pt_max) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_max_low", m_dv_ee_e_pt_max_low) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_eta", m_dv_ee_e_eta) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_phi", m_dv_ee_e_phi) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_d0", m_dv_ee_e_d0) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_z0", m_dv_ee_e_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_pt", m_dv_ee_e_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_pt_low", m_dv_ee_e_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_eta", m_dv_ee_e_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_phi", m_dv_ee_e_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_d0", m_dv_ee_e_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_z0", m_dv_ee_e_z0) );
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_DeltaR", m_dv_ee_DeltaR) );
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_DeltaR_low", m_dv_ee_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_Rcos", m_dv_ee_Rcos) );
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_Rcos_low", m_dv_ee_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_DeltaR", m_dv_ee_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_DeltaR_low", m_dv_ee_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_Rcos", m_dv_ee_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_Rcos_low", m_dv_ee_Rcos_low) );
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_M", m_dv_ee_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R", m_dv_ee_R_matched) );
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R_M", m_dv_ee_R_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/truth_dv_zp_eta", m_dv_ee_eta_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/reco_dv_ee_M", m_dv_ee_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/reco_dv_ee_R", m_dv_ee_R_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/reco_dv_ee_R_M", m_dv_ee_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/truth_dv_zp_eta", m_dv_ee_eta_matched) );
 
     //--------------------------------------------------------
     // emu
@@ -238,10 +222,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_e_phi = new TH1F("dv_emu_e_phi","Signal electron phi",50,-M_PI,M_PI);
     m_dv_emu_e_d0 = new TH1F("dv_emu_e_d0","Signal electron d0",50,-300,300);
     m_dv_emu_e_z0 = new TH1F("dv_emu_e_z0","Signal electron z0",50,-1000,1000);
-    //m_dv_emu_e_pt_min = new TH1F("dv_emu_e_pt_min","Signal electron pt_min",50,0.,1000.);
-    //m_dv_emu_e_pt_min_low = new TH1F("dv_emu_e_pt_min_low","Signal electron low pt_min",50,0.,100.);
-    //m_dv_emu_e_pt_max = new TH1F("dv_emu_e_pt_max","Signal electron pt_max",50,0.,1000.);
-    //m_dv_emu_e_pt_max_low = new TH1F("dv_emu_e_pt_max_low","Signal electron low pt_max",50,0.,100.);
 
     m_dv_emu_mu_pt = new TH1F("dv_emu_mu_pt","Signal electron pT",50,0.,1000.);
     m_dv_emu_mu_pt_low = new TH1F("dv_emu_mu_pt_low","Signal electron low pT",50,0.,100.);
@@ -249,10 +229,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_mu_phi = new TH1F("dv_emu_mu_phi","Signal electron phi",50,-M_PI,M_PI);
     m_dv_emu_mu_d0 = new TH1F("dv_emu_mu_d0","Signal electron d0",50,-300,300);
     m_dv_emu_mu_z0 = new TH1F("dv_emu_mu_z0","Signal electron z0",50,-1000,1000);
-    //m_dv_emu_mu_pt_min = new TH1F("dv_emu_mu_pt_min","Signal electron pt_min",50,0.,1000.);
-    //m_dv_emu_mu_pt_min_low = new TH1F("dv_emu_mu_pt_min_low","Signal electron low pt_min",50,0.,100.);
-    //m_dv_emu_mu_pt_max = new TH1F("dv_emu_mu_pt_max","Signal electron pt_max",50,0.,1000.);
-    //m_dv_emu_mu_pt_max_low = new TH1F("dv_emu_mu_pt_max_low","Signal electron low pt_max",50,0.,100.);
 
     // cosmic veto
     m_dv_emu_DeltaR = new TH1F("dv_emu_DeltaR","Signal emu Delta R",100, 0., 5.);
@@ -268,67 +244,82 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_chi2_ndof = new TH1F("dv_emu_chi2_ndof", "chi^2 / ndof (emu)", 100, 0, 10);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_cf", m_dv_emu_cf) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_M", m_dv_emu_M) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R", m_dv_emu_R) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R_low", m_dv_emu_R_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_z", m_dv_emu_z) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_l", m_dv_emu_l) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R_M", m_dv_emu_R_M) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_chi2_ndof", m_dv_emu_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_cf", m_dv_emu_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_M", m_dv_emu_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R", m_dv_emu_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R_low", m_dv_emu_R_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_z", m_dv_emu_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_l", m_dv_emu_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R_M", m_dv_emu_R_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_chi2_ndof", m_dv_emu_chi2_ndof) );
 
     // electron kinematics distribution
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt", m_dv_emu_e_pt) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_low", m_dv_emu_e_pt_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_eta", m_dv_emu_e_eta) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_phi", m_dv_emu_e_phi) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_d0", m_dv_emu_e_d0) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_z0", m_dv_emu_e_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_pt", m_dv_emu_e_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_pt_low", m_dv_emu_e_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_eta", m_dv_emu_e_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_phi", m_dv_emu_e_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_d0", m_dv_emu_e_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_z0", m_dv_emu_e_z0) );
 
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt", m_dv_emu_mu_pt) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_low", m_dv_emu_mu_pt_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_eta", m_dv_emu_mu_eta) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_phi", m_dv_emu_mu_phi) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_d0", m_dv_emu_mu_d0) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_z0", m_dv_emu_mu_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_pt", m_dv_emu_mu_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_pt_low", m_dv_emu_mu_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_eta", m_dv_emu_mu_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_phi", m_dv_emu_mu_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_d0", m_dv_emu_mu_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_z0", m_dv_emu_mu_z0) );
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_DeltaR", m_dv_emu_DeltaR) );
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_DeltaR_low", m_dv_emu_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_Rcos", m_dv_emu_Rcos) );
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_Rcos_low", m_dv_emu_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_DeltaR", m_dv_emu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_DeltaR_low", m_dv_emu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_Rcos", m_dv_emu_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_Rcos_low", m_dv_emu_Rcos_low) );
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_M", m_dv_emu_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R", m_dv_emu_R_matched) );
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R_M", m_dv_emu_R_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/truth_dv_zp_eta", m_dv_emu_eta_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/reco_dv_emu_M", m_dv_emu_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/reco_dv_emu_R", m_dv_emu_R_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/reco_dv_emu_R_M", m_dv_emu_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/truth_dv_zp_eta", m_dv_emu_eta_matched) );
 
 
     //--------------------------------------------------------
-    // trk plots
+    // trk-trk vertex plots
     //--------------------------------------------------------
     m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 12,0,12);
     m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 2000, 0, 2000. );
     m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 60, 0, 300. );
     m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 20, -1000., 1000.);
-    m_dv_idid_deltaR = new TH1F("dv_idid_deltaR","deltaR", 20, 0., 2.);
     m_dv_idid_l = new TH1F("dv_idid_l","l [mm]", 20, 0., 1000.);
     m_dv_idid_chi2_ndof = new TH1F("dv_idid_chi2_ndof","chi^2 / ndof", 20, 0.,5.);
 
+    // cosmic veto
+    m_dv_idid_DeltaR = new TH1F("dv_idid_DeltaR","Signal muon Delta R",100, 0., 5.);
+    m_dv_idid_DeltaR_low = new TH1F("dv_idid_DeltaR_low","Signal muon Delta R low",20, 0., 1);
+    m_dv_idid_Rcos = new TH1F("dv_idid_Rcos","Signal muon Rcos",25, 0., 5.);
+    m_dv_idid_Rcos_low = new TH1F("dv_idid_Rcos_low","Signal muon Rcos low",20, 0., 0.8);
+    m_dv_idid_DeltaR_Rcos = new TH2F("dv_idid_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
+
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_cf", m_dv_idid_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_M", m_dv_idid_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_R", m_dv_idid_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_z", m_dv_idid_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_l", m_dv_idid_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_chi2_ndof", m_dv_idid_chi2_ndof) );
+
+    // cosmic veto
+    CHECK( histSvc->regHist("/DV/cosmicBkg/idid/dv_idid_DeltaR", m_dv_idid_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/idid/dv_idid_DeltaR_low", m_dv_idid_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/idid/dv_idid_Rcos", m_dv_idid_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/idid/dv_idid_Rcos_low", m_dv_idid_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/idid/dv_idid_DeltaR_Rcos", m_dv_idid_DeltaR_Rcos) );
+
+    //--------------------------------------------------------
+    // mu + track, e + track
+    //--------------------------------------------------------
     m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 12,0,12);
     m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 12,0,12);
 
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_cf", m_dv_idid_cf) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_M", m_dv_idid_M) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_R", m_dv_idid_R) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_z", m_dv_idid_z) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_deltaR", m_dv_idid_deltaR) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_l", m_dv_idid_l) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_chi2_ndof", m_dv_idid_chi2_ndof) );
-
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_cf", m_dv_mut_cf) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_cf", m_dv_et_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_cf", m_dv_mut_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_cf", m_dv_et_cf) );
 
     return StatusCode::SUCCESS;
 }
@@ -425,7 +416,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // count all event before looop
     n_event_all++;
     n_dvc_copy = n_dvc_copy + (*dvc_copy.first).size();
-    //ATH_MSG_DEBUG("dvc_copy size = " << (*dvc_copy.first).size());
 
 
     //------------------------------
@@ -455,6 +445,12 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         auto dv_muc = m_accMu(*dv);
         auto dv_elc = m_accEl(*dv);
 
+        // access tracks from vertex
+        auto tpLinks = dv->trackParticleLinks();
+
+        xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+        xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
 
@@ -472,7 +468,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
-        //auto vxtype = m_dvc->GetType(*dv);
 
         if (channel == "mumu") {
 
@@ -504,15 +499,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*dv)) continue;
-            //m_dv_mumu_cf->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) continue;
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
-            // DESD filter
-            //m_dilepdvc->DoTriggerMatching(*dv);
-            //if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
-            //m_dv_mumu_cf->Fill("PassDESDMatching", 1);
+            // fill cosmic veto background
+            FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
             if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
@@ -533,34 +524,12 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // plot muon kinematics
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-            // only for MC: find truth dv matched to this dv
-            //if (isMC) {
-            //    // find truth dv matched to this dv
-            //    const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
-            //    if (tru_v_loose != nullptr) {
-            //        m_dv_mumu_cf->Fill("Matched (Loose)", 1);
-            //    }
-
-            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
-            //    if (tru_v != nullptr) {
-            //        m_dv_mumu_cf->Fill("Matched (Tight)", 1);
-
-            //        // fill matched dimuon vertex
-            //        float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-            //        m_dv_mumu_M_matched->Fill(dv_mass);                          // dimuon mass
-            //        m_dv_mumu_R_matched->Fill(dv_R);                                // R in [mm]
-            //        m_dv_mumu_R_M_matched->Fill(dv_R, dv_mass);
-            //        m_dv_mumu_eta_matched->Fill(tru_v->incomingParticle(0)->eta());
-            //    }
-
-            //} // end of isMC
-
             // truth match
             if (isMC){
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
                 if(tru_matched) m_dv_mumu_cf->Fill("Truth matched", 1);
             }
         } // end of mumu
@@ -598,15 +567,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*dv)) continue;
-            //m_dv_ee_cf->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) continue;
             m_dv_ee_cf->Fill("LowMassVeto", 1);
 
-            //// DESD filter
-            //m_dilepdvc->DoTriggerMatching(*dv);
-            //if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
-            //m_dv_ee_cf->Fill("PassDESDMatching", 1);
+            // fill cosmic veto background
+            FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
             if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
@@ -627,26 +592,12 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // plot muon kinematics
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-            // only for MC: find truth dv matched to this dv
-            //if (isMC) {
-            //    // find truth dv matched to this dv
-            //    const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
-            //    if (tru_v_loose != nullptr) {
-            //        m_dv_ee_cf->Fill("Matched (Loose)", 1);
-            //    }
-
-            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
-            //    if (tru_v != nullptr) {
-            //        m_dv_ee_cf->Fill("Matched (Tight)", 1);
-            //    }
-            //} // end of MC
-
             // truth match
             if (isMC){
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
                 if(tru_matched) m_dv_ee_cf->Fill("Truth matched", 1);
             }
 
@@ -658,8 +609,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("e#mu", 1);
 
             // Trigger matching
-            //m_dilepdvc->DoTriggerMatching(*dv);
-            //if(!m_dilepdvc->PassTriggerMatching(*dv)) continue;
             if(!m_dvutils->TrigMatching(*dv)) continue;
             m_dv_emu_cf->Fill("Trig. Matching", 1);
 
@@ -685,15 +634,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*dv)) continue;
-            //m_dv_emu_cf->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) continue;
             m_dv_emu_cf->Fill("LowMassVeto", 1);
 
-            //// DESD filter
-            //m_dilepdvc->DoTriggerMatching(*dv);
-            //if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
-            //m_dv_emu_cf->Fill("PassDESDMatching", 1);
+            // fill cosmic veto background
+            FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
             if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
@@ -714,26 +659,12 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // plot muon kinematics
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-            // only for MC: find truth dv matched to this dv
-            //if (isMC) {
-            //    // find truth dv matched to this dv
-            //    const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
-            //    if (tru_v_loose != nullptr) {
-            //        m_dv_emu_cf->Fill("Matched (Loose)", 1);
-            //    }
-
-            //    const xAOD::TruthVertex* tru_v = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
-            //    if (tru_v != nullptr) {
-            //        m_dv_emu_cf->Fill("Matched (Tight)", 1);
-            //    }
-            //} // end of MC
-
             // truth match
             if (isMC){
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
                 if(tru_matched) m_dv_emu_cf->Fill("Truth matched", 1);
             }
 
@@ -742,10 +673,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if (channel == "mut") {
 
             // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
+            //auto tpLinks = dv->trackParticleLinks();
 
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+            //xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+            //xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // mut pair
             m_dv_mut_cf->Fill("mu-trk", 1);
@@ -771,10 +702,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mut_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*dv)) continue;
-            //m_dv_mut_cf->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) continue;
             m_dv_mut_cf->Fill("LowMassVeto", 1);
+
+            // fill cosmic veto background
+            FillCosmicBkg(tp1, tp2, channel);
             
             // cosmic veto (R_CR)
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
@@ -791,7 +723,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
                 if(tru_matched) m_dv_mut_cf->Fill("Truth matched", 1);
             }
 
@@ -800,10 +732,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if (channel == "et") {
 
             // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
+            //auto tpLinks = dv->trackParticleLinks();
 
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+            //xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+            //xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // et pair
             m_dv_et_cf->Fill("mu-trk", 1);
@@ -829,27 +761,26 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_et_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*dv)) continue;
-            //m_dv_et_cf->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) continue;
             m_dv_et_cf->Fill("LowMassVeto", 1);
+
+            // fill cosmic veto background
+            FillCosmicBkg(tp1, tp2, channel);
             
             // cosmic veto (R_CR)
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             m_dv_et_cf->Fill("R_{CR} > 0.04", 1);
 
-
             // cosmic veto (deltaR)
             if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
             m_dv_et_cf->Fill("#DeltaR > 0.5", 1);
-
 
             // truth match
             if (isMC){
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
                 if(tru_matched) m_dv_et_cf->Fill("Truth matched", 1);
             }
 
@@ -858,14 +789,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if (channel == "trktrk") {
 
             // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
+            //auto tpLinks = dv->trackParticleLinks();
 
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+            //xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+            //xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // idid pair
             m_dv_idid_cf->Fill("Trk-Trk", 1);
-
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*dv)) continue;
@@ -888,10 +818,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_idid_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*dv)) continue;
-            //m_dv_idid_cf->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) continue;
             m_dv_idid_cf->Fill("LowMassVeto", 1);
+
+            // fill cosmic veto background
+            FillCosmicBkg(tp1, tp2, channel);
             
             // cosmic veto (R_CR)
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
@@ -907,26 +838,14 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             plot_dv(*dv, *pv, channel);
             m_dv_idid_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
 
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tp1.p4();
-            tlv_tp1 = tp2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-            m_dv_idid_deltaR->Fill(deltaR);
-
             n_dv_passed_cut++;
-            //==========================================
 
             // truth match
             if (isMC){
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv);
                 if(tru_matched) m_dv_idid_cf->Fill("Truth matched", 1);
             }
 
@@ -955,50 +874,6 @@ bool DisplacedDimuonAnalysisAlg::PassCosmicVeto(const DataVector<xAOD::Muon> dv_
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
     float deltaR = m_costool->getDeltaR(dv_muc, dv_elc, channel);
 
-    if (channel == "mumu"){
-        // plot Rcos after applying deltaR < deltaR_min
-        if (deltaR > deltaR_min){
-            m_dv_mumu_Rcos->Fill(Rcos);
-            m_dv_mumu_Rcos_low->Fill(Rcos);
-        }
-
-        // plot delta R after applying Rcos < Rcos_min
-        if (Rcos > Rcos_min){
-            m_dv_mumu_DeltaR->Fill(deltaR);
-            m_dv_mumu_DeltaR_low->Fill(deltaR);
-        }
-        // plot delta R vs R_cr
-        m_dv_mumu_DeltaR_Rcos->Fill(deltaR,Rcos);
-    }
-
-    if (channel == "ee"){
-        // plot Rcos after applying deltaR < deltaR_min
-        if (deltaR > deltaR_min){
-            m_dv_ee_Rcos->Fill(Rcos);
-            m_dv_ee_Rcos_low->Fill(Rcos);
-        }
-
-        // plot delta R after applying Rcos < Rcos_min
-        if (Rcos > Rcos_min){
-            m_dv_ee_DeltaR->Fill(deltaR);
-            m_dv_ee_DeltaR_low->Fill(deltaR);
-        }
-    }
-
-    if (channel == "emu"){
-        // plot Rcos after applying deltaR < deltaR_min
-        if (deltaR > deltaR_min){
-            m_dv_emu_Rcos->Fill(Rcos);
-            m_dv_emu_Rcos_low->Fill(Rcos);
-        }
-
-        // plot delta R after applying Rcos < Rcos_min
-        if (Rcos > Rcos_min){
-            m_dv_emu_DeltaR->Fill(deltaR);
-            m_dv_emu_DeltaR_low->Fill(deltaR);
-        }
-    }
-
     if (Rcos < Rcos_min) PassCosmicVeto = false;
 
     return PassCosmicVeto;
@@ -1017,14 +892,6 @@ void DisplacedDimuonAnalysisAlg::plot_signal_tp(const DataVector<xAOD::Muon> dv_
             m_dv_mumu_mu_d0->Fill(mu->primaryTrackParticle()->d0());
             m_dv_mumu_mu_z0->Fill(mu->primaryTrackParticle()->z0());
         }
-
-        //// plot the lowest pT of two muons
-        //float max_muon_pt = m_dvutils->getMaxPT(dv_muc);
-        //float min_muon_pt = m_dvutils->getMinPT(dv_muc);
-        //m_dv_mumu_mu_pt_max->Fill(max_muon_pt);
-        //m_dv_mumu_mu_pt_max_low->Fill(max_muon_pt);
-        //m_dv_mumu_mu_pt_min->Fill(min_muon_pt);
-        //m_dv_mumu_mu_pt_min_low->Fill(min_muon_pt);
     }
 
     if (channel == "ee"){
@@ -1153,34 +1020,85 @@ bool DisplacedDimuonAnalysisAlg::PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr0,
     return PassCosmicVeto;
 }
 
-const xAOD::TruthVertex* DisplacedDimuonAnalysisAlg::getClosestTruthVertex(const xAOD::Vertex *rv){
+void DisplacedDimuonAnalysisAlg::FillCosmicBkg(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1, std::string channel){
 
-    double maxDistance = 0.7;
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+    tlv_tp0 = tr0.p4();
+    tlv_tp1 = tr1.p4();
 
-    double minDistance = std::numeric_limits<double>::max();
-    const xAOD::TruthVertex *tvClosest{0};
-    
-    const xAOD::TruthVertexContainer *tvc{0};
-    evtStore()->retrieve(tvc, "TruthVertices" );
-    
-    for (const auto tv : *tvc) {
+    float Rcos_min = 0.04;
+    float deltaR_min = 0.5;
 
-        double distTvPv =
-        sqrt(
-        pow(tv->x() - rv->x(), 2) +
-        pow(tv->y() - rv->y(), 2) +
-        pow(tv->z() - rv->z(), 2));
+    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
+    float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
+    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
 
-        if (distTvPv < minDistance) {
-            minDistance = distTvPv;
-            tvClosest = tv;
+
+    if (channel == "mumu"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_mumu_Rcos->Fill(Rcos);
+            m_dv_mumu_Rcos_low->Fill(Rcos);
+        }
+
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_mumu_DeltaR->Fill(deltaR);
+            m_dv_mumu_DeltaR_low->Fill(deltaR);
+        }
+        // plot delta R vs R_cr
+        m_dv_mumu_DeltaR_Rcos->Fill(deltaR,Rcos);
+    }
+
+    if (channel == "ee"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_ee_Rcos->Fill(Rcos);
+            m_dv_ee_Rcos_low->Fill(Rcos);
+        }
+
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_ee_DeltaR->Fill(deltaR);
+            m_dv_ee_DeltaR_low->Fill(deltaR);
         }
     }
 
-    // return truth vertex only if distance < 1. mm
-    if (minDistance < maxDistance) {
-        ATH_MSG_DEBUG("truth vertex distance from reco vertex (closest) = " << minDistance );
-        return tvClosest;
+    if (channel == "emu"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_emu_Rcos->Fill(Rcos);
+            m_dv_emu_Rcos_low->Fill(Rcos);
+        }
+
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_emu_DeltaR->Fill(deltaR);
+            m_dv_emu_DeltaR_low->Fill(deltaR);
+        }
     }
-    else return nullptr;
+
+    if (channel == "trktrk"){
+        // plot Rcos after applying deltaR < deltaR_min
+        if (deltaR > deltaR_min){
+            m_dv_idid_Rcos->Fill(Rcos);
+            m_dv_idid_Rcos_low->Fill(Rcos);
+        }
+
+        // plot delta R after applying Rcos < Rcos_min
+        if (Rcos > Rcos_min){
+            m_dv_idid_DeltaR->Fill(deltaR);
+            m_dv_idid_DeltaR_low->Fill(deltaR);
+        }
+        // plot delta R vs R_cr
+        m_dv_idid_DeltaR_Rcos->Fill(deltaR,Rcos);
+    }
+
+
+    return;
 }
+
+

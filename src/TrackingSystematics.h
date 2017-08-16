@@ -98,6 +98,20 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         //TH1F* m_ks_pv_R; //!
         //TH1F* m_ks_pv_l; //!
 
+        // truth-matched Ks, Z' comparison
+        TH1F* m_Ks_pt; //!
+        TH1F* m_Ks_eta; //!
+        TH1F* m_Ks_r; //!
+        TH1F* m_Ks_z; //!
+        TH1F* m_Ks_DeltaR; //!
+
+        TH1F* m_zp_pt; //!
+        TH1F* m_zp_eta; //!
+        TH1F* m_zp_r; //!
+        TH1F* m_zp_z; //!
+        TH1F* m_zp_DeltaR; //!
+
+
 
 }; 
 

@@ -39,6 +39,9 @@ class IDVUtils: virtual public IAlgTool {
         virtual const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) = 0;
         virtual const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv) = 0;
 
+        // get closest truth DV
+        virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv) = 0;
+
 
         //----------------------------------------
         // truth tools

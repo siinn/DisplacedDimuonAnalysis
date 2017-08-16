@@ -50,6 +50,9 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv);
 
+        // get closest truth DV
+        const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv);
+
         // truth tools --------------------------
 
         // reco match using id track barcode
