@@ -28,6 +28,7 @@ class IDVUtils: virtual public IAlgTool {
         virtual float getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
         virtual float getz(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
         virtual float getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
+        virtual float getEta(const xAOD::Vertex& dv, const xAOD::Vertex& pv) = 0;
 
         // get decay channel
         virtual std::string DecayChannel(xAOD::Vertex& dv) = 0;

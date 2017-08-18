@@ -376,9 +376,6 @@ StatusCode TrackingSystematics::execute() {
         float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
         float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
 
-        const TVector3 dv_pos(dv->x(), dv->y(), dv->z());
-        float dv_eta = dv_pos.PseudoRapidity();
-
         // access tracks from vertex
         auto tpLinks = dv->trackParticleLinks();
         xAOD::TrackParticle tp1 = **(tpLinks.at(0));
@@ -398,6 +395,7 @@ StatusCode TrackingSystematics::execute() {
         float dv_R = m_dvutils->getR( *dv, *pv ); // R in [mm]
         float dv_z = m_dvutils->getz( *dv, *pv ); // z in [mm]
         float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
+        float dv_eta = m_dvutils->getEta( *dv, *pv ); // r in [mm]
 
         // collect leptons from this dv
         auto dv_muc = m_accMu(*dv);
@@ -543,9 +541,6 @@ StatusCode TrackingSystematics::execute() {
         float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
         float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
 
-        const TVector3 dv_pos(dv->x(), dv->y(), dv->z());
-        float dv_eta = dv_pos.PseudoRapidity();
-
         // access tracks from vertex
         auto tpLinks = dv->trackParticleLinks();
 
@@ -566,6 +561,7 @@ StatusCode TrackingSystematics::execute() {
         float dv_R = m_dvutils->getR( *dv, *pv ); // R in [mm]
         float dv_z = m_dvutils->getz( *dv, *pv ); // z in [mm]
         float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
+        float dv_eta = m_dvutils->getEta( *dv, *pv ); // r in [mm]
 
         // collect leptons from this dv
         auto dv_muc = m_accMu(*dv);

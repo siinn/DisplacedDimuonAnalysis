@@ -77,7 +77,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 12,0,12);
+    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
     m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 200,0,2000 );
     m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
@@ -95,9 +95,9 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     // cosmic veto
     m_dv_mumu_DeltaR = new TH1F("dv_mumu_DeltaR","Signal muon Delta R",100, 0., 5.);
-    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",20, 0., 1);
-    m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",25, 0., 5.);
-    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",20, 0., 0.8);
+    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",60, 0., 1);
+    m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",50, 0., 5.);
+    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",1000, 0., 0.1);
     m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
 
     // only for MC
@@ -143,7 +143,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 12,0,12);
+    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 10,0,10);
     m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",200, 0, 2000);
     m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",50,0.,300.);
     m_dv_ee_R_low = new TH1F("dv_ee_R_low","R of ee dv [mm], low",50,0.,50.);
@@ -207,7 +207,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 12,0,12);
+    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 10,0,10);
     m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",200,0,2000);
     m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",50,0.,300.);
     m_dv_emu_R_low = new TH1F("dv_emu_R_low","R of emu dv [mm], low",50,0.,50.);
@@ -284,7 +284,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
     // trk-trk vertex plots
     //--------------------------------------------------------
-    m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 12,0,12);
+    m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 10,0,10);
     m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 2000, 0, 2000. );
     m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 60, 0, 300. );
     m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 20, -1000., 1000.);
@@ -295,7 +295,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_idid_DeltaR = new TH1F("dv_idid_DeltaR","Signal muon Delta R",100, 0., 5.);
     m_dv_idid_DeltaR_low = new TH1F("dv_idid_DeltaR_low","Signal muon Delta R low",20, 0., 1);
     m_dv_idid_Rcos = new TH1F("dv_idid_Rcos","Signal muon Rcos",25, 0., 5.);
-    m_dv_idid_Rcos_low = new TH1F("dv_idid_Rcos_low","Signal muon Rcos low",20, 0., 0.8);
+    m_dv_idid_Rcos_low = new TH1F("dv_idid_Rcos_low","Signal muon Rcos low",1000, 0., 0.1);
     m_dv_idid_DeltaR_Rcos = new TH2F("dv_idid_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
 
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_cf", m_dv_idid_cf) );
@@ -315,8 +315,8 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
     // mu + track, e + track
     //--------------------------------------------------------
-    m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 12,0,12);
-    m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 12,0,12);
+    m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 10,0,10);
+    m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 10,0,10);
 
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_cf", m_dv_mut_cf) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_cf", m_dv_et_cf) );
@@ -432,9 +432,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         // counting all dv
         n_dv_all++;
 
-        // select only vertex with tracks
-        if(dv->trackParticleLinks().size() != 2) continue;
-
         // perform lepton matching
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
 
@@ -465,6 +462,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // muon selection tool
         m_leptool->MuonSelection(*dv);
+
+        // select only vertex with tracks
+        if(dv->trackParticleLinks().size() != 2) continue;
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);

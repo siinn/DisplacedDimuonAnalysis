@@ -48,6 +48,8 @@ class CosmicBackground: public ::AthAnalysisAlgorithm {
         virtual StatusCode  finalize();       
 
         virtual bool VertexTrackSelection(const xAOD::TrackParticle& tr);
+        virtual float GetRcos(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        virtual float GetDeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
 
         bool isMC;
      
@@ -84,6 +86,10 @@ class CosmicBackground: public ::AthAnalysisAlgorithm {
         TH1F* m_mumu_DeltaR; //!
         TH1F* m_mumu_DeltaR_low; //!
         TH2F* m_mumu_DeltaR_Rcos; //!
+
+        // 2D number of cosmic muon vs vertices in DeltaR control region
+        int m_n_cosmic_muon = 0; //!
+        TH2F* m_mumu_Ncosmic_DeltaR; //!
 
 
 }; 

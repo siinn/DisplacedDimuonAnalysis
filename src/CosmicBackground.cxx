@@ -78,18 +78,20 @@ StatusCode CosmicBackground::initialize() {
     // event cut flow
     m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
     m_mumu_DeltaR = new TH1F("mumu_DeltaR","DeltaR of muon pair", 100, 0., 5.);
-    m_mumu_DeltaR_low = new TH1F("mumu_DeltaR_low","DeltaR (low)  of muon pair", 50, 0.,1);
+    m_mumu_DeltaR_low = new TH1F("mumu_DeltaR_low","DeltaR (low)  of muon pair", 60, 0.,1);
     m_mumu_Rcos = new TH1F("mumu_Rcos","Rcos of muon pair", 50, 0., 5.);
-    m_mumu_Rcos_low = new TH1F("mumu_Rcos_low","Rcos (low)  of muon pair", 25, 0., 0.1);
-    m_mumu_DeltaR_Rcos = new TH2F("mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 500,0,5,100,0,5);
+    m_mumu_Rcos_low = new TH1F("mumu_Rcos_low","Rcos (low)  of muon pair", 1000, 0., 0.1);
+    m_mumu_DeltaR_Rcos = new TH2F("mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
+    m_mumu_Ncosmic_DeltaR = new TH2F("mumu_Ncosmic_DeltaR","#DeltaR vs cosmic muon",1000,0,5, 3,0,3);
 
     // register output
-    CHECK( histSvc->regHist("/DV/cosmic_bkg/event_cutflow", m_event_cutflow) );
-    CHECK( histSvc->regHist("/DV/cosmic_bkg/mumu_DeltaR", m_mumu_DeltaR) );
-    CHECK( histSvc->regHist("/DV/cosmic_bkg/mumu_DeltaR_low", m_mumu_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/cosmic_bkg/mumu_Rcos", m_mumu_Rcos) );
-    CHECK( histSvc->regHist("/DV/cosmic_bkg/mumu_Rcos_low", m_mumu_Rcos_low) );
-    CHECK( histSvc->regHist("/DV/cosmic_bkg/mumu_DeltaR_Rcos", m_mumu_DeltaR_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/event_cutflow", m_event_cutflow) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumuPair/DeltaR", m_mumu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumuPair/DeltaR_low", m_mumu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumuPair/Rcos", m_mumu_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumuPair/Rcos_low", m_mumu_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumuPair/DeltaR_Rcos", m_mumu_DeltaR_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/m_mumu_Ncosmic_DeltaR", m_mumu_Ncosmic_DeltaR) );
 
     // flag to check MC
     bool isMC;
@@ -104,6 +106,10 @@ StatusCode CosmicBackground::finalize() {
 
 StatusCode CosmicBackground::execute() { 
     ATH_MSG_DEBUG ("Executing " << name() << "...");
+
+    // set cosmic veto threshold
+    float Rcos_min = 0.04;
+    float deltaR_min = 0.5;
 
     // retrieve event info
     const xAOD::EventInfo* evtInfo = nullptr;
@@ -131,7 +137,7 @@ StatusCode CosmicBackground::execute() {
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
-    if(!trig_passed) return StatusCode::SUCCESS;
+    //if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
 
     // retrieve muon and electron container
@@ -151,6 +157,26 @@ StatusCode CosmicBackground::execute() {
     // apply overlap removal
     m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
 
+    // retrieve primary vertices
+    const xAOD::VertexContainer* pvc = nullptr;
+    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
+
+    // get primary vertex
+    auto pv = m_evtc->GetPV(*pvc);
+    auto pv_pos = m_evtc->GetPV(*pvc)->position();
+
+    // retrieve secondary vertices
+    const xAOD::VertexContainer* dvc = nullptr;
+    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
+
+    // make a copy of vertex containers
+    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
+
+    // perform lepton matching
+    for(auto dv: *dvc_copy.first) {
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
+    }
+
     // containers to hold two leading muons
     auto mu_sel     = new xAOD::TrackParticleContainer();
     auto mu_sel_aux = new xAOD::TrackParticleAuxContainer();
@@ -158,7 +184,7 @@ StatusCode CosmicBackground::execute() {
 
 
     // vector to hold two leading muons
-    std::vector<const xAOD::IParticle*> leading_muons;
+    //std::vector<const xAOD::IParticle*> leading_muons;
    
     // plotting muon distribution
     for (auto mu: *muc_copy.first){
@@ -174,61 +200,200 @@ StatusCode CosmicBackground::execute() {
         if(mu_tr == nullptr) continue;
 
         // vertex track selection
-        if(!VertexTrackSelection(*mu_tr)) continue;
+        // No vertex selection for mumu pair plots
+        //if(!VertexTrackSelection(*mu_tr)) continue;
 
+        // copy ID track
+        xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
+        mu_sel->push_back(tr_ptr);
+        xAOD::safeDeepCopy(*mu_tr, *tr_ptr);
 
-        // adding muon to leading muon vector
-        if(leading_muons.size() < 2) {
-            ATH_MSG_DEBUG("Adding muon with pt = " << mu_tr->pt());
-            leading_muons.push_back(mu_tr);
-        }
+        // decorate ID track with muon p4
+        m_acc_p4(*tr_ptr) = mu->p4();
 
-        // if leading muon is full, replace the lowest pt muon
-        else if(leading_muons.size() == 2) {
+        //// adding muon to leading muon vector
+        //if(leading_muons.size() < 2) {
+        //    ATH_MSG_DEBUG("Adding muon with pt = " << mu_tr->pt());
+        //    leading_muons.push_back(mu_tr);
+        //}
 
-            // retrieve muon pt
-            float mu_current_pt = mu_tr->pt();
-            float mu1_pt = leading_muons.at(0)->pt();
-            float mu2_pt = leading_muons.at(1)->pt();
-            ATH_MSG_DEBUG("(before)muon 1 pt = " << mu1_pt << ", muon 2 pt = " << mu2_pt);
-            ATH_MSG_DEBUG("current muon pt = " << mu_current_pt);
+        //// if leading muon is full, replace the lowest pt muon
+        //else if(leading_muons.size() == 2) {
 
-            // replace lowest pt muon
-            if((mu1_pt > mu2_pt) and (mu_current_pt > mu2_pt)) {
-                leading_muons.at(1) = mu_tr;
+        //    // retrieve muon pt
+        //    float mu_current_pt = mu_tr->pt();
+        //    float mu1_pt = leading_muons.at(0)->pt();
+        //    float mu2_pt = leading_muons.at(1)->pt();
+        //    ATH_MSG_DEBUG("(before)muon 1 pt = " << mu1_pt << ", muon 2 pt = " << mu2_pt);
+        //    ATH_MSG_DEBUG("current muon pt = " << mu_current_pt);
+
+        //    // replace lowest pt muon
+        //    if((mu1_pt > mu2_pt) and (mu_current_pt > mu2_pt)) {
+        //        leading_muons.at(1) = mu_tr;
+        //    }
+        //    else if((mu1_pt < mu2_pt) and (mu_current_pt > mu1_pt)) {
+        //        leading_muons.at(0) = mu_tr;
+        //    }
+
+        //}
+    }
+
+    //===============================================================================
+    // loop over all possible combination of muons passing vertex track selection cut
+    //===============================================================================
+    // this is first round to mark cosmic muons
+    if(mu_sel->size() > 1) {
+        // perform vertexing
+        for(auto mu1_itr = mu_sel->begin(); mu1_itr != mu_sel->end(); mu1_itr++)
+        {
+            for(auto mu2_itr = mu1_itr+1; mu2_itr != mu_sel->end(); mu2_itr++)
+            {
+                float Rcos = GetRcos(**mu1_itr, **mu2_itr);
+
+                // check if this pair is from a cosmic muon
+                if(Rcos > Rcos_min) continue;
+                m_mumu_Rcos->Fill(Rcos);
+                m_mumu_Rcos_low->Fill(Rcos);
+
+                // mark two muons as cosmic muon
+                (*mu1_itr)->auxdecor<int>("cosmic") = 1;
+                (*mu2_itr)->auxdecor<int>("cosmic") = 1;
+
+                // add number of cosmic muon
+                m_n_cosmic_muon++;
+
             }
-            else if((mu1_pt < mu2_pt) and (mu_current_pt > mu1_pt)) {
-                leading_muons.at(0) = mu_tr;
-            }
-
         }
     }
+
+    // second round to plot DeltaR between two cosmic muons
+    if(mu_sel->size() > 1) {
+        // perform vertexing
+        for(auto mu1_itr = mu_sel->begin(); mu1_itr != mu_sel->end(); mu1_itr++)
+        {
+            for(auto mu2_itr = mu1_itr+1; mu2_itr != mu_sel->end(); mu2_itr++)
+            {
+                // check if muons are cosmic
+                static SG::AuxElement::ConstAccessor<int> acc_cosmic("cosmic");
+                bool cosmic1 = acc_cosmic.isAvailable(**mu1_itr);
+                bool cosmic2 = acc_cosmic.isAvailable(**mu2_itr);
+
+                float DeltaR = GetDeltaR(**mu1_itr, **mu2_itr);
+                float Rcos = GetRcos(**mu1_itr, **mu2_itr);
+
+                // two muons are both cosmic and not from the same cosmic muon
+                if((cosmic1) and (cosmic2) and (Rcos > Rcos_min)) {
+                    m_mumu_DeltaR->Fill(DeltaR);
+                    m_mumu_DeltaR_low->Fill(DeltaR);
+                }
+            }
+        }
+    }
+
+    //------------------------------
+    // dv cut flow
+    //------------------------------
+    for(auto dv: *dvc_copy.first) {
+
+        // mass cut
+        float mass_min = 3.;
+
+        // perform lepton matching
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
+
+        // access invariant mass
+        float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
+
+        // collect leptons from this dv
+        auto dv_muc = m_accMu(*dv);
+        auto dv_elc = m_accEl(*dv);
+
+        // access tracks from vertex
+        auto tpLinks = dv->trackParticleLinks();
+
+        xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+        xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+
+        // remove overlapping muon
+        m_dilepdvc->ApplyOverlapRemoval(*dv);
+
+        // remove bad electrons
+        //m_leptool->BadClusterRemoval(*dv);
+
+        // kinematic cut
+        m_leptool->ElectronKinematicCut(*dv);
+
+        // Electron identification
+        //m_leptool->ElectronID(*dv);
+
+        // muon selection tool
+        m_leptool->MuonSelection(*dv);
+
+        // select only vertex with tracks
+        if(dv->trackParticleLinks().size() != 2) continue;
+
+        // find decay channel of dv
+        std::string channel = m_dvutils->DecayChannel(*dv);
+
+        if (channel == "mumu") {
+
+            // Trigger matching
+            if(!m_dvutils->TrigMatching(*dv)) continue;
+
+            // vertex fit quality
+            if(!m_dvc->PassChisqCut(*dv)) continue;
+
+            // minimum distance from pv (from 0 for MC)
+            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+
+            // charge requirements
+            if(!m_dvc->PassChargeRequirement(*dv)) continue;
+
+            // disabled module
+            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+
+            // material veto (only e)
+            // no material veto for muon
+
+            // low mass veto
+            if(dv_mass < mass_min) continue;
+
+            // cosmic veto
+            if(GetRcos(tp1,tp2) < Rcos_min) continue;
+
+            // fill number of cosmic muon vs deltaR
+            float DeltaR = GetDeltaR(tp1,tp2);
+            m_mumu_Ncosmic_DeltaR->Fill(DeltaR,m_n_cosmic_muon);
+
+        } // end of mumu
+    }
+
 
     // having 2 leading muons, now fill histograms
-    if(leading_muons.size() == 2) {
+    //if(leading_muons.size() == 2) {
 
-        // define TLorentzVector of decay particles
-        TLorentzVector tlv_tp0;
-        TLorentzVector tlv_tp1;
-        tlv_tp0 = leading_muons.at(0)->p4();
-        tlv_tp1 = leading_muons.at(1)->p4();
+    //    // define TLorentzVector of decay particles
+    //    TLorentzVector tlv_tp0;
+    //    TLorentzVector tlv_tp1;
+    //    tlv_tp0 = leading_muons.at(0)->p4();
+    //    tlv_tp1 = leading_muons.at(1)->p4();
 
-        float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
-        float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
-        float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
-        float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+    //    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    //    float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
+    //    float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
+    //    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
 
-        float mu1_pt = leading_muons.at(0)->pt();
-        float mu2_pt = leading_muons.at(1)->pt();
+    //    float mu1_pt = leading_muons.at(0)->pt();
+    //    float mu2_pt = leading_muons.at(1)->pt();
 
-        ATH_MSG_DEBUG("Rcos = " << Rcos << ", delta R = " << deltaR);
+    //    ATH_MSG_DEBUG("Rcos = " << Rcos << ", delta R = " << deltaR);
 
-        m_mumu_Rcos->Fill(Rcos);
-        m_mumu_Rcos_low->Fill(Rcos);
-        m_mumu_DeltaR->Fill(deltaR); 
-        m_mumu_DeltaR_low->Fill(deltaR); 
-        m_mumu_DeltaR_Rcos->Fill(deltaR,Rcos); 
-    }
+    //    m_mumu_Rcos->Fill(Rcos);
+    //    m_mumu_Rcos_low->Fill(Rcos);
+    //    m_mumu_DeltaR->Fill(deltaR); 
+    //    m_mumu_DeltaR_low->Fill(deltaR); 
+    //    m_mumu_DeltaR_Rcos->Fill(deltaR,Rcos); 
+    //}
 
     return StatusCode::SUCCESS;
 }
@@ -327,3 +492,35 @@ bool CosmicBackground::VertexTrackSelection(const xAOD::TrackParticle& tr){
 
     return Pass;
 }
+
+
+float CosmicBackground::GetRcos(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
+
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+    tlv_tp0 = tr0.p4();
+    tlv_tp1 = tr1.p4();
+
+    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
+    float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
+
+    return Rcos;
+}
+
+float CosmicBackground::GetDeltaR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
+
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+
+    // define TLorentzVector of decay particles
+    tlv_tp0 = tr0.p4();
+    tlv_tp1 = tr1.p4();
+
+    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+
+    return deltaR;
+}
+

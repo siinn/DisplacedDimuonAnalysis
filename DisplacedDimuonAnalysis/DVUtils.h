@@ -39,6 +39,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         float getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
         float getz(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
         float getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
+        float getEta(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
 
         // get decay channel
         std::string DecayChannel(xAOD::Vertex& dv);

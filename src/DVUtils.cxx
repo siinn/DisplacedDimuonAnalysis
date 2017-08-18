@@ -139,6 +139,7 @@ float DVUtils::getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 
     // distance in 3d vector
     auto dist = pv_pos - dv_pos;
+    //auto dist = dv_pos;
 
     // return distance in transverse plane
     return dist.perp();
@@ -180,6 +181,23 @@ float DVUtils::getr(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 
 }
 
+// calculate eta of df
+float DVUtils::getEta(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
+
+    // access position of vertices
+    auto dv_pos = dv.position();
+    auto pv_pos = pv.position();
+
+    // distance in 3d vector
+    auto dist = pv_pos - dv_pos;
+
+    const TVector3 pos_rel(dist.x(), dist.y(), dist.z());
+    float dv_eta = pos_rel.PseudoRapidity();
+
+    // return eta of dv
+    return dv_eta;
+
+}
 
 // match dv to signal truth
 const xAOD::TruthVertex* DVUtils::IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
