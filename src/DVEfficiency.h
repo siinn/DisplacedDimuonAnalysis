@@ -41,7 +41,8 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         virtual StatusCode  execute();
         virtual StatusCode  finalize();
         
-        virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
+        virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
         
         
         
@@ -63,6 +64,9 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
 
+        // number of events processed
+        int n_events = 0;
+
         // efficiency as a function of track parameters
         TEfficiency* m_dv_eff_eta; //! 
         TEfficiency* m_dv_eff_phi; //! 
@@ -74,6 +78,12 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         TEfficiency* m_dv_eff_zp_eta; //! 
         TEfficiency* m_dv_eff_zp_beta; //! 
         TEfficiency* m_dv_eff_zp_pt; //! 
+
+        // efficiency as a function of pile-up
+        TEfficiency* m_dv_eff_mu; //! 
+
+        // trigger efficiency
+        TH1D* m_dv_eff_trig; //! 
 
         // efficiency map
         TH2F* m_dv_eff_map_pt_eta_num; //! 

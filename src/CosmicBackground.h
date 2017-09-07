@@ -88,8 +88,10 @@ class CosmicBackground: public ::AthAnalysisAlgorithm {
         TH2F* m_mumu_DeltaR_Rcos; //!
 
         // 2D number of cosmic muon vs vertices in DeltaR control region
-        int m_n_cosmic_muon = 0; //!
-        TH2F* m_mumu_Ncosmic_DeltaR; //!
+        int m_n_cosmicPair_muon = 0; //!
+        int m_n_cosmicVertex_muon = 0; //!
+        TH2F* m_mumu_NcosmicPair_DeltaR; //!
+        TH2F* m_mumu_NcosmicVertex_DeltaR; //!
 
 
 }; 

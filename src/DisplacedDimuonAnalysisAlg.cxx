@@ -77,8 +77,10 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
+    //m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
     m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
     m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 200,0,2000 );
+    m_dv_mumu_M_low = new TH1F("dv_mumu_M_low","Dimuon DV mass in GeV", 8000,0,2000 );
     m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
     m_dv_mumu_z = new TH1F("dv_mumu_z","z of dimuon dv [mm]",100,-1000.,1000.);
@@ -110,6 +112,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // registor for output
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_M", m_dv_mumu_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_M_low", m_dv_mumu_M_low) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R", m_dv_mumu_R) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
@@ -369,7 +372,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     // trigger check
-    //if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
     if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
 
@@ -499,7 +501,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(dv_mass < mass_min) continue;
+            // temporarily disable for testing 3 vertices
+            //if(dv_mass < mass_min) continue;
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
             // fill cosmic veto background
@@ -509,12 +512,17 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
 
+            ATH_MSG_INFO("Found mumu (DeltaR < 0.5) with mass = " << dv_mass << ", runNumber = "
+            << evtInfo->runNumber() << ", eventNumber = "
+            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
+
             // delta R 
-            if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
-            m_dv_mumu_cf->Fill("#DeltaR > 0.5", 1);
+            // temporarily disable for testing 3 vertices
+            //if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
+            //m_dv_mumu_cf->Fill("#DeltaR > 0.5", 1);
     
             // end of cut flow. Now plotting
-            ATH_MSG_INFO("Found mumu with mass = " << dv_mass << ", runNumber = "
+            ATH_MSG_INFO("Found signal mumu with mass = " << dv_mass << ", runNumber = "
             << evtInfo->runNumber() << ", eventNumber = "
             << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
 
@@ -942,6 +950,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
 
     if (channel == "mumu"){
         m_dv_mumu_M->Fill(dv_mass);                             // dimuon mass
+        m_dv_mumu_M_low->Fill(dv_mass);                             // dimuon mass
         m_dv_mumu_R->Fill(dv_R);                                
         m_dv_mumu_R_low->Fill(dv_R);                                
         m_dv_mumu_z->Fill(dv_z);                                

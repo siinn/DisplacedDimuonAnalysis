@@ -82,6 +82,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
 
             // dimuon vertices
             TH1F* m_dv_mumu_M; //!
+            TH1F* m_dv_mumu_M_low; //!
             TH1F* m_dv_mumu_R; //!
             TH1F* m_dv_mumu_R_low; //!
             TH1F* m_dv_mumu_z; //!

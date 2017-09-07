@@ -94,6 +94,12 @@ StatusCode DVEfficiency::initialize() {
     m_dv_eff_zp_beta = new TEfficiency("m_dv_eff_zp_beta", "DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
     m_dv_eff_zp_pt = new TEfficiency("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 25, 0, 500); // GeV
 
+    // efficiency as a function of mu
+    m_dv_eff_mu = new TEfficiency("m_dv_eff_mu", "DV reconstruction efficiency vs #mu", 50, 0, 50);
+
+    // trigger effieicny test
+    m_dv_eff_trig = new TH1D("m_dv_eff_trig", "Trigger efficiency", 4, 0, 4);
+
     // efficiency map (Z' pt and eta)
     m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 10, 0., 1000., 10, -3.0, 3.0); // GeV
     m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 10, 0., 1000., 10, -3.0, 3.0); // GeV
@@ -125,10 +131,9 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_beta",reinterpret_cast<TGraph*>(m_dv_eff_zp_beta)) );
     CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_pt",reinterpret_cast<TGraph*>(m_dv_eff_zp_pt)) );
 
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv_eff_mu",reinterpret_cast<TGraph*>(m_dv_eff_mu)) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_trig", m_dv_eff_trig) );
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta", m_dv_eff_map_pt_eta) );
-    ////CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta", reinterpret_cast<TH2*>(m_dv_eff_map_pt_eta)) );
-
-
 
     CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_R_err", m_dv_R_err_tight) );
     CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_z_err", m_dv_z_err_tight) );
@@ -144,6 +149,11 @@ StatusCode DVEfficiency::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
 
     m_dv_eff_map_pt_eta->Divide(m_dv_eff_map_pt_eta_num, m_dv_eff_map_pt_eta_den,1,1, "b");
+
+    // divide trigger plot by the number of events processed
+    //m_dv_eff_trig->Scale(1/n_events);
+
+    ATH_MSG_INFO("number of events processed = " << n_events);
     
     return StatusCode::SUCCESS;
 }
@@ -151,9 +161,15 @@ StatusCode DVEfficiency::finalize() {
 StatusCode DVEfficiency::execute() {  
     ATH_MSG_DEBUG ("Executing " << name() << "...");
 
+    // count number of events processed
+    n_events++;
+
     // retrieve event info
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+
+    // pile-up
+    int mu = evtInfo->actualInteractionsPerCrossing();
 
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
@@ -189,23 +205,29 @@ StatusCode DVEfficiency::execute() {
     // make a copy of vertex containers
     auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
 
-    // perform lepton matching
-    for(auto dv: *dvc_copy.first) {
-        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
-    }
-
     // set global flag
     bool dv_matched = false;
 
     // cut flow
     for(auto dv: *dvc_copy.first) {
 
+        // access tracks from vertex
+        auto tpLinks = dv->trackParticleLinks();
+        xAOD::TrackParticle tp1 = **(tpLinks.at(0));
+        xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+
         // access invariant mass
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in GeV
+
+        // mass cut
+        float mass_min = 3.;
 
         // collect leptons from this dv
         auto dv_muc = m_accMu(*dv);
         auto dv_elc = m_accEl(*dv);
+
+        // perform lepton matching
+        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
@@ -225,6 +247,9 @@ StatusCode DVEfficiency::execute() {
         // Electron identification
         m_leptool->ElectronID(*dv);
 
+        // select only vertex with tracks
+        if(dv->trackParticleLinks().size() != 2) continue;
+
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
 
@@ -232,8 +257,9 @@ StatusCode DVEfficiency::execute() {
         if (!((channel == "mumu") or (channel == "emu") or (channel == "ee"))) continue;
 
         // Trigger matching
-        m_dilepdvc->DoTriggerMatching(*dv);
-        if(!m_dilepdvc->PassTriggerMatching(*dv)) continue;
+        //m_dilepdvc->DoTriggerMatching(*dv);
+        //if(!m_dilepdvc->PassTriggerMatching(*dv)) continue;
+        if(!m_dvutils->TrigMatching(*dv)) continue;
 
         // vertex fit quality
         if(!m_dvc->PassChisqCut(*dv)) continue;
@@ -251,53 +277,53 @@ StatusCode DVEfficiency::execute() {
             if(!m_dvc->PassMaterialVeto(*dv)) continue;
         }
 
-        // DESD filter
-        //if(!m_dilepdvc->PassDESDMatching(*dv)) continue;
+        // low mass veto
+        if(dv_mass < mass_min) continue;
 
-        // cosmic veto
-        if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+        // cosmic veto (R_CR)
+        if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
 
-        // delta R 
-        float deltaR_min = 0.5;
-        if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) break;
+        // cosmic veto (deltaR)
+        if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
 
         // mark this event as reconstructed
         dv_matched = true;
 
-        if (isMC) {
-            // find truth dv matched to this dv
-            const xAOD::TruthVertex* tru_v_tight = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
-            const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
 
-            if (tru_v_tight != nullptr) {
+        //if (isMC) {
+        //    // find truth dv matched to this dv
+        //    const xAOD::TruthVertex* tru_v_tight = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
+        //    const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
 
-                // flag this truth vertex as reconstructed
-                //tru_v_tight->auxdecor<int>("reconstructed") = 1;
+        //    if (tru_v_tight != nullptr) {
 
-                // fill error
-                float R_err = tru_v_tight->perp() - (*dv).position().perp();
-                float z_err = tru_v_tight->z() - (*dv).position().z();
-                float m_err = (m_dvutils->TruthMass(tru_v_tight) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_tight); // GeV
-                m_dv_R_err_tight->Fill(R_err);    // in mm
-                m_dv_z_err_tight->Fill(z_err);    // in mm
-                m_dv_m_err_tight->Fill(m_err);    // in mm
-            }
+        //        // flag this truth vertex as reconstructed
+        //        //tru_v_tight->auxdecor<int>("reconstructed") = 1;
 
-            if (tru_v_loose != nullptr) {
+        //        // fill error
+        //        float R_err = tru_v_tight->perp() - (*dv).position().perp();
+        //        float z_err = tru_v_tight->z() - (*dv).position().z();
+        //        float m_err = (m_dvutils->TruthMass(tru_v_tight) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_tight); // GeV
+        //        m_dv_R_err_tight->Fill(R_err);    // in mm
+        //        m_dv_z_err_tight->Fill(z_err);    // in mm
+        //        m_dv_m_err_tight->Fill(m_err);    // in mm
+        //    }
 
-                // flag this truth vertex as reconstructed
-                tru_v_loose->auxdecor<int>("reconstructed") = 1;
+        //    if (tru_v_loose != nullptr) {
 
-                // fill error
-                float R_err = tru_v_loose->perp() - (*dv).position().perp();
-                float z_err = tru_v_loose->z() - (*dv).position().z();
-                float m_err = (m_dvutils->TruthMass(tru_v_loose) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_loose); // GeV
-                m_dv_R_err_loose->Fill(R_err);    // in mm
-                m_dv_z_err_loose->Fill(z_err);    // in mm
-                m_dv_m_err_loose->Fill(m_err);    // in mm
-            }
+        //        // flag this truth vertex as reconstructed
+        //        tru_v_loose->auxdecor<int>("reconstructed") = 1;
 
-        } // end of isMC
+        //        // fill error
+        //        float R_err = tru_v_loose->perp() - (*dv).position().perp();
+        //        float z_err = tru_v_loose->z() - (*dv).position().z();
+        //        float m_err = (m_dvutils->TruthMass(tru_v_loose) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_loose); // GeV
+        //        m_dv_R_err_loose->Fill(R_err);    // in mm
+        //        m_dv_z_err_loose->Fill(z_err);    // in mm
+        //        m_dv_m_err_loose->Fill(m_err);    // in mm
+        //    }
+
+        //} // end of isMC
     } // end of dv loop
 
 
@@ -308,13 +334,34 @@ StatusCode DVEfficiency::execute() {
     if(!m_evtc->PassEventCleaning(*evtInfo)) dv_matched = false;
 
     // trigger check
-    //if(!m_evtc->PassTrigger()) dv_matched = false;
     bool trig_passed = false;
-    if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
-    if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
-    if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
-    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
+    
+    // place holder
+    m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",0);
+    m_dv_eff_trig->Fill("HLT_g140_loose",0);
+    m_dv_eff_trig->Fill("HLT_2g50_loose",0);
+    //m_dv_eff_trig->Fill("HLT_2g60_loose",0);
+
+    // check trigger and fill histogram for trigger efficiency
+    if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) {
+        m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",1);
+        trig_passed = true;
+        }
+    if (m_tdt->isPassed("HLT_g140_loose")) {
+        m_dv_eff_trig->Fill("HLT_g140_loose",1);
+        trig_passed = true;
+        }
+    if (m_tdt->isPassed("HLT_2g50_loose")) {
+        m_dv_eff_trig->Fill("HLT_2g50_loose",1);
+        trig_passed = true;
+        }
+    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) {
+        //m_dv_eff_trig->Fill("HLT_2g60_loose",1);
+        trig_passed = true;
+        }
     if(!trig_passed) dv_matched = false;
+    else m_dv_eff_trig->Fill("Combined",1);
+
 
     //-----------------------------------------------------------------
     // end of cut flow                                                -
@@ -353,10 +400,11 @@ StatusCode DVEfficiency::execute() {
         float zp_m = tru_v->incomingParticle(0)->m();
         float zp_e = tru_v->incomingParticle(0)->e();
         float zp_beta = sqrt(1 - (zp_m/zp_e)*(zp_m/zp_e));
-
+//
         m_dv_eff_zp_eta->Fill(dv_matched, zp_eta);
         m_dv_eff_zp_beta->Fill(dv_matched, zp_beta);
         m_dv_eff_zp_pt->Fill(dv_matched, zp_pt / 1000.);
+        m_dv_eff_mu->Fill(dv_matched, mu);
 
         // fill efficiency map
         m_dv_eff_map_pt_eta_den->Fill(zp_pt / 1000., zp_eta);
@@ -369,20 +417,45 @@ StatusCode DVEfficiency::execute() {
     return StatusCode::SUCCESS;
 }
 
-bool DVEfficiency::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
+
+bool DVEfficiency::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
 
     bool PassCosmicVeto = true;
-
     float Rcos_min = 0.04;
-    float deltaR_min = 0.5;
-    float deltaPhiMinusPi = m_costool->getDeltaPhiMinusPi(dv_muc, dv_elc, channel);
-    float sumEta = m_costool->getSumEta(dv_muc, dv_elc, channel);
 
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+    tlv_tp0 = tr0.p4();
+    tlv_tp1 = tr1.p4();
+
+    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
-    float deltaR = m_costool->getDeltaR(dv_muc, dv_elc, channel);
+
+    ATH_MSG_DEBUG("Rcos = " << Rcos << ", tlv_tp0.eta = " << tlv_tp0.Eta() << ", tlv_tp1.eta = " << tlv_tp1.Eta());
 
     if (Rcos < Rcos_min) PassCosmicVeto = false;
 
     return PassCosmicVeto;
 }
 
+bool DVEfficiency::PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
+
+    bool PassCosmicVeto = true;
+    float deltaR_min = 0.5;
+
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+
+    // define TLorentzVector of decay particles
+    tlv_tp0 = tr0.p4();
+    tlv_tp1 = tr1.p4();
+
+    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+
+    if (deltaR < deltaR_min) PassCosmicVeto = false;
+
+
+    return PassCosmicVeto;
+}
