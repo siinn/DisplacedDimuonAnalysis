@@ -77,10 +77,9 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    //m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
-    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 10,0,10);
+    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 9,0,9);
     m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 200,0,2000 );
-    m_dv_mumu_M_low = new TH1F("dv_mumu_M_low","Dimuon DV mass in GeV", 8000,0,2000 );
+    m_dv_mumu_M_low = new TH1F("dv_mumu_M_low","Dimuon DV mass in GeV", 1000,0,100);
     m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
     m_dv_mumu_z = new TH1F("dv_mumu_z","z of dimuon dv [mm]",100,-1000.,1000.);
@@ -146,7 +145,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 10,0,10);
+    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 9,0,9);
     m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",200, 0, 2000);
     m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",50,0.,300.);
     m_dv_ee_R_low = new TH1F("dv_ee_R_low","R of ee dv [mm], low",50,0.,50.);
@@ -210,7 +209,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 10,0,10);
+    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 9,0,9);
     m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",200,0,2000);
     m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",50,0.,300.);
     m_dv_emu_R_low = new TH1F("dv_emu_R_low","R of emu dv [mm], low",50,0.,50.);
@@ -287,8 +286,8 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
     // trk-trk vertex plots
     //--------------------------------------------------------
-    m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 10,0,10);
-    m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 2000, 0, 2000. );
+    m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 8,0,8);
+    m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 200, 0, 2000. );
     m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 60, 0, 300. );
     m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 20, -1000., 1000.);
     m_dv_idid_l = new TH1F("dv_idid_l","l [mm]", 20, 0., 1000.);
@@ -318,8 +317,8 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
     // mu + track, e + track
     //--------------------------------------------------------
-    m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 10,0,10);
-    m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 10,0,10);
+    m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 8,0,8);
+    m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 8,0,8);
 
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_cf", m_dv_mut_cf) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_cf", m_dv_et_cf) );
@@ -404,32 +403,20 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
     n_vrtsec_all = n_vrtsec_all + dvc->size();
 
-    // perform vertex truth matching
-    //CHECK( m_matchTool->matchVertices(*dvc));
-
     // make a copy of vertex containers
     auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
-
-    // accessor for the vertex matching type
-    //xAOD::Vertex::Decorator<InDetVertexTruthMatchUtils::VertexMatchType> getMatchType("VertexMatchType");
-    //xAOD::Vertex::Decorator<std::vector<InDetVertexTruthMatchUtils::VertexTruthMatchInfo>> getMatchInfo("TruthEventMatchingInfos");
-
 
     // count all event before looop
     n_event_all++;
     n_dvc_copy = n_dvc_copy + (*dvc_copy.first).size();
-
 
     //------------------------------
     // dv cut flow
     //------------------------------
     for(auto dv: *dvc_copy.first) {
 
-        // minimum delta R
-        float deltaR_min = 0.5;
-        
         // mass cut
-        float mass_min = 3.;
+        float mass_min = 10.;
 
         // counting all dv
         n_dv_all++;
@@ -501,26 +488,16 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            // temporarily disable for testing 3 vertices
-            //if(dv_mass < mass_min) continue;
+            if(dv_mass < mass_min) continue;
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
-            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
 
-            ATH_MSG_INFO("Found mumu (DeltaR < 0.5) with mass = " << dv_mass << ", runNumber = "
-            << evtInfo->runNumber() << ", eventNumber = "
-            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
-
-            // delta R 
-            // temporarily disable for testing 3 vertices
-            //if(m_dvutils->getDeltaR(*dv_muc) < deltaR_min) continue;
-            //m_dv_mumu_cf->Fill("#DeltaR > 0.5", 1);
-    
             // end of cut flow. Now plotting
             ATH_MSG_INFO("Found signal mumu with mass = " << dv_mass << ", runNumber = "
             << evtInfo->runNumber() << ", eventNumber = "
@@ -585,15 +562,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             m_dv_ee_cf->Fill("R_{CR} > 0.04", 1);
 
-            // delta R 
-            if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) continue;
-            m_dv_ee_cf->Fill("#DeltaR > 0.5", 1);
-    
-            // end of cut flow. Now plotting
-            ATH_MSG_INFO("Found ee with mass = " << dv_mass << ", runNumber = "
-            << evtInfo->runNumber() << ", eventNumber = "
-            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
-
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
 
@@ -652,15 +620,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             m_dv_emu_cf->Fill("R_{CR} > 0.04", 1);
 
-            // delta R 
-            if(m_costool->getDeltaR(*dv_muc, *dv_elc, channel) < deltaR_min) continue;
-            m_dv_emu_cf->Fill("#DeltaR > 0.5", 1);
-    
-            // end of cut flow. Now plotting
-            ATH_MSG_INFO("Found emu with mass = " << dv_mass << ", runNumber = "
-            << evtInfo->runNumber() << ", eventNumber = "
-            << evtInfo->eventNumber() << ", Lumiblock = " << evtInfo->lumiBlock() );
-
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
 
@@ -679,12 +638,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         } // end of emu
 
         if (channel == "mut") {
-
-            // access tracks from vertex
-            //auto tpLinks = dv->trackParticleLinks();
-
-            //xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            //xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // mut pair
             m_dv_mut_cf->Fill("mu-trk", 1);
@@ -720,12 +673,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             m_dv_mut_cf->Fill("R_{CR} > 0.04", 1);
 
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
-            m_dv_mut_cf->Fill("#DeltaR > 0.5", 1);
-
-
             // truth match
             if (isMC){
                 // create truth vertex for matching
@@ -738,12 +685,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         }
 
         if (channel == "et") {
-
-            // access tracks from vertex
-            //auto tpLinks = dv->trackParticleLinks();
-
-            //xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            //xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // et pair
             m_dv_et_cf->Fill("mu-trk", 1);
@@ -779,10 +720,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             m_dv_et_cf->Fill("R_{CR} > 0.04", 1);
 
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
-            m_dv_et_cf->Fill("#DeltaR > 0.5", 1);
-
             // truth match
             if (isMC){
                 // create truth vertex for matching
@@ -795,12 +732,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         }
 
         if (channel == "trktrk") {
-
-            // access tracks from vertex
-            //auto tpLinks = dv->trackParticleLinks();
-
-            //xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            //xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // idid pair
             m_dv_idid_cf->Fill("Trk-Trk", 1);
@@ -835,10 +766,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // cosmic veto (R_CR)
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
-            m_dv_idid_cf->Fill("#DeltaR > 0.5", 1);
 
             //==========================================
             // plot trk-trk distributions

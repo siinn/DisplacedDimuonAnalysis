@@ -220,7 +220,7 @@ StatusCode DVEfficiency::execute() {
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in GeV
 
         // mass cut
-        float mass_min = 3.;
+        float mass_min = 10.;
 
         // collect leptons from this dv
         auto dv_muc = m_accMu(*dv);
@@ -234,9 +234,6 @@ StatusCode DVEfficiency::execute() {
 
         // muon selection tool
         m_leptool->MuonSelection(*dv);
-
-        // old method: only require combined muon
-        //if(!m_dvutils->IsCombinedMuon(*dv_muc)) continue;
 
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
@@ -257,8 +254,6 @@ StatusCode DVEfficiency::execute() {
         if (!((channel == "mumu") or (channel == "emu") or (channel == "ee"))) continue;
 
         // Trigger matching
-        //m_dilepdvc->DoTriggerMatching(*dv);
-        //if(!m_dilepdvc->PassTriggerMatching(*dv)) continue;
         if(!m_dvutils->TrigMatching(*dv)) continue;
 
         // vertex fit quality
@@ -283,45 +278,9 @@ StatusCode DVEfficiency::execute() {
         // cosmic veto (R_CR)
         if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
 
-        // cosmic veto (deltaR)
-        if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
-
         // mark this event as reconstructed
         dv_matched = true;
 
-
-        //if (isMC) {
-        //    // find truth dv matched to this dv
-        //    const xAOD::TruthVertex* tru_v_tight = m_dvutils->IsSignalDV(*dv_muc, *dv_elc, channel);
-        //    const xAOD::TruthVertex* tru_v_loose = m_dvutils->IsSignalDV_loose(*dv_muc, *dv_elc, channel, *dv);
-
-        //    if (tru_v_tight != nullptr) {
-
-        //        // flag this truth vertex as reconstructed
-        //        //tru_v_tight->auxdecor<int>("reconstructed") = 1;
-
-        //        // fill error
-        //        float R_err = tru_v_tight->perp() - (*dv).position().perp();
-        //        float z_err = tru_v_tight->z() - (*dv).position().z();
-        //        float m_err = (m_dvutils->TruthMass(tru_v_tight) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_tight); // GeV
-        //        m_dv_R_err_tight->Fill(R_err);    // in mm
-        //        m_dv_z_err_tight->Fill(z_err);    // in mm
-        //        m_dv_m_err_tight->Fill(m_err);    // in mm
-        //    }
-
-        //    if (tru_v_loose != nullptr) {
-
-        //        // flag this truth vertex as reconstructed
-        //        tru_v_loose->auxdecor<int>("reconstructed") = 1;
-
-        //        // fill error
-        //        float R_err = tru_v_loose->perp() - (*dv).position().perp();
-        //        float z_err = tru_v_loose->z() - (*dv).position().z();
-        //        float m_err = (m_dvutils->TruthMass(tru_v_loose) - std::fabs(m_accMass(*dv)) ) / m_dvutils->TruthMass(tru_v_loose); // GeV
-        //        m_dv_R_err_loose->Fill(R_err);    // in mm
-        //        m_dv_z_err_loose->Fill(z_err);    // in mm
-        //        m_dv_m_err_loose->Fill(m_err);    // in mm
-        //    }
 
         //} // end of isMC
     } // end of dv loop
@@ -400,7 +359,7 @@ StatusCode DVEfficiency::execute() {
         float zp_m = tru_v->incomingParticle(0)->m();
         float zp_e = tru_v->incomingParticle(0)->e();
         float zp_beta = sqrt(1 - (zp_m/zp_e)*(zp_m/zp_e));
-//
+
         m_dv_eff_zp_eta->Fill(dv_matched, zp_eta);
         m_dv_eff_zp_beta->Fill(dv_matched, zp_beta);
         m_dv_eff_zp_pt->Fill(dv_matched, zp_pt / 1000.);
@@ -440,22 +399,3 @@ bool DVEfficiency::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackPart
     return PassCosmicVeto;
 }
 
-bool DVEfficiency::PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
-
-    bool PassCosmicVeto = true;
-    float deltaR_min = 0.5;
-
-    TLorentzVector tlv_tp0;
-    TLorentzVector tlv_tp1;
-
-    // define TLorentzVector of decay particles
-    tlv_tp0 = tr0.p4();
-    tlv_tp1 = tr1.p4();
-
-    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-
-    if (deltaR < deltaR_min) PassCosmicVeto = false;
-
-
-    return PassCosmicVeto;
-}

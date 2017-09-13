@@ -229,120 +229,6 @@ StatusCode TrackingSystematics::execute() {
     // make a copy of vertex containers
     auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
 
-
-    //// Ks candidate selection cuts
-    //float track_pt_min = 400;
-    //float track_eta_max = 2.5;
-    //int n_TRT_min = 10;
-    //int n_Si_min = 3;
-    //float track_chi2_ndof_max = 5;
-    //float d0_max = 2;
-    //float z0_max = 2;
-    //float cos_min = 0.995;
-    //float l_min = 10.;
-    //float chi2_ndof_max = 5.;
-
-    //for (const xAOD::Vertex *vtx : (*pvc)) {
-
-    //    // skip if this is primary vertex
-    //    if (vtx->vertexType() == xAOD::VxType::PriVtx) continue;
-    //    if (vtx->vertexType() == xAOD::VxType::NoVtx) continue;
-
-    //    // require 2 tracks
-    //    if (!(vtx->nTrackParticles() == 2)) continue;
-
-    //    // LorentzVector to calculate invariant mass of two track
-    //    TLorentzVector ks_cand;
-    //    ATH_MSG_INFO("===========================");
-    //    ATH_MSG_INFO("Ks mass before sum = " << ks_cand.M());
-
-    //    bool pass_track = true;
-
-    //    // loop over tracks at vertex
-    //    const std::vector<ElementLink<xAOD::TrackParticleContainer>> tpLinks =  vtx->trackParticleLinks();
-    //    for (const ElementLink<xAOD::TrackParticleContainer>& trk : vtx->trackParticleLinks()) {
-
-    //        // check if we have a valid link
-    //        if(!(trk)) continue;
-
-    //        ATH_MSG_INFO("track pt = " << (*trk)->pt() << ", M = " << (*trk)->m() << ", E = " << (*trk)->e() );
-   
-    //        // sum p4 
-    //        ks_cand += (*trk)->p4();
-
-    //    //    // hit quality
-    //    //    std::uint8_t nPix = 0;
-    //    //    std::uint8_t nSCT = 0;
-    //    //    std::uint8_t nTRT = 0;
-
-    //    //    if(!(*trk)->summaryValue(nPix, xAOD::numberOfPixelHits)) {
-    //    //        pass_track = false;
-    //    //        continue;
-    //    //    }
-    //    //    if(!(*trk)->summaryValue(nSCT, xAOD::numberOfSCTHits)) {
-    //    //        pass_track = false;
-    //    //        continue;
-    //    //    }
-    //    //    if(!(*trk)->summaryValue(nTRT, xAOD::numberOfTRTHits)) {
-    //    //        pass_track = false;
-    //    //        continue;
-    //    //    }
-
-    //    //    auto numberDoF = (*trk)->numberDoF();
-    //    //    if(numberDoF == 0) return false;
-
-    //    //    if ((*trk)->pt() < track_pt_min) pass_track = false;
-    //    //    if ((*trk)->eta() > track_eta_max) pass_track = false;
-    //    //    if (nTRT <= n_TRT_min) pass_track = false;
-    //    //    if ((nPix + nSCT) <= n_Si_min) pass_track = false;
-    //    //    if(((*trk)->chiSquared() / numberDoF) > track_chi2_ndof_max) return false;
-    //    }
-
-    //    ATH_MSG_INFO("Ks mass after sum = " << ks_cand.M());
-
-    //    // continue if all tracks don't pass selection
-    //    if (pass_track == false) continue;
-
-    //    // get 3D position vector
-    //    const TVector3 pv_pos(pv->x(), pv->y(), pv->z());
-    //    const TVector3 v_pos(vtx->x(), vtx->y(), vtx->z());
-
-    //    //  Ks candidate 3D vector with respect to PV
-    //    const TVector3 v_pos_wrt_pv(v_pos - pv_pos);
-
-    //    // vector from PV to Ks
-    //    TLorentzVector KsFlightDirection(0.,0.,0.,0.);
-    //    KsFlightDirection.SetVect(v_pos_wrt_pv - pv_pos);
-
-    //    double chi2 = vtx->chiSquared();
-    //    double dof = vtx->numberDoF();
-    //    double chi2ovdof = chi2/dof;
-    //    float inv_mass = ks_cand.M();
-    //    float ks_R = std::sqrt(v_pos_wrt_pv.x()*v_pos_wrt_pv.x() + v_pos_wrt_pv.y()*v_pos_wrt_pv.y());
-    //    float ks_l = std::sqrt( v_pos_wrt_pv.x()*v_pos_wrt_pv.x() + 
-    //          v_pos_wrt_pv.y()*v_pos_wrt_pv.y() + v_pos_wrt_pv.z()*v_pos_wrt_pv.z());
-
-    //    // cut flow
-    //    m_ks_pv_cf->Fill("Track pass", 1);
-
-    //    //if (ks_l < l_min) continue;
-    //    //m_ks_pv_cf->Fill("Decay length > 10 mm", 1);
-
-    //    //if (chi2ovdof > chi2_ndof_max) continue;
-    //    //m_ks_pv_cf->Fill("#Chi^2 / DOF < 5", 1);
-
-    //    //if(!(std::abs(std::cos(ks_cand.Angle(KsFlightDirection.Vect()))) > cos_min)) continue;
-    //    //m_ks_pv_cf->Fill("cos(#theta_{V}) > 0.995", 1);
-
-    //    ATH_MSG_INFO("Ks inv_mass = " << inv_mass);
-
-    //    m_ks_pv_M->Fill(inv_mass);
-    //    m_ks_pv_R->Fill(ks_R);
-    //    m_ks_pv_l->Fill(ks_l);
-
-    //}
-
-
     //=======================================================
     // Ks cutflow
     //=======================================================
@@ -447,10 +333,6 @@ StatusCode TrackingSystematics::execute() {
             if(!PassKsSelection(*dv, *pv)) continue;
             m_dv_idid_cf->Fill("K_{s} candidate", 1);
 
-            //// cosmic veto (deltaR)
-            //if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
-            //m_dv_idid_cf->Fill("#DeltaR > 0.5", 1);
-
             //-----------------------------------
             // fill histogram
             //-----------------------------------
@@ -511,7 +393,7 @@ StatusCode TrackingSystematics::execute() {
         float deltaR_min = 0.5;
         
         // mass cut
-        float mass_min = 3.;
+        float mass_min = 10.;
 
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) continue;
@@ -594,9 +476,6 @@ StatusCode TrackingSystematics::execute() {
             // cosmic veto
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
 
-            // delta R 
-            if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
-
             // make histograms from truth-matched Ks
             if(isMC){
                 // find closest truth vertex
@@ -645,26 +524,6 @@ bool TrackingSystematics::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::Tr
     ATH_MSG_DEBUG("Rcos = " << Rcos << ", tlv_tp0.eta = " << tlv_tp0.Eta() << ", tlv_tp1.eta = " << tlv_tp1.Eta());
 
     if (Rcos < Rcos_min) PassCosmicVeto = false;
-
-    return PassCosmicVeto;
-}
-
-bool TrackingSystematics::PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
-
-    bool PassCosmicVeto = true;
-    float deltaR_min = 0.5;
-
-    TLorentzVector tlv_tp0;
-    TLorentzVector tlv_tp1;
-
-    // define TLorentzVector of decay particles
-    tlv_tp0 = tr0.p4();
-    tlv_tp1 = tr1.p4();
-
-    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-
-    if (deltaR < deltaR_min) PassCosmicVeto = false;
-
 
     return PassCosmicVeto;
 }

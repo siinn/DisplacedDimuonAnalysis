@@ -42,7 +42,6 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         virtual StatusCode  finalize();
         
         virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
-        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
         
         
         

@@ -41,7 +41,6 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         virtual StatusCode  finalize();       //once, after all events processed
 
         virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
-        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
         virtual bool PassKsSelection(const xAOD::Vertex& dv, const xAOD::Vertex& pv);
 
     

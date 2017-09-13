@@ -213,31 +213,6 @@ StatusCode CosmicBackground::execute() {
         // decorate ID track with muon p4
         m_acc_p4(*tr_ptr) = mu->p4();
 
-        //// adding muon to leading muon vector
-        //if(leading_muons.size() < 2) {
-        //    ATH_MSG_DEBUG("Adding muon with pt = " << mu_tr->pt());
-        //    leading_muons.push_back(mu_tr);
-        //}
-
-        //// if leading muon is full, replace the lowest pt muon
-        //else if(leading_muons.size() == 2) {
-
-        //    // retrieve muon pt
-        //    float mu_current_pt = mu_tr->pt();
-        //    float mu1_pt = leading_muons.at(0)->pt();
-        //    float mu2_pt = leading_muons.at(1)->pt();
-        //    ATH_MSG_DEBUG("(before)muon 1 pt = " << mu1_pt << ", muon 2 pt = " << mu2_pt);
-        //    ATH_MSG_DEBUG("current muon pt = " << mu_current_pt);
-
-        //    // replace lowest pt muon
-        //    if((mu1_pt > mu2_pt) and (mu_current_pt > mu2_pt)) {
-        //        leading_muons.at(1) = mu_tr;
-        //    }
-        //    else if((mu1_pt < mu2_pt) and (mu_current_pt > mu1_pt)) {
-        //        leading_muons.at(0) = mu_tr;
-        //    }
-
-        //}
     }
 
     //===============================================================================
@@ -304,7 +279,7 @@ StatusCode CosmicBackground::execute() {
     for(auto dv: *dvc_copy.first) {
 
         // mass cut
-        float mass_min = 3.;
+        float mass_min = 10.;
 
         // perform lepton matching
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
@@ -384,7 +359,7 @@ StatusCode CosmicBackground::execute() {
     for(auto dv: *dvc_copy.first) {
 
         // mass cut
-        float mass_min = 3.;
+        float mass_min = 10.;
 
         // perform lepton matching
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
