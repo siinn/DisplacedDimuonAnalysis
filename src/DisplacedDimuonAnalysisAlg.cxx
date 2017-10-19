@@ -69,8 +69,12 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // event cut flow
-    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
+    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 5,0,5);
     CHECK( histSvc->regHist("/DV/event_cutflow", m_event_cutflow) );
+
+    // pile-up distribution
+    m_pileup = new TH1F("m_pileup", "m_pileup", 100, 0, 100); 
+    CHECK( histSvc->regHist("/DV/pileup", m_pileup) );
 
     //--------------------------------------------------------
     // mumu
@@ -79,11 +83,12 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
     m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 9,0,9);
     m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 200,0,2000 );
-    m_dv_mumu_M_low = new TH1F("dv_mumu_M_low","Dimuon DV mass in GeV", 1000,0,100);
+    m_dv_mumu_M_low = new TH1F("dv_mumu_M_low","Dimuon DV mass in GeV", 100,0,100);
     m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
     m_dv_mumu_z = new TH1F("dv_mumu_z","z of dimuon dv [mm]",100,-1000.,1000.);
     m_dv_mumu_l = new TH1F("dv_mumu_l","l of dimuon dv [mm]",100,0.,1000.);
+    m_dv_mumu_eta = new TH1F("dv_mumu_eta","eta of dimuon dv ",30,-3,3);
     m_dv_mumu_R_M = new TH2F("dv_mumu_R_M","Dimuon DV position R vs M", 50,0,300,200,0,2000);
 
     // muon kinematics distribution
@@ -116,6 +121,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_l", m_dv_mumu_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_eta", m_dv_mumu_eta) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_M", m_dv_mumu_R_M) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_chi2_ndof", m_dv_mumu_chi2_ndof) );
 
@@ -146,11 +152,13 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     //Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
     m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 9,0,9);
-    m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",200, 0, 2000);
+    //m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",200, 0, 2000);
+    m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",100, 0, 100);
     m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",50,0.,300.);
     m_dv_ee_R_low = new TH1F("dv_ee_R_low","R of ee dv [mm], low",50,0.,50.);
     m_dv_ee_z = new TH1F("dv_ee_z","z of ee dv [mm]",100,-1000.,1000.);
     m_dv_ee_l = new TH1F("dv_ee_l","l of ee dv [mm]",100,0.,1000.);
+    m_dv_ee_eta = new TH1F("dv_ee_eta","eta of ee dv ",30,-3,3);
     m_dv_ee_R_M = new TH2F("dv_ee_R_M","ee DV position R vs M", 50,0,300,200,0,2000);
 
     // muon kinematics distribution
@@ -181,6 +189,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R_low", m_dv_ee_R_low) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_z", m_dv_ee_z) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_l", m_dv_ee_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_eta", m_dv_ee_eta) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R_M", m_dv_ee_R_M) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_chi2_ndof", m_dv_ee_chi2_ndof) );
 
@@ -210,11 +219,13 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     //Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
     m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 9,0,9);
-    m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",200,0,2000);
+    //m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",200,0,2000);
+    m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",100,0,100);
     m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",50,0.,300.);
     m_dv_emu_R_low = new TH1F("dv_emu_R_low","R of emu dv [mm], low",50,0.,50.);
     m_dv_emu_z = new TH1F("dv_emu_z","z of emu dv [mm]",100,-1000.,1000.);
     m_dv_emu_l = new TH1F("dv_emu_l","l of emu dv [mm]",100,0.,1000.);
+    m_dv_emu_eta = new TH1F("dv_emu_eta","eta of emu dv ",30,-3,3);
     m_dv_emu_R_M = new TH2F("dv_emu_R_M","emu DV position R vs M", 50,0,300,200,0,2000);
 
     // muon kinematics distribution
@@ -252,6 +263,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R_low", m_dv_emu_R_low) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_z", m_dv_emu_z) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_l", m_dv_emu_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_eta", m_dv_emu_eta) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R_M", m_dv_emu_R_M) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_chi2_ndof", m_dv_emu_chi2_ndof) );
 
@@ -291,6 +303,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 60, 0, 300. );
     m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 20, -1000., 1000.);
     m_dv_idid_l = new TH1F("dv_idid_l","l [mm]", 20, 0., 1000.);
+    m_dv_idid_eta = new TH1F("dv_idid_eta","eta of idid dv ",30,-3,3);
     m_dv_idid_chi2_ndof = new TH1F("dv_idid_chi2_ndof","chi^2 / ndof", 20, 0.,5.);
 
     // cosmic veto
@@ -305,6 +318,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_R", m_dv_idid_R) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_z", m_dv_idid_z) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_l", m_dv_idid_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_eta", m_dv_idid_eta) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_chi2_ndof", m_dv_idid_chi2_ndof) );
 
     // cosmic veto
@@ -349,13 +363,22 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 
+    // pile-up
+    int pileup = evtInfo->actualInteractionsPerCrossing();
+    m_pileup->Fill(pileup);
+
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
     //bool trig_passed = true;
     bool trig_passed = false;
 
-    m_event_cutflow->Fill("AllEvents", 1);
+    if(isMC){
+        m_event_cutflow->Fill("AllEvents",1);
+        m_event_cutflow->SetBinContent(1, 20000);
+    }
+
+    m_event_cutflow->Fill("RPVLLFilter", 1);
 
     // GRL
     if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
@@ -372,7 +395,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     // trigger check
     if(!trig_passed) return StatusCode::SUCCESS;
-    m_event_cutflow->Fill("Trig", 1);
+    m_event_cutflow->Fill("TrigFilter", 1);
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -488,14 +511,15 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_mumu_cf->Fill("LowMassVeto", 1);
+            if(dv_mass > mass_min) continue;
+            //m_dv_mumu_cf->Fill("LowMassVeto", 1);
+            m_dv_mumu_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
-            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
 
             // end of cut flow. Now plotting
@@ -525,8 +549,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("ee", 1);
 
             // Trigger matching
-            //m_dilepdvc->DoTriggerMatching(*dv);
-            //if(!m_dilepdvc->PassTriggerMatching(*dv)) continue;
             if(!m_dvutils->TrigMatching(*dv)) continue;
             m_dv_ee_cf->Fill("Trig. Matching", 1);
 
@@ -552,8 +574,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_ee_cf->Fill("LowMassVeto", 1);
+            if(dv_mass > mass_min) continue;
+            //m_dv_ee_cf->Fill("LowMassVeto", 1);
+            m_dv_ee_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
@@ -610,8 +633,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_emu_cf->Fill("LowMassVeto", 1);
+            if(dv_mass > mass_min) continue;
+            //m_dv_emu_cf->Fill("LowMassVeto", 1);
+            m_dv_emu_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
@@ -874,6 +898,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
     float dv_R = m_dvutils->getR( dv, pv );                 // R in [mm]
     float dv_z = m_dvutils->getz( dv, pv );                 // z in [mm]
     float dv_l = m_dvutils->getr( dv, pv );                 // r in [mm]
+    float dv_eta = m_dvutils->getEta( dv, pv );
 
     if (channel == "mumu"){
         m_dv_mumu_M->Fill(dv_mass);                             // dimuon mass
@@ -882,6 +907,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
         m_dv_mumu_R_low->Fill(dv_R);                                
         m_dv_mumu_z->Fill(dv_z);                                
         m_dv_mumu_l->Fill(dv_l);                                
+        m_dv_mumu_eta->Fill(dv_eta);                                
         m_dv_mumu_R_M->Fill(dv_R, dv_mass);
     }
 
@@ -891,6 +917,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
         m_dv_ee_R_low->Fill(dv_R);                                
         m_dv_ee_z->Fill(dv_z);                                
         m_dv_ee_l->Fill(dv_l);                                
+        m_dv_ee_eta->Fill(dv_eta);                                
         m_dv_ee_R_M->Fill(dv_R, dv_mass);
     }
 
@@ -900,6 +927,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
         m_dv_emu_R_low->Fill(dv_R);                                
         m_dv_emu_z->Fill(dv_z);                                
         m_dv_emu_l->Fill(dv_l);                                
+        m_dv_emu_eta->Fill(dv_eta);                                
         m_dv_emu_R_M->Fill(dv_R, dv_mass);
     }
 
@@ -908,6 +936,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
         m_dv_idid_R->Fill(dv_R);                                
         m_dv_idid_z->Fill(dv_z);                                
         m_dv_idid_l->Fill(dv_l);                                
+        m_dv_idid_eta->Fill(dv_eta);                                
     }
 
     return;

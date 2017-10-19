@@ -5,6 +5,9 @@
 #include "TH1F.h"
 #include "TProfile.h"
 
+// xAOD
+#include "xAODEventInfo/EventInfo.h"
+
 // xAOD Truth
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
@@ -21,10 +24,12 @@
 
 TruthPlots::TruthPlots( const std::string& name, ISvcLocator* pSvcLocator ) :
 AthAnalysisAlgorithm( name, pSvcLocator ),
+m_prw("CP::PileupReweightingTool/PileupReweightingTool"),
 m_dvutils("DVUtils")
 {
     // initialize tools
     declareProperty("DVUtils", m_dvutils);
+    declareProperty("PileupReweightingTool", m_prw);
 }
 
 
@@ -37,11 +42,18 @@ StatusCode TruthPlots::initialize() {
 
     // register histograms
 
+    // pile-up distribution
+    m_pileup = new TH1F("m_pileup", "m_pileup", 100, 0, 100); 
+    m_pileup_reweighted = new TH1F("m_pileup_reweighted", "m_pileup_reweighted", 100, 0, 100); 
+
+    // pile-up weights
+    m_p_weight = new TH1F("m_p_weight", "m_p_weight", 100, 0, 100); 
+
     // signal el
     m_el_m = new TH1F("m_el_m", "signal el m", 100, 0, 1.0); // MeV
     m_el_pt = new TH1F("m_el_pt", "signal el pt", 50, 0, 1000); // GeV
     m_el_pt_low = new TH1F("m_el_pt_low", "signal el pt", 50, 0, 50); // GeV
-    m_el_eta = new TH1F("m_el_eta", "signal el eta", 50, -3.0, 3.0);
+    m_el_eta = new TH1F("m_el_eta", "signal el eta", 30, -3.0, 3.0);
     m_el_phi = new TH1F("m_el_phi", "signal el phi", 50, -M_PI, M_PI);
     m_el_R = new TH1F("m_el_R", "signal el R", 50, 0., 300.0);
     m_el_z = new TH1F("m_el_z", "signal el z", 50, -500.0, 500.0);
@@ -51,14 +63,14 @@ StatusCode TruthPlots::initialize() {
     m_muon_m = new TH1F("m_muon_m", "signal muon m", 100, 0, 0.2); // GeV
     m_muon_pt = new TH1F("m_muon_pt", "signal muon pt", 50, 0, 1000); // GeV
     m_muon_pt_low = new TH1F("m_muon_pt_low", "signal muon pt", 50, 0, 50); // GeV
-    m_muon_eta = new TH1F("m_muon_eta", "signal muon eta", 50, -3.0, 3.0);
+    m_muon_eta = new TH1F("m_muon_eta", "signal muon eta", 30, -3.0, 3.0);
     m_muon_phi = new TH1F("m_muon_phi", "signal muon phi", 50, -M_PI, M_PI);
     m_muon_R = new TH1F("m_muon_R", "signal muon R", 50, 0., 300.0);
     m_muon_z = new TH1F("m_muon_z", "signal muon z", 50, -500.0, 500.0);
     m_muon_pdgId = new TH1F("m_muon_pdgId", "signal muon pdgId", 64, -32, 32);
 
     m_muon_pt_vs_prodVtxR = new TH2F("m_muon_pt_vs_prodVtxR", "signal muon pt vs prodVtx R", 50, 0, 300, 50, 0, 1000); // GeV
-    m_muon_eta_vs_prodVtxR = new TH2F("m_muon_eta_vs_prodVtxR", "signal muon eta vs prodVtx R", 50, 0, 300, 50, -3.0, 3.0);
+    m_muon_eta_vs_prodVtxR = new TH2F("m_muon_eta_vs_prodVtxR", "signal muon eta vs prodVtx R", 50, 0, 300, 30, -3.0, 3.0);
     m_muon_acceptance = new TProfile("m_muon_acceptance", "ratio of muons passing eta cut", 50, 0, 300); // muon passing eta over all muon
 
     // signal dilep
@@ -68,7 +80,7 @@ StatusCode TruthPlots::initialize() {
 
     // signal Z'
     m_zp_pt = new TH1F("m_zp_pt", "Z' pt distribution", 50, 0, 1000);
-    m_zp_eta = new TH1F("m_zp_eta", "Z' eta distribution", 40, -4.0, 4.0);
+    m_zp_eta = new TH1F("m_zp_eta", "Z' eta distribution", 30, -3.0, 3.0);
     m_zp_phi = new TH1F("m_zp_phi", "Z' phi distribution", 50, -M_PI, M_PI);
     m_zp_m = new TH1F("m_zp_m", "Z' m distribution", 750, 0, 1500); // GeV
     m_zp_pdgId = new TH1F("m_zp_pdgId", "signal zp pdgId", 35, 0, 35);
@@ -82,58 +94,65 @@ StatusCode TruthPlots::initialize() {
     m_zp_t_endcap = new TH1F("m_zp_t_endcap", "Z' lifetime in lab frame (endcap)", 50, 0, 25);
 
     m_fraction_dv_cut = new TProfile("m_fraction_dv_cut","fraction of Z' that decays within R < 2 mm", 1,0,1);
-    m_zp_eta_vs_prodVtxR = new TH2F("m_zp_eta_vs_prodVtxR", "signal Z' eta vs prodVtx R", 50, 0, 300, 50, -3.0, 3.0);
+    m_zp_eta_vs_prodVtxR = new TH2F("m_zp_eta_vs_prodVtxR", "signal Z' eta vs prodVtx R", 50, 0, 300, 30, -3.0, 3.0);
     m_truth_zp_acceptance = new TProfile("m_truth_zp_acceptance", "ratio of zp passing eta cut", 50, 0, 300); // zp passing eta over all zp
 
     // output
 
+    // pile-up
+    CHECK( histSvc->regHist("/DV/truth/pileup", m_pileup) );
+    CHECK( histSvc->regHist("/DV/truth/pileup_reweighted", m_pileup_reweighted) );
+
+    // pile-up weight
+    CHECK( histSvc->regHist("/DV/truth/p_weight", m_p_weight) );
+
     // signal el
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/m/el_m", m_el_m) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/pt/el_pt", m_el_pt) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/pt/el_pt_low", m_el_pt_low) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/eta/el_eta", m_el_eta) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/phi/el_phi", m_el_phi) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/R/el_R", m_el_R) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/z/el_z", m_el_z) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_el/pdgId/el_pdgId", m_el_pdgId) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/m/el_m", m_el_m) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/pt/el_pt", m_el_pt) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/pt/el_pt_low", m_el_pt_low) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/eta/el_eta", m_el_eta) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/phi/el_phi", m_el_phi) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/R/el_R", m_el_R) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/z/el_z", m_el_z) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/pdgId/el_pdgId", m_el_pdgId) );
 
     // signal muon
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/m/muon_m", m_muon_m) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/pt/muon_pt", m_muon_pt) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/pt/muon_pt_low", m_muon_pt_low) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/eta/muon_eta", m_muon_eta) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/phi/muon_phi", m_muon_phi) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/R/muon_R", m_muon_R) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/z/muon_z", m_muon_z) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/pdgId/muon_pdgId", m_muon_pdgId) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/m/muon_m", m_muon_m) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/pt/muon_pt", m_muon_pt) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/pt/muon_pt_low", m_muon_pt_low) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/eta/muon_eta", m_muon_eta) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/phi/muon_phi", m_muon_phi) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/R/muon_R", m_muon_R) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/z/muon_z", m_muon_z) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/pdgId/muon_pdgId", m_muon_pdgId) );
 
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/eta/muon_acceptance", m_muon_acceptance) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/pt/muon_pt_vs_prodVtxR", m_muon_pt_vs_prodVtxR) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_muon/eta/muon_eta_vs_prodVtxR", m_muon_eta_vs_prodVtxR) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/eta/muon_acceptance", m_muon_acceptance) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/pt/muon_pt_vs_prodVtxR", m_muon_pt_vs_prodVtxR) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/eta/muon_eta_vs_prodVtxR", m_muon_eta_vs_prodVtxR) );
 
     // signal dilep
-    CHECK( histSvc->regHist("/DV/Truth/signal_dilep/m/dilep_m", m_dilep_m) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_dilep/pt/dilep_pt", m_dilep_pt) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_dilep/dr/dilep_dr", m_dilep_dr) );
+    CHECK( histSvc->regHist("/DV/truth/signal_dilep/m/dilep_m", m_dilep_m) );
+    CHECK( histSvc->regHist("/DV/truth/signal_dilep/pt/dilep_pt", m_dilep_pt) );
+    CHECK( histSvc->regHist("/DV/truth/signal_dilep/dr/dilep_dr", m_dilep_dr) );
 
     // signal Z'
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/m/zp_m", m_zp_m) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/pt/zp_pt", m_zp_pt) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta", m_zp_eta) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/phi/zp_phi", m_zp_phi) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/zp_R", m_zp_R) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/zp_R_low", m_zp_R_low) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/pdgId/zp_pdgId", m_zp_pdgId) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/beta/zp_beta", m_zp_beta) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/ctau0/zp_ctau0", m_zp_ctau0) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/l/zp_l", m_zp_l) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/t/zp_t_barrel", m_zp_t_barrel) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/t/zp_t_endcap", m_zp_t_endcap) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/z/zp_z", m_zp_z) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/m/zp_m", m_zp_m) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/pt/zp_pt", m_zp_pt) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/eta/zp_eta", m_zp_eta) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/phi/zp_phi", m_zp_phi) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/R/zp_R", m_zp_R) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/R/zp_R_low", m_zp_R_low) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/pdgId/zp_pdgId", m_zp_pdgId) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/beta/zp_beta", m_zp_beta) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/ctau0/zp_ctau0", m_zp_ctau0) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/l/zp_l", m_zp_l) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/t/zp_t_barrel", m_zp_t_barrel) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/t/zp_t_endcap", m_zp_t_endcap) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/z/zp_z", m_zp_z) );
 
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/R/fraction_dv_within_2mm", m_fraction_dv_cut) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/zp_eta_vs_prodVtxR", m_zp_eta_vs_prodVtxR) );
-    CHECK( histSvc->regHist("/DV/Truth/signal_zp/eta/truth_zp_acceptance", m_truth_zp_acceptance) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/R/fraction_dv_within_2mm", m_fraction_dv_cut) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/eta/zp_eta_vs_prodVtxR", m_zp_eta_vs_prodVtxR) );
+    CHECK( histSvc->regHist("/DV/truth/signal_zp/eta/truth_zp_acceptance", m_truth_zp_acceptance) );
 
 
     return StatusCode::SUCCESS;
@@ -146,6 +165,22 @@ StatusCode TruthPlots::finalize() {
 
 StatusCode TruthPlots::execute() {  
     ATH_MSG_DEBUG ("Executing " << name() << "...");
+
+    // retrieve event info
+    const xAOD::EventInfo* evtInfo = nullptr;
+    CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+
+    // get combine weight from pileup reweighting tool
+    float p_weight = m_prw->getCombinedWeight(*evtInfo);
+
+    // pile-up
+    int pileup = evtInfo->actualInteractionsPerCrossing();
+    m_pileup->Fill(pileup);
+    m_pileup_reweighted->Fill(pileup,p_weight);
+
+    // get pile-up weights
+    m_p_weight->SetBinContent(pileup+1,p_weight);
+    ATH_MSG_DEBUG("mu = " << pileup << ", weight = " << p_weight << ", bin center = " << m_p_weight->GetBinCenter(pileup+1));
 
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     CHECK( evtStore()->retrieve( tru_vc, "TruthVertices"));

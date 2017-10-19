@@ -24,7 +24,8 @@
 #include "DisplacedDimuonAnalysis/CosmicTools.h"
 
 // GRL
-#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
+//#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
+#include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
 
 // Trigger decision tool
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -80,22 +81,93 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH2F* m_dv_idid_R_M; //!
 
         // mass plot in bins of R
-        //TH1F* m_dv_idid_M_0; //!
         TH1F* m_dv_idid_M_1; //!
         TH1F* m_dv_idid_M_2; //!
         TH1F* m_dv_idid_M_3; //!
         TH1F* m_dv_idid_M_4; //!
         TH1F* m_dv_idid_M_5; //!
         TH1F* m_dv_idid_M_6; //!
+        TH1F* m_dv_idid_M_7; //!
+        TH1F* m_dv_idid_M_8; //!
+        TH1F* m_dv_idid_M_9; //!
+        TH1F* m_dv_idid_M_10; //!
+        TH1F* m_dv_idid_M_11; //!
+        TH1F* m_dv_idid_M_12; //!
+        TH1F* m_dv_idid_M_13; //!
+        TH1F* m_dv_idid_M_14; //!
+        TH1F* m_dv_idid_M_15; //!
 
         // ratio plot (Ri / R0)
         TH1F* m_dv_idid_ratio_R; //!
 
-        // Ks candidate from PrimaryVertex
-        //TH1D* m_ks_pv_cf; //!
-        //TH1F* m_ks_pv_M; //!
-        //TH1F* m_ks_pv_R; //!
-        //TH1F* m_ks_pv_l; //!
+        //==================================
+        // barrel
+        //==================================
+        // Ks candidate from VrtSecInclusive
+        TH1D* m_dv_idid_barrel_cf; //!
+        TH1F* m_dv_idid_barrel_M; //!
+        TH1F* m_dv_idid_barrel_R; //!
+        TH1F* m_dv_idid_barrel_z; //!
+        TH1F* m_dv_idid_barrel_l; //!
+        TH1F* m_dv_idid_barrel_pt; //!
+        TH1F* m_dv_idid_barrel_mu; //!
+        TH1F* m_dv_idid_barrel_DeltaR; //!
+        TH2F* m_dv_idid_barrel_R_M; //!
+
+        // mass plot in bins of R
+        TH1F* m_dv_idid_barrel_M_1; //!
+        TH1F* m_dv_idid_barrel_M_2; //!
+        TH1F* m_dv_idid_barrel_M_3; //!
+        TH1F* m_dv_idid_barrel_M_4; //!
+        TH1F* m_dv_idid_barrel_M_5; //!
+        TH1F* m_dv_idid_barrel_M_6; //!
+        TH1F* m_dv_idid_barrel_M_7; //!
+        TH1F* m_dv_idid_barrel_M_8; //!
+        TH1F* m_dv_idid_barrel_M_9; //!
+        TH1F* m_dv_idid_barrel_M_10; //!
+        TH1F* m_dv_idid_barrel_M_11; //!
+        TH1F* m_dv_idid_barrel_M_12; //!
+        TH1F* m_dv_idid_barrel_M_13; //!
+        TH1F* m_dv_idid_barrel_M_14; //!
+        TH1F* m_dv_idid_barrel_M_15; //!
+
+        // ratio plot (Ri / R0)
+        TH1F* m_dv_idid_barrel_ratio_R; //!
+
+        //==================================
+        // end-cap
+        //==================================
+        // Ks candidate from VrtSecInclusive
+        TH1D* m_dv_idid_endcap_cf; //!
+        TH1F* m_dv_idid_endcap_M; //!
+        TH1F* m_dv_idid_endcap_R; //!
+        TH1F* m_dv_idid_endcap_z; //!
+        TH1F* m_dv_idid_endcap_l; //!
+        TH1F* m_dv_idid_endcap_pt; //!
+        TH1F* m_dv_idid_endcap_mu; //!
+        TH1F* m_dv_idid_endcap_DeltaR; //!
+        TH2F* m_dv_idid_endcap_R_M; //!
+
+        // mass plot in bins of R
+        TH1F* m_dv_idid_endcap_M_1; //!
+        TH1F* m_dv_idid_endcap_M_2; //!
+        TH1F* m_dv_idid_endcap_M_3; //!
+        TH1F* m_dv_idid_endcap_M_4; //!
+        TH1F* m_dv_idid_endcap_M_5; //!
+        TH1F* m_dv_idid_endcap_M_6; //!
+        TH1F* m_dv_idid_endcap_M_7; //!
+        TH1F* m_dv_idid_endcap_M_8; //!
+        TH1F* m_dv_idid_endcap_M_9; //!
+        TH1F* m_dv_idid_endcap_M_10; //!
+        TH1F* m_dv_idid_endcap_M_11; //!
+        TH1F* m_dv_idid_endcap_M_12; //!
+        TH1F* m_dv_idid_endcap_M_13; //!
+        TH1F* m_dv_idid_endcap_M_14; //!
+        TH1F* m_dv_idid_endcap_M_15; //!
+
+        // ratio plot (Ri / R0)
+        TH1F* m_dv_idid_endcap_ratio_R; //!
+
 
         // truth-matched Ks, Z' comparison
         TH1F* m_Ks_pt; //!

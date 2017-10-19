@@ -5,6 +5,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticle.h"
 
+// pile-up reweighting
+#include "AsgAnalysisInterfaces/IPileupReweightingTool.h"
+
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
 
@@ -20,6 +23,14 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
     
     private: 
         ToolHandle<IDVUtils>  m_dvutils; //!
+        ToolHandle<CP::IPileupReweightingTool> m_prw; //!
+
+        // pile-up distribution
+        TH1F* m_pileup; //!
+        TH1F* m_pileup_reweighted; //!
+
+        // pile-up weight
+        TH1F* m_p_weight; //!
 
         // signal el distribution
         TH1F* m_el_pt; //!

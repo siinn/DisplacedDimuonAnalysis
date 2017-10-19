@@ -50,6 +50,7 @@ m_costool("CosmicTools"),
 m_grlTool("GoodRunsListSelectionTool/GRLTool"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
 m_or("DDL::OverlapRemoval/OverlapRemoval"),
+m_prw("CP::PileupReweightingTool/PileupReweightingTool"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
 m_accMass("mass")
@@ -65,6 +66,7 @@ m_accMass("mass")
     declareProperty("TrigDecisionTool", m_tdt);
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
+    declareProperty("PileupReweightingTool", m_prw);
 }
 
 
@@ -83,14 +85,15 @@ StatusCode DVEfficiency::initialize() {
     m_dv_mass = new TH1F( "m_dv_mass", "Invariant mass of all signal vertex", 50, 0, 1500 ); // GeV
 
     // efficiency plots
-    m_dv_eff_eta = new TEfficiency( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 50, -4.0, 4.0);
-    m_dv_eff_phi = new TEfficiency( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 50, -M_PI, M_PI);
+    m_dv_eff_eta = new TEfficiency( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 20, -3.0, 3.0);
+    m_dv_eff_phi = new TEfficiency( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 20, -M_PI, M_PI);
     m_dv_eff_mass = new TEfficiency( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 150, 0, 1500); // GeV
-    m_dv_eff_R = new TEfficiency( "m_dv_eff_R", "DV reconstruction efficiency vs R", 100, 0, 400); // mm
-    m_dv_eff_d0 = new TEfficiency( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 100, 0, 400); // mm
+    m_dv_eff_R = new TEfficiency( "m_dv_eff_R", "DV reconstruction efficiency vs R", 20, 0, 400); // mm
+    m_dv_eff_z = new TEfficiency( "m_dv_eff_z", "DV reconstruction efficiency vs z", 20, -1000, 1000); // mm
+    m_dv_eff_d0 = new TEfficiency( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 30, 0, 400); // mm
 
     // efficiency as a function of Z' parameters
-    m_dv_eff_zp_eta = new TEfficiency("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 25, -3.0, 3.0);
+    m_dv_eff_zp_eta = new TEfficiency("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 30, -3.0, 3.0);
     m_dv_eff_zp_beta = new TEfficiency("m_dv_eff_zp_beta", "DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
     m_dv_eff_zp_pt = new TEfficiency("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 25, 0, 500); // GeV
 
@@ -101,10 +104,14 @@ StatusCode DVEfficiency::initialize() {
     m_dv_eff_trig = new TH1D("m_dv_eff_trig", "Trigger efficiency", 4, 0, 4);
 
     // efficiency map (Z' pt and eta)
-    m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 10, 0., 1000., 10, -3.0, 3.0); // GeV
-    m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 10, 0., 1000., 10, -3.0, 3.0); // GeV
-    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
-    //m_dv_eff_map_pt_eta = new TEfficiency("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 10, -3.0, 3.0); // GeV
+    m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 10, 0., 1000., 6, -3.0, 3.0); // GeV
+    m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 10, 0., 1000., 6, -3.0, 3.0); // GeV
+    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, 0., 1000., 6, -3.0, 3.0); // GeV
+
+    // efficiency map (Z' eta and pileup)
+    m_dv_eff_map_mu_eta_den = new TH2F("m_dv_eff_map_mu_eta_den", "DV reconstruction efficiency map, mu vs eta (den)", 50, 0., 50., 30, -3.0, 3.0); // GeV
+    m_dv_eff_map_mu_eta_num = new TH2F("m_dv_eff_map_mu_eta_num", "DV reconstruction efficiency map, mu vs eta (num)", 50, 0., 50., 30, -3.0, 3.0); // GeV
+    m_dv_eff_map_mu_eta = new TH2F("m_dv_eff_map_mu_eta", "DV reconstruction efficiency map, mu vs eta", 50, 0., 50., 30, -3.0, 3.0); // GeV
 
 
     // error on reco DV
@@ -125,6 +132,7 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_phi", reinterpret_cast<TGraph*>(m_dv_eff_phi)));
     CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_mass",reinterpret_cast<TGraph*>(m_dv_eff_mass)));
     CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_R",reinterpret_cast<TGraph*>(m_dv_eff_R)) );
+    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_z",reinterpret_cast<TGraph*>(m_dv_eff_z)) );
     CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_d0",reinterpret_cast<TGraph*>(m_dv_eff_d0)) );
 
     CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_eta",reinterpret_cast<TGraph*>(m_dv_eff_zp_eta)) );
@@ -133,7 +141,14 @@ StatusCode DVEfficiency::initialize() {
 
     CHECK( histSvc->regGraph("/DV/truth/efficiency/dv_eff_mu",reinterpret_cast<TGraph*>(m_dv_eff_mu)) );
     CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_trig", m_dv_eff_trig) );
+
+    // efficiency map
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta", m_dv_eff_map_pt_eta) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta_den", m_dv_eff_map_pt_eta_den) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_pt_eta_num", m_dv_eff_map_pt_eta_num) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta", m_dv_eff_map_mu_eta) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta_den", m_dv_eff_map_mu_eta_den) ); // for error calculation
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta_num", m_dv_eff_map_mu_eta_num) );
 
     CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_R_err", m_dv_R_err_tight) );
     CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_z_err", m_dv_z_err_tight) );
@@ -149,6 +164,7 @@ StatusCode DVEfficiency::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
 
     m_dv_eff_map_pt_eta->Divide(m_dv_eff_map_pt_eta_num, m_dv_eff_map_pt_eta_den,1,1, "b");
+    m_dv_eff_map_mu_eta->Divide(m_dv_eff_map_mu_eta_num, m_dv_eff_map_mu_eta_den,1,1, "b");
 
     // divide trigger plot by the number of events processed
     //m_dv_eff_trig->Scale(1/n_events);
@@ -167,6 +183,11 @@ StatusCode DVEfficiency::execute() {
     // retrieve event info
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
+
+    // get combine weight from pileup reweighting tool
+    p_weight = m_prw->getCombinedWeight(*evtInfo);
+    ATH_MSG_DEBUG("pileup weight = " << p_weight);
+
 
     // pile-up
     int mu = evtInfo->actualInteractionsPerCrossing();
@@ -351,6 +372,7 @@ StatusCode DVEfficiency::execute() {
         m_dv_eff_phi->Fill(dv_matched, tru_v->phi());
         m_dv_eff_mass->Fill(dv_matched, DVMass);
         m_dv_eff_R->Fill(dv_matched, tru_v->perp());
+        m_dv_eff_z->Fill(dv_matched,tru_v->z());
         m_dv_eff_d0->Fill(dv_matched,m_dvutils->GetMaxd0(tru_v));
 
         // efficiency as a function of Z'
@@ -367,7 +389,12 @@ StatusCode DVEfficiency::execute() {
 
         // fill efficiency map
         m_dv_eff_map_pt_eta_den->Fill(zp_pt / 1000., zp_eta);
-        if (dv_matched) m_dv_eff_map_pt_eta_num->Fill(zp_pt / 1000., zp_eta); 
+        m_dv_eff_map_mu_eta_den->Fill(mu, zp_eta);
+
+        if (dv_matched) {
+            m_dv_eff_map_pt_eta_num->Fill(zp_pt / 1000., zp_eta); 
+            m_dv_eff_map_mu_eta_num->Fill(mu, zp_eta); 
+        }
 
 
     } // end of efficiency loop

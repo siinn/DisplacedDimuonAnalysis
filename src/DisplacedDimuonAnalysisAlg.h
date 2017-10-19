@@ -24,7 +24,8 @@
 #include "DisplacedDimuonAnalysis/CosmicTools.h"
 
 // GRL
-#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
+//#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
+#include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
 
 // Trigger decision tool
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -75,6 +76,9 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         // output
         TH1D* m_event_cutflow; //!
 
+        // pile-up distribution
+        TH1F* m_pileup; //!
+
         //----------------------------------
         // mumu plots
         //----------------------------------
@@ -87,6 +91,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mumu_R_low; //!
             TH1F* m_dv_mumu_z; //!
             TH1F* m_dv_mumu_l; //!
+            TH1F* m_dv_mumu_eta; //!
             TH2F* m_dv_mumu_R_M; //! ABCD
             // check vertex fit
             TH1F* m_dv_mumu_chi2_ndof; //!
@@ -124,6 +129,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_ee_R_low; //!
             TH1F* m_dv_ee_z; //!
             TH1F* m_dv_ee_l; //!
+            TH1F* m_dv_ee_eta; //!
             TH2F* m_dv_ee_R_M; //! ABCD
             // check vertex fit
             TH1F* m_dv_ee_chi2_ndof; //!
@@ -160,6 +166,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_R_low; //!
             TH1F* m_dv_emu_z; //!
             TH1F* m_dv_emu_l; //!
+            TH1F* m_dv_emu_eta; //!
             TH2F* m_dv_emu_R_M; //! ABCD
             // check vertex fit
             TH1F* m_dv_emu_chi2_ndof; //!
@@ -205,6 +212,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_idid_z; //!
             TH1F* m_dv_idid_R; //!
             TH1F* m_dv_idid_l; //!
+            TH1F* m_dv_idid_eta; //!
             TH1F* m_dv_idid_chi2_ndof; //!
 
             // cosmic veto

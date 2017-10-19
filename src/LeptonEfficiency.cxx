@@ -41,17 +41,17 @@ StatusCode LeptonEfficiency::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
    
     // signal tracking efficiency
-    m_eff_mu_eta = new TProfile("m_eff_mu_eta", "Muon tracking efficiency vs Z' eta", 50,-3.0,3.0);
+    m_eff_mu_eta = new TProfile("m_eff_mu_eta", "Muon tracking efficiency vs Z' eta", 20,-3.0,3.0);
     m_eff_mu_pt = new TProfile("m_eff_mu_pt", "Muon tracking efficiency vs pt", 50,0,800);
     m_eff_mu_R = new TProfile("m_eff_mu_R", "Muon tracking efficiency vs R", 50,0,400);
-    m_eff_mu_d0 = new TProfile("m_eff_mu_d0", "Muon tracking efficiency vs d0", 50,0,400);
-    m_eff_mu_z0 = new TProfile("m_eff_mu_z0", "Muon tracking efficiency vs z0", 200,-1000,1000);
+    m_eff_mu_d0 = new TProfile("m_eff_mu_d0", "Muon tracking efficiency vs d0", 25,0,400);
+    m_eff_mu_z0 = new TProfile("m_eff_mu_z0", "Muon tracking efficiency vs z0", 50,0,1000);
 
-    m_eff_el_eta = new TProfile("m_eff_el_eta", "Electron tracking efficiency vs Z' eta", 50,-3.0,3.0);
+    m_eff_el_eta = new TProfile("m_eff_el_eta", "Electron tracking efficiency vs Z' eta", 20,-3.0,3.0);
     m_eff_el_pt = new TProfile("m_eff_el_pt", "Electron tracking efficiency vs pt", 50,0,800);
     m_eff_el_R = new TProfile("m_eff_el_R", "Electron tracking efficiency vs R", 50,0,400);
-    m_eff_el_d0 = new TProfile("m_eff_el_d0", "Electron tracking efficiency vs d0", 50,0,400);
-    m_eff_el_z0 = new TProfile("m_eff_el_z0", "Electron tracking efficiency vs z0", 200,-1000,1000);
+    m_eff_el_d0 = new TProfile("m_eff_el_d0", "Electron tracking efficiency vs d0", 25,0,400);
+    m_eff_el_z0 = new TProfile("m_eff_el_z0", "Electron tracking efficiency vs z0", 50,0,1000);
 
     // 2D efficiency
     m_eff_mu_pt_vs_prodVtxR_num = new TH2F("m_eff_mu_pt_vs_prodVtxR_num", "signal mu eff pt vs prodVtx R, num", 50, 0, 300, 50, 0, 1000); // GeV
