@@ -51,22 +51,26 @@ StatusCode TruthPlots::initialize() {
 
     // signal el
     m_el_m = new TH1F("m_el_m", "signal el m", 100, 0, 1.0); // MeV
-    m_el_pt = new TH1F("m_el_pt", "signal el pt", 50, 0, 1000); // GeV
+    m_el_pt = new TH1F("m_el_pt", "signal el pt", 1000, 0, 1000); // GeV
     m_el_pt_low = new TH1F("m_el_pt_low", "signal el pt", 50, 0, 50); // GeV
     m_el_eta = new TH1F("m_el_eta", "signal el eta", 30, -3.0, 3.0);
     m_el_phi = new TH1F("m_el_phi", "signal el phi", 50, -M_PI, M_PI);
     m_el_R = new TH1F("m_el_R", "signal el R", 50, 0., 300.0);
     m_el_z = new TH1F("m_el_z", "signal el z", 50, -500.0, 500.0);
+    m_el_d0 = new TH1F("m_el_d0", "signal el d0", 3000, 0, 300);
+    m_el_z0 = new TH1F("m_el_z0", "signal el z0", 100, -500, 500);
     m_el_pdgId = new TH1F("m_el_pdgId", "signal el pdgId", 64, -32, 32);
 
     // signal muon
     m_muon_m = new TH1F("m_muon_m", "signal muon m", 100, 0, 0.2); // GeV
-    m_muon_pt = new TH1F("m_muon_pt", "signal muon pt", 50, 0, 1000); // GeV
+    m_muon_pt = new TH1F("m_muon_pt", "signal muon pt", 1000, 0, 1000); // GeV
     m_muon_pt_low = new TH1F("m_muon_pt_low", "signal muon pt", 50, 0, 50); // GeV
     m_muon_eta = new TH1F("m_muon_eta", "signal muon eta", 30, -3.0, 3.0);
     m_muon_phi = new TH1F("m_muon_phi", "signal muon phi", 50, -M_PI, M_PI);
     m_muon_R = new TH1F("m_muon_R", "signal muon R", 50, 0., 300.0);
     m_muon_z = new TH1F("m_muon_z", "signal muon z", 50, -500.0, 500.0);
+    m_muon_d0 = new TH1F("m_muon_d0", "signal muon d0", 3000, 0, 300);
+    m_muon_z0 = new TH1F("m_muon_z0", "signal muon z0", 100, -500, 500);
     m_muon_pdgId = new TH1F("m_muon_pdgId", "signal muon pdgId", 64, -32, 32);
 
     m_muon_pt_vs_prodVtxR = new TH2F("m_muon_pt_vs_prodVtxR", "signal muon pt vs prodVtx R", 50, 0, 300, 50, 0, 1000); // GeV
@@ -114,6 +118,8 @@ StatusCode TruthPlots::initialize() {
     CHECK( histSvc->regHist("/DV/truth/signal_el/phi/el_phi", m_el_phi) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/R/el_R", m_el_R) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/z/el_z", m_el_z) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/d0/el_d0", m_el_d0) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/z0/el_z0", m_el_z0) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/pdgId/el_pdgId", m_el_pdgId) );
 
     // signal muon
@@ -124,6 +130,8 @@ StatusCode TruthPlots::initialize() {
     CHECK( histSvc->regHist("/DV/truth/signal_muon/phi/muon_phi", m_muon_phi) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/R/muon_R", m_muon_R) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/z/muon_z", m_muon_z) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/d0/muon_d0", m_muon_d0) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/z0/muon_z0", m_muon_z0) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/pdgId/muon_pdgId", m_muon_pdgId) );
 
     CHECK( histSvc->regHist("/DV/truth/signal_muon/eta/muon_acceptance", m_muon_acceptance) );
@@ -206,6 +214,8 @@ StatusCode TruthPlots::execute() {
                 m_el_phi->Fill(signal_lep->phi());
                 m_el_R->Fill(tru_v->perp());
                 m_el_z->Fill(tru_v->z());
+                m_el_d0->Fill(signal_lep->auxdata< float >("d0"));
+                m_el_z0->Fill(signal_lep->auxdata< float >("z0"));
                 m_el_pt->Fill( signal_lep->pt() / 1000.);
                 m_el_pt_low->Fill( signal_lep->pt() / 1000. );
             }
@@ -220,6 +230,8 @@ StatusCode TruthPlots::execute() {
                 m_muon_phi->Fill(signal_lep->phi());
                 m_muon_R->Fill(tru_v->perp());
                 m_muon_z->Fill(tru_v->z());
+                m_muon_d0->Fill(signal_lep->auxdata< float >("d0"));
+                m_muon_z0->Fill(signal_lep->auxdata< float >("z0"));
                 m_muon_pt->Fill( signal_lep->pt() / 1000.);
                 m_muon_pt_low->Fill( signal_lep->pt() / 1000. );
 

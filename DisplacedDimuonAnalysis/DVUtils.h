@@ -115,6 +115,9 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         bool TrackSelection (const xAOD::TrackParticle* tp);
         bool TrackSelection (const xAOD::TruthParticle* tp);
 
+        // check if there is an associated lepton
+        bool IsLepton (const xAOD::TrackParticle* tp);
+
         // accessor for original ID track
         SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> m_accTr;
 

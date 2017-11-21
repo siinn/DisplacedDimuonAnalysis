@@ -41,6 +41,8 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         TH1F* m_el_phi; //!
         TH1F* m_el_R; //!
         TH1F* m_el_z; //!
+        TH1F* m_el_d0; //!
+        TH1F* m_el_z0; //!
 
         // signal muon distribution
         TH1F* m_muon_pt; //!
@@ -51,6 +53,8 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         TH1F* m_muon_phi; //!
         TH1F* m_muon_R; //!
         TH1F* m_muon_z; //!
+        TH1F* m_muon_d0; //!
+        TH1F* m_muon_z0; //!
 
         // signal dilep distribution
         TH1F* m_dilep_m; //!

@@ -13,6 +13,7 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 #include "cmath"
 #include <algorithm>    // to find min and max
 #include <string>
@@ -983,6 +984,50 @@ bool DVUtils::TrackSelection (const xAOD::TruthParticle* tp) {
 
 
 
+// check if there is an associated lepton
+bool DVUtils::IsLepton(const xAOD::TrackParticle* tp){
+    // sourced from DDLBase OverlapRemoval.cxx
+
+    // if trc is a shallow copy: get original track
+    auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*tp));
+    if (orig_tr == nullptr) orig_tr = tp;
+
+    // if trc == VrtSecInclusive__SelectedTrackParticles (or a copy)
+    if(m_accTr.isAvailable(*orig_tr)) {
+        orig_tr = *(m_accTr(*orig_tr));
+    }
+
+    // retrieve muon container
+    const xAOD::MuonContainer* muc = nullptr;
+    CHECK( evtStore()->retrieve( muc, "Muons" ) );
+
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+    
+    // loop over muon container, looking for matched reco muon
+    for(auto mu: *muc) {
+
+        auto mu_tr = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        if(mu_tr == nullptr) continue;
+
+        if(orig_tr == mu_tr) {
+            return true;    // found muon with the same id track
+        }
+    }
+
+    // loop over electron container, looking for matched reco electron
+    for(auto el: *elc) {
+
+        auto el_tr = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
+        if(el_tr == nullptr) continue;
+        
+        if(orig_tr == el_tr) {
+            return true;    // found electron with the same id track
+        }
+    }
+    
+    return false;
+}
 
 
 

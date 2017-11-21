@@ -105,6 +105,9 @@ class IDVUtils: virtual public IAlgTool {
         // track selection for validation
         virtual bool TrackSelection (const xAOD::TrackParticle* tp) = 0;
         virtual bool TrackSelection (const xAOD::TruthParticle* tp) = 0;
+
+        // check if there is an associated lepton
+        virtual bool IsLepton(const xAOD::TrackParticle* tp) = 0;
     
     private:
     
