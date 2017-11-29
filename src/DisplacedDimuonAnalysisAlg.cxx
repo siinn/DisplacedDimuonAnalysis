@@ -511,9 +511,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(dv_mass > mass_min) continue;
-            //m_dv_mumu_cf->Fill("LowMassVeto", 1);
-            m_dv_mumu_cf->Fill("m < 10 GeV", 1);
+            if(dv_mass < mass_min) continue;
+            m_dv_mumu_cf->Fill("LowMassVeto", 1);
+            //m_dv_mumu_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
@@ -574,9 +574,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
-            if(dv_mass > mass_min) continue;
-            //m_dv_ee_cf->Fill("LowMassVeto", 1);
-            m_dv_ee_cf->Fill("m < 10 GeV", 1);
+            if(dv_mass < mass_min) continue;
+            m_dv_ee_cf->Fill("LowMassVeto", 1);
+            //m_dv_ee_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
@@ -633,9 +633,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
-            if(dv_mass > mass_min) continue;
-            //m_dv_emu_cf->Fill("LowMassVeto", 1);
-            m_dv_emu_cf->Fill("m < 10 GeV", 1);
+            if(dv_mass < mass_min) continue;
+            m_dv_emu_cf->Fill("LowMassVeto", 1);
+            //m_dv_emu_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);

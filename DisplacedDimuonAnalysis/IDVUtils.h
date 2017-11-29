@@ -8,6 +8,7 @@
 #include "xAODMuon/MuonContainer.h"
 //#include "xAODMuon/MuonAuxContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include <string>
 
 
@@ -108,6 +109,9 @@ class IDVUtils: virtual public IAlgTool {
 
         // check if there is an associated lepton
         virtual bool IsLepton(const xAOD::TrackParticle* tp) = 0;
+
+        // RPVLL filter test
+        virtual bool PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc) = 0;
     
     private:
     

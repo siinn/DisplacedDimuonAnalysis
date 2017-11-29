@@ -108,15 +108,6 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         
         // invariant mass of all signal truth vertex
         TH1F* m_dv_mass; //!
-
-        // difference between truth and reco DV
-        TH1F* m_dv_R_err_tight; //!
-        TH1F* m_dv_z_err_tight; //!
-        TH1F* m_dv_m_err_tight; //!
-    
-        TH1F* m_dv_R_err_loose; //!
-        TH1F* m_dv_z_err_loose; //!
-        TH1F* m_dv_m_err_loose; //!
     
 }; 
 

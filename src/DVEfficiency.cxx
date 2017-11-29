@@ -24,6 +24,7 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 
 // tools
 #include "PathResolver/PathResolver.h"
@@ -114,16 +115,6 @@ StatusCode DVEfficiency::initialize() {
     m_dv_eff_map_mu_eta = new TH2F("m_dv_eff_map_mu_eta", "DV reconstruction efficiency map, mu vs eta", 50, 0., 50., 30, -3.0, 3.0); // GeV
 
 
-    // error on reco DV
-    m_dv_R_err_tight = new TH1F("dv_R_err_tight","Error on R of DV, tight [mm]",200,-1.,1.);
-    m_dv_z_err_tight = new TH1F("dv_z_err_tight","Error on z of DV, tight [mm]",200,-1.,1.);
-    m_dv_m_err_tight = new TH1F("dv_m_err_tight","Error on m of DV, tight [GeV]",200,-1.,1.);
-
-    m_dv_R_err_loose = new TH1F("dv_R_err_loose","Error on R of DV, loose [mm]",200,-1.,1.);
-    m_dv_z_err_loose = new TH1F("dv_z_err_loose","Error on z of DV, loose [mm]",200,-1.,1.);
-    m_dv_m_err_loose = new TH1F("dv_m_err_loose","Error on m of DV, loose [GeV]",200,-1.,1.);
- 
-
     // output
     CHECK( histSvc->regHist("/DV/truth/dv_mass", m_dv_mass) );
 
@@ -149,13 +140,6 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta", m_dv_eff_map_mu_eta) );
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta_den", m_dv_eff_map_mu_eta_den) ); // for error calculation
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta_num", m_dv_eff_map_mu_eta_num) );
-
-    CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_R_err", m_dv_R_err_tight) );
-    CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_z_err", m_dv_z_err_tight) );
-    CHECK( histSvc->regHist("/DV/truth/err/dv/tight/dv_m_err", m_dv_m_err_tight) );
-    CHECK( histSvc->regHist("/DV/truth/err/dv/loose/dv_R_err", m_dv_R_err_loose) );
-    CHECK( histSvc->regHist("/DV/truth/err/dv/loose/dv_z_err", m_dv_z_err_loose) );
-    CHECK( histSvc->regHist("/DV/truth/err/dv/loose/dv_m_err", m_dv_m_err_loose) );
 
     return StatusCode::SUCCESS;
 }
@@ -201,6 +185,9 @@ StatusCode DVEfficiency::execute() {
 
     const xAOD::ElectronContainer* elc = nullptr;
     CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
+    const xAOD::PhotonContainer* phc = nullptr;
+    CHECK( evtStore()->retrieve( phc, "Photons" ));
 
     // make copies of leptons
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
@@ -289,9 +276,9 @@ StatusCode DVEfficiency::execute() {
         // disabled module
         if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
 
-        if ((channel == "emu") or (channel == "ee")) {
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-        }
+        //if ((channel == "emu") or (channel == "ee")) {
+        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        //}
 
         // low mass veto
         if(dv_mass < mass_min) continue;
@@ -306,21 +293,21 @@ StatusCode DVEfficiency::execute() {
         //} // end of isMC
     } // end of dv loop
 
-
     // GRL
     if (!isMC and !m_grlTool->passRunLB(*evtInfo)) dv_matched = false;
 
     // event cleaning
     if(!m_evtc->PassEventCleaning(*evtInfo)) dv_matched = false;
 
+    // RPVLL filter
+    //if(!m_dvutils->PassRPVLLFilter(*elc, *phc, *muc)) dv_matched = false;
+
     // trigger check
     bool trig_passed = false;
     
-    // place holder
     m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",0);
     m_dv_eff_trig->Fill("HLT_g140_loose",0);
     m_dv_eff_trig->Fill("HLT_2g50_loose",0);
-    //m_dv_eff_trig->Fill("HLT_2g60_loose",0);
 
     // check trigger and fill histogram for trigger efficiency
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) {
@@ -335,10 +322,7 @@ StatusCode DVEfficiency::execute() {
         m_dv_eff_trig->Fill("HLT_2g50_loose",1);
         trig_passed = true;
         }
-    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) {
-        //m_dv_eff_trig->Fill("HLT_2g60_loose",1);
-        trig_passed = true;
-        }
+
     if(!trig_passed) dv_matched = false;
     else m_dv_eff_trig->Fill("Combined",1);
 
@@ -357,11 +341,6 @@ StatusCode DVEfficiency::execute() {
 
         // only selecting signal truth
         if (!m_dvutils->isSignalVertex(tru_v)) continue;
-
-        // -------- replace this with global dv_matched -------------
-        // create accessor for reconstruction flag
-        //static SG::AuxElement::ConstAccessor<int> acc_tru_v("reconstructed");
-        //bool dv_matched = acc_tru_v.isAvailable(*tru_v);
 
         // fill truth signal vertex mass
         float DVMass = m_dvutils->TruthMass(tru_v) / 1000.;

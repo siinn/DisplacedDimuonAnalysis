@@ -55,6 +55,9 @@ use xAODCore                    xAODCore-*                      Event/xAOD
 
 use PathResolver                PathResolver-*                  Tools
 
+# pileup reweighting tool
+use PileupReweighting           PileupReweighting-*             PhysicsAnalysis/AnalysisCommon
+
 # DV
 #use DVTools                     DVTools-*                       DV_xAODAnalysis
 #use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis

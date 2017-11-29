@@ -1031,5 +1031,15 @@ bool DVUtils::IsLepton(const xAOD::TrackParticle* tp){
 
 
 
+// check if event pass RPVLL filter
+bool DVUtils::PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc){
+
+    return false;
+}
+
+
+
+
+
 
 

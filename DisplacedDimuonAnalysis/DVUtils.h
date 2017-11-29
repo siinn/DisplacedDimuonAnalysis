@@ -23,6 +23,7 @@
 #include "xAODMuon/MuonContainer.h"
 //#include "xAODMuon/MuonAuxContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include <string>
 
 class DVUtils : public AthAlgTool, virtual public IDVUtils {
@@ -117,6 +118,9 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
         // check if there is an associated lepton
         bool IsLepton (const xAOD::TrackParticle* tp);
+
+        // RPVLL filter test
+        bool PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc);
 
         // accessor for original ID track
         SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> m_accTr;
