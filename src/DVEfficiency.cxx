@@ -83,6 +83,9 @@ StatusCode DVEfficiency::initialize() {
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
+    // cutflow
+    m_dv_eff_cutflow = new TH1D("dv cut flow", "dv cut flow", 14,0,14);
+
     m_dv_mass = new TH1F( "m_dv_mass", "Invariant mass of all signal vertex", 50, 0, 1500 ); // GeV
 
     // efficiency plots
@@ -116,6 +119,7 @@ StatusCode DVEfficiency::initialize() {
 
 
     // output
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_cutflow;", m_dv_eff_cutflow) );
     CHECK( histSvc->regHist("/DV/truth/dv_mass", m_dv_mass) );
 
     // efficiency plots
@@ -213,11 +217,72 @@ StatusCode DVEfficiency::execute() {
     // make a copy of vertex containers
     auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
 
-    // set global flag
+    //=================================================
+    // event cut flow
+    //=================================================
+
+    // place holder
+    m_dv_eff_cutflow->Fill("RPVLL",0);
+    m_dv_eff_cutflow->Fill("GRL",0);
+    m_dv_eff_cutflow->Fill("EventCleaning",0);
+    m_dv_eff_cutflow->Fill("TrigFilter",0);
+
+    // event selection flag
+    bool event_passed = true;
+
+    // all events
+    m_dv_eff_cutflow->Fill("RPVLL",1);
+
+    // GRL
+    if (!isMC and !m_grlTool->passRunLB(*evtInfo)) event_passed = false;
+    if (event_passed) m_dv_eff_cutflow->Fill("GRL",1);
+
+    // event cleaning
+    if (!m_evtc->PassEventCleaning(*evtInfo)) event_passed = false;
+    if (event_passed) m_dv_eff_cutflow->Fill("EventCleaning",1);
+
+    // RPVLL filter
+    //if(!m_dvutils->PassRPVLLFilter(*elc, *phc, *muc)) event_passed = false;
+    // trigger check
+    bool trig_passed = false;
+    
+    m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",0);
+    m_dv_eff_trig->Fill("HLT_g140_loose",0);
+    m_dv_eff_trig->Fill("HLT_2g50_loose",0);
+
+    // check trigger and fill histogram for trigger efficiency
+    if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) {
+        m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",1);
+        trig_passed = true;
+        }
+    if (m_tdt->isPassed("HLT_g140_loose")) {
+        m_dv_eff_trig->Fill("HLT_g140_loose",1);
+        trig_passed = true;
+        }
+    if (m_tdt->isPassed("HLT_2g50_loose")) {
+        m_dv_eff_trig->Fill("HLT_2g50_loose",1);
+        trig_passed = true;
+        }
+
+    if(!trig_passed) {
+        event_passed = false;
+    }
+    else {
+        m_dv_eff_trig->Fill("Combined",1);
+    }
+
+    if (event_passed) m_dv_eff_cutflow->Fill("TrigFilter",1);
+
+    //=================================================
+    // vertex cut flow
+    //=================================================
+    // set to true if vertex pass all selection
     bool dv_matched = false;
 
     // cut flow
     for(auto dv: *dvc_copy.first) {
+
+        m_dv_eff_cutflow->Fill("Vertex",1);
 
         // access tracks from vertex
         auto tpLinks = dv->trackParticleLinks();
@@ -260,31 +325,40 @@ StatusCode DVEfficiency::execute() {
 
         // only select mumu, ee, or emu
         if (!((channel == "mumu") or (channel == "emu") or (channel == "ee"))) continue;
+        m_dv_eff_cutflow->Fill("LeptonID",1);
 
         // Trigger matching
         if(!m_dvutils->TrigMatching(*dv)) continue;
+        m_dv_eff_cutflow->Fill("Trig.Matching",1);
 
         // vertex fit quality
         if(!m_dvc->PassChisqCut(*dv)) continue;
+        m_dv_eff_cutflow->Fill("#chi^{2} / DOF",1);
 
         // minimum distance from pv (from 0 for MC)
         if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        m_dv_eff_cutflow->Fill("MinDisplacment",1);
 
         // charge requirements
         if(!m_dvc->PassChargeRequirement(*dv)) continue;
+        m_dv_eff_cutflow->Fill("Oppo.Charge",1);
 
         // disabled module
         if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        m_dv_eff_cutflow->Fill("DisabledModule",1);
 
-        //if ((channel == "emu") or (channel == "ee")) {
-        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
-        //}
+        if ((channel == "emu") or (channel == "ee")) {
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        }
+        m_dv_eff_cutflow->Fill("MaterialVeto",1);
 
         // low mass veto
         if(dv_mass < mass_min) continue;
+        m_dv_eff_cutflow->Fill("LowMass",1);
 
         // cosmic veto (R_CR)
         if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+        m_dv_eff_cutflow->Fill("CosmicVeto",1);
 
         // mark this event as reconstructed
         dv_matched = true;
@@ -292,40 +366,9 @@ StatusCode DVEfficiency::execute() {
 
         //} // end of isMC
     } // end of dv loop
-
-    // GRL
-    if (!isMC and !m_grlTool->passRunLB(*evtInfo)) dv_matched = false;
-
-    // event cleaning
-    if(!m_evtc->PassEventCleaning(*evtInfo)) dv_matched = false;
-
-    // RPVLL filter
-    //if(!m_dvutils->PassRPVLLFilter(*elc, *phc, *muc)) dv_matched = false;
-
-    // trigger check
-    bool trig_passed = false;
     
-    m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",0);
-    m_dv_eff_trig->Fill("HLT_g140_loose",0);
-    m_dv_eff_trig->Fill("HLT_2g50_loose",0);
-
-    // check trigger and fill histogram for trigger efficiency
-    if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) {
-        m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",1);
-        trig_passed = true;
-        }
-    if (m_tdt->isPassed("HLT_g140_loose")) {
-        m_dv_eff_trig->Fill("HLT_g140_loose",1);
-        trig_passed = true;
-        }
-    if (m_tdt->isPassed("HLT_2g50_loose")) {
-        m_dv_eff_trig->Fill("HLT_2g50_loose",1);
-        trig_passed = true;
-        }
-
-    if(!trig_passed) dv_matched = false;
-    else m_dv_eff_trig->Fill("Combined",1);
-
+    // if event didn't pass event selection, mark as not reconstructed
+    if (!event_passed) dv_matched = false;
 
     //-----------------------------------------------------------------
     // end of cut flow                                                -

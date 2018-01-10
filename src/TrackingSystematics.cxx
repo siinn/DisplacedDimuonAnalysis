@@ -93,13 +93,6 @@ StatusCode TrackingSystematics::initialize() {
     m_dv_idid_M_6 = new TH1F("dv_idid_M_6","K_{S} candidate mass in MeV (R_6)", 400,0,1000 );
     m_dv_idid_M_7 = new TH1F("dv_idid_M_7","K_{S} candidate mass in MeV (R_7)", 400,0,1000 );
     m_dv_idid_M_8 = new TH1F("dv_idid_M_8","K_{S} candidate mass in MeV (R_8)", 400,0,1000 );
-    m_dv_idid_M_9 = new TH1F("dv_idid_M_9","K_{S} candidate mass in MeV (R_9)", 400,0,1000 );
-    m_dv_idid_M_10 = new TH1F("dv_idid_M_10","K_{S} candidate mass in MeV (R_10)", 400,0,1000 );
-    m_dv_idid_M_11 = new TH1F("dv_idid_M_11","K_{S} candidate mass in MeV (R_11)", 400,0,1000 );
-    m_dv_idid_M_12 = new TH1F("dv_idid_M_12","K_{S} candidate mass in MeV (R_12)", 400,0,1000 );
-    m_dv_idid_M_13 = new TH1F("dv_idid_M_13","K_{S} candidate mass in MeV (R_13)", 400,0,1000 );
-    m_dv_idid_M_14 = new TH1F("dv_idid_M_14","K_{S} candidate mass in MeV (R_14)", 400,0,1000 );
-    m_dv_idid_M_15 = new TH1F("dv_idid_M_15","K_{S} candidate mass in MeV (R_15)", 400,0,1000 );
     m_dv_idid_ratio_R = new TH1F("dv_idid_ratio_R","K_{S} ratio plot (R_{i} / R_{0})",6,0,300);
 
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_cf", m_dv_idid_cf) );
@@ -119,118 +112,7 @@ StatusCode TrackingSystematics::initialize() {
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_6", m_dv_idid_M_6) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_7", m_dv_idid_M_7) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_8", m_dv_idid_M_8) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_9", m_dv_idid_M_9) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_10", m_dv_idid_M_10) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_11", m_dv_idid_M_11) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_12", m_dv_idid_M_12) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_13", m_dv_idid_M_13) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_14", m_dv_idid_M_14) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_15", m_dv_idid_M_15) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_ratio_R", m_dv_idid_ratio_R) );
-
-    // barrel
-    // Ks candidate
-    m_dv_idid_barrel_M = new TH1F("dv_idid_barrel_M","K_{S} candidate mass in MeV", 100,0,1000 );
-    m_dv_idid_barrel_R = new TH1F("dv_idid_barrel_R","K_{S} candidate R", 300,0,300);
-    m_dv_idid_barrel_z = new TH1F("dv_idid_barrel_z","K_{S} candidate z", 100,-1000,1000);
-    m_dv_idid_barrel_l = new TH1F("dv_idid_barrel_l","K_{S} candidate decay length", 100,0,1000);
-    m_dv_idid_barrel_pt = new TH1F("dv_idid_barrel_pt","K_{S} candidate pt", 100,0,100);
-    m_dv_idid_barrel_mu = new TH1F("dv_idid_barrel_mu","K_{S} candidate vs inst. mu", 50,0,50);
-    m_dv_idid_barrel_DeltaR = new TH1F("dv_idid_barrel_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
-    m_dv_idid_barrel_R_M = new TH2F("dv_idid_barrel_R_M","K_{S} position R vs M", 50,0,300,100,0,1000);
-    m_dv_idid_barrel_M_1 = new TH1F("dv_idid_barrel_M_1","K_{S} candidate mass in MeV (R_1)", 400,0,1000 );
-    m_dv_idid_barrel_M_2 = new TH1F("dv_idid_barrel_M_2","K_{S} candidate mass in MeV (R_2)", 400,0,1000 );
-    m_dv_idid_barrel_M_3 = new TH1F("dv_idid_barrel_M_3","K_{S} candidate mass in MeV (R_3)", 400,0,1000 );
-    m_dv_idid_barrel_M_4 = new TH1F("dv_idid_barrel_M_4","K_{S} candidate mass in MeV (R_4)", 400,0,1000 );
-    m_dv_idid_barrel_M_5 = new TH1F("dv_idid_barrel_M_5","K_{S} candidate mass in MeV (R_5)", 400,0,1000 );
-    m_dv_idid_barrel_M_6 = new TH1F("dv_idid_barrel_M_6","K_{S} candidate mass in MeV (R_6)", 400,0,1000 );
-    m_dv_idid_barrel_M_7 = new TH1F("dv_idid_barrel_M_7","K_{S} candidate mass in MeV (R_7)", 400,0,1000 );
-    m_dv_idid_barrel_M_8 = new TH1F("dv_idid_barrel_M_8","K_{S} candidate mass in MeV (R_8)", 400,0,1000 );
-    m_dv_idid_barrel_M_9 = new TH1F("dv_idid_barrel_M_9","K_{S} candidate mass in MeV (R_9)", 400,0,1000 );
-    m_dv_idid_barrel_M_10 = new TH1F("dv_idid_barrel_M_10","K_{S} candidate mass in MeV (R_10)", 400,0,1000 );
-    m_dv_idid_barrel_M_11 = new TH1F("dv_idid_barrel_M_11","K_{S} candidate mass in MeV (R_11)", 400,0,1000 );
-    m_dv_idid_barrel_M_12 = new TH1F("dv_idid_barrel_M_12","K_{S} candidate mass in MeV (R_12)", 400,0,1000 );
-    m_dv_idid_barrel_M_13 = new TH1F("dv_idid_barrel_M_13","K_{S} candidate mass in MeV (R_13)", 400,0,1000 );
-    m_dv_idid_barrel_M_14 = new TH1F("dv_idid_barrel_M_14","K_{S} candidate mass in MeV (R_14)", 400,0,1000 );
-    m_dv_idid_barrel_M_15 = new TH1F("dv_idid_barrel_M_15","K_{S} candidate mass in MeV (R_15)", 400,0,1000 );
-    m_dv_idid_barrel_ratio_R = new TH1F("dv_idid_barrel_ratio_R","K_{S} ratio plot (R_{i} / R_{0})",6,0,300);
-
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_M", m_dv_idid_barrel_M) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_R", m_dv_idid_barrel_R) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_z", m_dv_idid_barrel_z) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_l", m_dv_idid_barrel_l) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_pt", m_dv_idid_barrel_pt) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_mu", m_dv_idid_barrel_mu) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_DeltaR", m_dv_idid_barrel_DeltaR) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_R_M", m_dv_idid_barrel_R_M) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_1", m_dv_idid_barrel_M_1) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_2", m_dv_idid_barrel_M_2) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_3", m_dv_idid_barrel_M_3) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_4", m_dv_idid_barrel_M_4) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_5", m_dv_idid_barrel_M_5) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_6", m_dv_idid_barrel_M_6) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_7", m_dv_idid_barrel_M_7) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_8", m_dv_idid_barrel_M_8) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_9", m_dv_idid_barrel_M_9) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_10", m_dv_idid_barrel_M_10) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_11", m_dv_idid_barrel_M_11) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_12", m_dv_idid_barrel_M_12) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_13", m_dv_idid_barrel_M_13) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_14", m_dv_idid_barrel_M_14) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_barrel_M_15", m_dv_idid_barrel_M_15) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_barrel_ratio_R", m_dv_idid_barrel_ratio_R) );
-
-    // endcap
-    // Ks candidate
-    m_dv_idid_endcap_M = new TH1F("dv_idid_endcap_M","K_{S} candidate mass in MeV", 100,0,1000 );
-    m_dv_idid_endcap_R = new TH1F("dv_idid_endcap_R","K_{S} candidate R", 300,0,300);
-    m_dv_idid_endcap_z = new TH1F("dv_idid_endcap_z","K_{S} candidate z", 100,-1000,1000);
-    m_dv_idid_endcap_l = new TH1F("dv_idid_endcap_l","K_{S} candidate decay length", 100,0,1000);
-    m_dv_idid_endcap_pt = new TH1F("dv_idid_endcap_pt","K_{S} candidate pt", 100,0,100);
-    m_dv_idid_endcap_mu = new TH1F("dv_idid_endcap_mu","K_{S} candidate vs inst. mu", 50,0,50);
-    m_dv_idid_endcap_DeltaR = new TH1F("dv_idid_endcap_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
-    m_dv_idid_endcap_R_M = new TH2F("dv_idid_endcap_R_M","K_{S} position R vs M", 50,0,300,100,0,1000);
-    m_dv_idid_endcap_M_1 = new TH1F("dv_idid_endcap_M_1","K_{S} candidate mass in MeV (R_1)", 400,0,1000 );
-    m_dv_idid_endcap_M_2 = new TH1F("dv_idid_endcap_M_2","K_{S} candidate mass in MeV (R_2)", 400,0,1000 );
-    m_dv_idid_endcap_M_3 = new TH1F("dv_idid_endcap_M_3","K_{S} candidate mass in MeV (R_3)", 400,0,1000 );
-    m_dv_idid_endcap_M_4 = new TH1F("dv_idid_endcap_M_4","K_{S} candidate mass in MeV (R_4)", 400,0,1000 );
-    m_dv_idid_endcap_M_5 = new TH1F("dv_idid_endcap_M_5","K_{S} candidate mass in MeV (R_5)", 400,0,1000 );
-    m_dv_idid_endcap_M_6 = new TH1F("dv_idid_endcap_M_6","K_{S} candidate mass in MeV (R_6)", 400,0,1000 );
-    m_dv_idid_endcap_M_7 = new TH1F("dv_idid_endcap_M_7","K_{S} candidate mass in MeV (R_7)", 400,0,1000 );
-    m_dv_idid_endcap_M_8 = new TH1F("dv_idid_endcap_M_8","K_{S} candidate mass in MeV (R_8)", 400,0,1000 );
-    m_dv_idid_endcap_M_9 = new TH1F("dv_idid_endcap_M_9","K_{S} candidate mass in MeV (R_9)", 400,0,1000 );
-    m_dv_idid_endcap_M_10 = new TH1F("dv_idid_endcap_M_10","K_{S} candidate mass in MeV (R_10)", 400,0,1000 );
-    m_dv_idid_endcap_M_11 = new TH1F("dv_idid_endcap_M_11","K_{S} candidate mass in MeV (R_11)", 400,0,1000 );
-    m_dv_idid_endcap_M_12 = new TH1F("dv_idid_endcap_M_12","K_{S} candidate mass in MeV (R_12)", 400,0,1000 );
-    m_dv_idid_endcap_M_13 = new TH1F("dv_idid_endcap_M_13","K_{S} candidate mass in MeV (R_13)", 400,0,1000 );
-    m_dv_idid_endcap_M_14 = new TH1F("dv_idid_endcap_M_14","K_{S} candidate mass in MeV (R_14)", 400,0,1000 );
-    m_dv_idid_endcap_M_15 = new TH1F("dv_idid_endcap_M_15","K_{S} candidate mass in MeV (R_15)", 400,0,1000 );
-    m_dv_idid_endcap_ratio_R = new TH1F("dv_idid_endcap_ratio_R","K_{S} ratio plot (R_{i} / R_{0})",30,0,300);
-
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_M", m_dv_idid_endcap_M) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_R", m_dv_idid_endcap_R) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_z", m_dv_idid_endcap_z) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_l", m_dv_idid_endcap_l) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_pt", m_dv_idid_endcap_pt) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_mu", m_dv_idid_endcap_mu) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_DeltaR", m_dv_idid_endcap_DeltaR) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_R_M", m_dv_idid_endcap_R_M) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_1", m_dv_idid_endcap_M_1) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_2", m_dv_idid_endcap_M_2) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_3", m_dv_idid_endcap_M_3) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_4", m_dv_idid_endcap_M_4) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_5", m_dv_idid_endcap_M_5) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_6", m_dv_idid_endcap_M_6) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_7", m_dv_idid_endcap_M_7) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_8", m_dv_idid_endcap_M_8) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_9", m_dv_idid_endcap_M_9) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_10", m_dv_idid_endcap_M_10) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_11", m_dv_idid_endcap_M_11) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_12", m_dv_idid_endcap_M_12) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_13", m_dv_idid_endcap_M_13) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_14", m_dv_idid_endcap_M_14) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_endcap_M_15", m_dv_idid_endcap_M_15) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_endcap_ratio_R", m_dv_idid_endcap_ratio_R) );
 
     // truth-matched Ks and Z' comparison
     m_Ks_r = new TH1F("dv_Ks_r","K_{S} candidate r", 60,0,300);
@@ -307,7 +189,6 @@ StatusCode TrackingSystematics::execute() {
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
     if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
-    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     // trigger check
     if(!trig_passed) return StatusCode::SUCCESS;
@@ -402,7 +283,6 @@ StatusCode TrackingSystematics::execute() {
         auto dv_muc = m_accMu(*dv);
         auto dv_elc = m_accEl(*dv);
 
-        //if (channel == "trktrk") {
         if (true) {
 
             float track_pt_min = 400;   // MeV
@@ -462,92 +342,17 @@ StatusCode TrackingSystematics::execute() {
             m_dv_idid_R_M->Fill(dv_R, dv_mass);
 
             // fill mass plot
-            //if (dv_R < 10) m_dv_idid_M_0->Fill(dv_mass);
             if (dv_R < 20)   m_dv_idid_M_1->Fill(dv_mass);
-            if ((dv_R >= 20) and (dv_R < 40))  m_dv_idid_M_2->Fill(dv_mass);
-            if ((dv_R >= 40) and (dv_R < 60)) m_dv_idid_M_3->Fill(dv_mass);
-            if ((dv_R >= 60) and (dv_R < 80)) m_dv_idid_M_4->Fill(dv_mass);
-            if ((dv_R >= 80) and (dv_R < 100)) m_dv_idid_M_5->Fill(dv_mass);
-            if ((dv_R >= 100) and (dv_R < 120)) m_dv_idid_M_6->Fill(dv_mass);
-            if ((dv_R >= 120) and (dv_R < 140)) m_dv_idid_M_7->Fill(dv_mass);
-            if ((dv_R >= 140) and (dv_R < 160)) m_dv_idid_M_8->Fill(dv_mass);
-            if ((dv_R >= 160) and (dv_R < 180)) m_dv_idid_M_9->Fill(dv_mass);
-            if ((dv_R >= 180) and (dv_R < 200)) m_dv_idid_M_10->Fill(dv_mass);
-            if ((dv_R >= 200) and (dv_R < 220)) m_dv_idid_M_11->Fill(dv_mass);
-            if ((dv_R >= 220) and (dv_R < 240)) m_dv_idid_M_12->Fill(dv_mass);
-            if ((dv_R >= 240) and (dv_R < 260)) m_dv_idid_M_13->Fill(dv_mass);
-            if ((dv_R >= 260) and (dv_R < 280)) m_dv_idid_M_14->Fill(dv_mass);
-            if ((dv_R >= 280) and (dv_R < 300)) m_dv_idid_M_15->Fill(dv_mass);
+            if ((dv_R >= 20) and (dv_R < 60))  m_dv_idid_M_2->Fill(dv_mass);
+            if ((dv_R >= 60) and (dv_R < 100)) m_dv_idid_M_3->Fill(dv_mass);
+            if ((dv_R >= 100) and (dv_R < 140)) m_dv_idid_M_4->Fill(dv_mass);
+            if ((dv_R >= 140) and (dv_R < 180)) m_dv_idid_M_5->Fill(dv_mass);
+            if ((dv_R >= 180) and (dv_R < 220)) m_dv_idid_M_6->Fill(dv_mass);
+            if ((dv_R >= 220) and (dv_R < 260)) m_dv_idid_M_7->Fill(dv_mass);
+            if ((dv_R >= 260) and (dv_R < 300)) m_dv_idid_M_8->Fill(dv_mass);
 
             // fill ratio plot
             m_dv_idid_ratio_R->Fill(dv_R); // to be divided by the first bin in post script
-
-            //-----------------------------------
-            // separating barrel and endcap
-            //-----------------------------------
-
-            //
-            float dv_z_abs = std::abs(dv_z);
-
-            if ((dv_R < 242. and dv_z_abs < 400.5) or // pixel barrel
-               ((dv_R >=242. and dv_R < 549.) and dv_z_abs < 805.) or // SCT barrel
-               (dv_R >=549. and dv_z_abs < 780.)) { // TRT barrel
-
-                m_dv_idid_barrel_M->Fill(dv_mass);
-                m_dv_idid_barrel_R->Fill(dv_R);
-                m_dv_idid_barrel_z->Fill(dv_z);
-                m_dv_idid_barrel_l->Fill(dv_l);
-                m_dv_idid_barrel_pt->Fill(dv_pt);
-                m_dv_idid_barrel_mu->Fill(mu);
-                m_dv_idid_barrel_DeltaR->Fill(deltaR);
-                m_dv_idid_barrel_R_M->Fill(dv_R, dv_mass);
-
-                // fill mass plot
-                if (dv_R < 20)   m_dv_idid_barrel_M_1->Fill(dv_mass);
-                if ((dv_R >= 20) and (dv_R < 40))  m_dv_idid_barrel_M_2->Fill(dv_mass);
-                if ((dv_R >= 40) and (dv_R < 60)) m_dv_idid_barrel_M_3->Fill(dv_mass);
-                if ((dv_R >= 60) and (dv_R < 80)) m_dv_idid_barrel_M_4->Fill(dv_mass);
-                if ((dv_R >= 80) and (dv_R < 100)) m_dv_idid_barrel_M_5->Fill(dv_mass);
-                if ((dv_R >= 100) and (dv_R < 120)) m_dv_idid_barrel_M_6->Fill(dv_mass);
-                if ((dv_R >= 120) and (dv_R < 140)) m_dv_idid_barrel_M_7->Fill(dv_mass);
-                if ((dv_R >= 140) and (dv_R < 160)) m_dv_idid_barrel_M_8->Fill(dv_mass);
-                if ((dv_R >= 160) and (dv_R < 180)) m_dv_idid_barrel_M_9->Fill(dv_mass);
-                if ((dv_R >= 180) and (dv_R < 200)) m_dv_idid_barrel_M_10->Fill(dv_mass);
-                if ((dv_R >= 200) and (dv_R < 220)) m_dv_idid_barrel_M_11->Fill(dv_mass);
-                if ((dv_R >= 220) and (dv_R < 240)) m_dv_idid_barrel_M_12->Fill(dv_mass);
-                if ((dv_R >= 240) and (dv_R < 260)) m_dv_idid_barrel_M_13->Fill(dv_mass);
-                if ((dv_R >= 260) and (dv_R < 280)) m_dv_idid_barrel_M_14->Fill(dv_mass);
-                if ((dv_R >= 280) and (dv_R < 300)) m_dv_idid_barrel_M_15->Fill(dv_mass);
-            }
-
-            else { // endcap
-
-                m_dv_idid_endcap_M->Fill(dv_mass);
-                m_dv_idid_endcap_R->Fill(dv_R);
-                m_dv_idid_endcap_z->Fill(dv_z);
-                m_dv_idid_endcap_l->Fill(dv_l);
-                m_dv_idid_endcap_pt->Fill(dv_pt);
-                m_dv_idid_endcap_mu->Fill(mu);
-                m_dv_idid_endcap_DeltaR->Fill(deltaR);
-                m_dv_idid_endcap_R_M->Fill(dv_R, dv_mass);
-
-                // fill mass plot
-                if (dv_R < 20)   m_dv_idid_endcap_M_1->Fill(dv_mass);
-                if ((dv_R >= 20) and (dv_R < 40))  m_dv_idid_endcap_M_2->Fill(dv_mass);
-                if ((dv_R >= 40) and (dv_R < 60)) m_dv_idid_endcap_M_3->Fill(dv_mass);
-                if ((dv_R >= 60) and (dv_R < 80)) m_dv_idid_endcap_M_4->Fill(dv_mass);
-                if ((dv_R >= 80) and (dv_R < 100)) m_dv_idid_endcap_M_5->Fill(dv_mass);
-                if ((dv_R >= 100) and (dv_R < 120)) m_dv_idid_endcap_M_6->Fill(dv_mass);
-                if ((dv_R >= 120) and (dv_R < 140)) m_dv_idid_endcap_M_7->Fill(dv_mass);
-                if ((dv_R >= 140) and (dv_R < 160)) m_dv_idid_endcap_M_8->Fill(dv_mass);
-                if ((dv_R >= 160) and (dv_R < 180)) m_dv_idid_endcap_M_9->Fill(dv_mass);
-                if ((dv_R >= 180) and (dv_R < 200)) m_dv_idid_endcap_M_10->Fill(dv_mass);
-                if ((dv_R >= 200) and (dv_R < 220)) m_dv_idid_endcap_M_11->Fill(dv_mass);
-                if ((dv_R >= 220) and (dv_R < 240)) m_dv_idid_endcap_M_12->Fill(dv_mass);
-                if ((dv_R >= 240) and (dv_R < 260)) m_dv_idid_endcap_M_13->Fill(dv_mass);
-                if ((dv_R >= 260) and (dv_R < 280)) m_dv_idid_endcap_M_14->Fill(dv_mass);
-                if ((dv_R >= 280) and (dv_R < 300)) m_dv_idid_endcap_M_15->Fill(dv_mass);
-            }
         }
 
         // make histograms from truth-matched Ks

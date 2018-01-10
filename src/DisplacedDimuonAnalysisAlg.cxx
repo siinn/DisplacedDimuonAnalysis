@@ -39,7 +39,6 @@ m_tmt("Trig::MatchingTool/TrigMatchingTool"),
 m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
-//m_matchTool("InDetVertexTruthMatchTool"),
 m_accMass("mass")
 {
     // initialize tools
@@ -54,7 +53,6 @@ m_accMass("mass")
     declareProperty("TrigMatchingTool", m_tmt);
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
-    //declareProperty("InDetVertexTruthMatchTool", m_matchTool);
 
 
 }
@@ -375,7 +373,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
     if(isMC){
         m_event_cutflow->Fill("AllEvents",1);
-        m_event_cutflow->SetBinContent(1, 20000);
+        //m_event_cutflow->SetBinContent(1, 20000);
     }
 
     m_event_cutflow->Fill("RPVLLFilter", 1);
@@ -391,7 +389,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
     if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
-    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
+    //if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     // trigger check
     if(!trig_passed) return StatusCode::SUCCESS;
@@ -513,7 +511,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
-            //m_dv_mumu_cf->Fill("m < 10 GeV", 1);
 
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
@@ -758,7 +755,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if (channel == "trktrk") {
 
             // idid pair
-            m_dv_idid_cf->Fill("Trk-Trk", 1);
+            m_dv_idid_cf->Fill("xx", 1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*dv)) continue;
@@ -770,7 +767,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // charge requirements
             if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_idid_cf->Fill("trk^{+}-trk^{-}", 1);
+            m_dv_idid_cf->Fill("x^{+}x^{-}", 1);
 
             // disabled module
             if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
@@ -792,7 +789,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
 
             //==========================================
-            // plot trk-trk distributions
+            // plot xx distributions
             //==========================================
             plot_dv(*dv, *pv, channel);
             m_dv_idid_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );

@@ -2,11 +2,15 @@
 #include "GaudiKernel/DeclareFactoryEntries.h"
 
 #include "../DisplacedDimuonAnalysisAlg.h"
+#include "../SUSYSelection.h"
+#include "../LowMass.h"
 #include "../DisplacedDimuonAnalysis/DVUtils.h"
 #include "../DisplacedDimuonAnalysis/LeptonSelectionTools.h"
 #include "../DisplacedDimuonAnalysis/CosmicTools.h"
 
 DECLARE_ALGORITHM_FACTORY( DisplacedDimuonAnalysisAlg )
+DECLARE_ALGORITHM_FACTORY( SUSYSelection )
+DECLARE_ALGORITHM_FACTORY( LowMass )
 DECLARE_TOOL_FACTORY( DVUtils )
 DECLARE_TOOL_FACTORY( LeptonSelectionTools )
 DECLARE_TOOL_FACTORY( CosmicTools )
@@ -49,6 +53,8 @@ DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis )
   DECLARE_ALGORITHM( DVEfficiency );
   DECLARE_ALGORITHM( LeptonEfficiency );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )
+  DECLARE_ALGORITHM( SUSYSelection )
+  DECLARE_ALGORITHM( LowMass )
   DECLARE_ALGORITHM( TrackingSystematics )
   DECLARE_ALGORITHM( CosmicBackground )
   DECLARE_TOOL( DVUtils )

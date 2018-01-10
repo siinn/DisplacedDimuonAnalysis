@@ -178,17 +178,17 @@ StatusCode TruthPlots::execute() {
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 
-    // get combine weight from pileup reweighting tool
-    float p_weight = m_prw->getCombinedWeight(*evtInfo);
+    //  // get combine weight from pileup reweighting tool
+    //  float p_weight = m_prw->getCombinedWeight(*evtInfo);
 
-    // pile-up
-    int pileup = evtInfo->actualInteractionsPerCrossing();
-    m_pileup->Fill(pileup);
-    m_pileup_reweighted->Fill(pileup,p_weight);
+    //  // pile-up
+    //  int pileup = evtInfo->actualInteractionsPerCrossing();
+    //  m_pileup->Fill(pileup);
+    //  m_pileup_reweighted->Fill(pileup,p_weight);
 
-    // get pile-up weights
-    m_p_weight->SetBinContent(pileup+1,p_weight);
-    ATH_MSG_DEBUG("mu = " << pileup << ", weight = " << p_weight << ", bin center = " << m_p_weight->GetBinCenter(pileup+1));
+    //  // get pile-up weights
+    //  m_p_weight->SetBinContent(pileup+1,p_weight);
+    //  ATH_MSG_DEBUG("mu = " << pileup << ", weight = " << p_weight << ", bin center = " << m_p_weight->GetBinCenter(pileup+1));
 
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     CHECK( evtStore()->retrieve( tru_vc, "TruthVertices"));

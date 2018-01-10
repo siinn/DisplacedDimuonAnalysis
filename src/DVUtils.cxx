@@ -892,13 +892,26 @@ bool DVUtils::isSignal (const xAOD::TruthParticle* p) {
 // check if truth vertex is signal vertex
 bool DVUtils::isSignalVertex (const xAOD::TruthVertex* v) {
 
-    if (!(v->nIncomingParticles() == 1)) return false;
-    if (!(v->nOutgoingParticles() == 2)) return false;
+    bool signal = true;
+
+    ATH_MSG_DEBUG("DEBUG: 0, nIncoming = " << v->nIncomingParticles() << ", nOutgoing = " << v->nOutgoingParticles());
+
+    if (!(v->nIncomingParticles() == 1)) signal = false;
+    if (!((v->nOutgoingParticles() == 2) or (v->nOutgoingParticles() == 3)))
+    {
+        signal = false;
+    }
 
     // access parent
     const xAOD::TruthParticle* parent = v->incomingParticle(0);
-    if ((parent->absPdgId() ==32)) return true;
-    else return false;
+    ATH_MSG_DEBUG("DEBUG: 1, parent->absPdgId() = " << parent->absPdgId());
+    if (!((parent->absPdgId() ==32) or (parent->absPdgId() ==1000022)))
+    {
+        signal = false;
+    }
+
+    ATH_MSG_DEBUG("DEBUG: 2, signal = " << signal);
+    return signal;
 
 } // end of isSignal
 
@@ -912,6 +925,10 @@ float DVUtils::TruthMass (const xAOD::TruthVertex* v) {
     for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
 
         const xAOD::TruthParticle* p = v->outgoingParticle(i);
+
+        // skip if particle is not charged (to remove neutrino from mass calculation)
+        if (p->isNeutral()) continue;
+
         outgoing_tlv += TLorentzVector( p->px(), p->py(), p->pz(), p->e());
 
     } // end of outgoingn particle loop
@@ -929,6 +946,10 @@ float DVUtils::TruthPt (const xAOD::TruthVertex* v) {
     for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
 
         const xAOD::TruthParticle* p = v->outgoingParticle(i);
+
+        // skip if particle is not charged (to remove neutrino from mass calculation)
+        if (p->isNeutral()) continue;
+
         outgoing_tlv += TLorentzVector( p->px(), p->py(), p->pz(), p->e());
     } // end of outgoingn particle loop
 

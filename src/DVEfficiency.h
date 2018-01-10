@@ -61,11 +61,8 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or; //!
-        //ToolHandle<CP::IPileupReweightingTool> m_prw; //!
         ToolHandle<CP::IPileupReweightingTool> m_prw; //!
 
-
-        
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
@@ -76,6 +73,9 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
 
         // pileup weight
         float p_weight = 0;
+
+        // cut flow
+        TH1D* m_dv_eff_cutflow; //!
 
         // efficiency as a function of track parameters
         TEfficiency* m_dv_eff_eta; //! 
