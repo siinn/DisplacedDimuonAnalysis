@@ -12,4 +12,8 @@ S'../../../DisplacedDimuonAnalysis/genConf/DisplacedDimuonAnalysis/DisplacedDimu
 p6
 S'../../InstallArea/python/DisplacedDimuonAnalysis/DisplacedDimuonAnalysisConf.py'
 p7
-sssb.
+ssS'../../../../../../../../cvmfs/atlas.cern.ch/repo/sw/software/AthAnalysisBase/x86_64-slc6-gcc49-opt/2.4.32/GAUDI/v26r2p1-lcg81e/GaudiPolicy/cmt/fragments/__init__.py'
+p8
+S'../../InstallArea/python/DisplacedDimuonAnalysis/__init__.py'
+p9
+ssb.

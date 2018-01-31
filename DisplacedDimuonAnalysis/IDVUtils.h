@@ -41,6 +41,12 @@ class IDVUtils: virtual public IAlgTool {
         virtual const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) = 0;
         virtual const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv) = 0;
 
+        // find invariant mass of two track
+        virtual float TrackMass (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2) = 0;
+
+        // find delta R between two track
+        virtual float getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2) = 0;
+
         // get closest truth DV
         virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv) = 0;
 
@@ -109,9 +115,6 @@ class IDVUtils: virtual public IAlgTool {
 
         // check if there is an associated lepton
         virtual bool IsLepton(const xAOD::TrackParticle* tp) = 0;
-
-        // RPVLL filter test
-        virtual bool PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc) = 0;
     
     private:
     

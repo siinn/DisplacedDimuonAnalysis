@@ -21,19 +21,13 @@ use TrigDecisionTool            TrigDecisionTool-*              Trigger/TrigAnal
 
 # DV
 use DDLBase                     DDLBase-*                       
-#use DDLCombBkg                  DDLCombBkg-*                       
+use DDLCombBkg                  DDLCombBkg-*                       
 
 # xAOD
 use xAODTracking                xAODTracking-*                  Event/xAOD
 use xAODTruth                   xAODTruth-*                     Event/xAOD
 use xAODMuon                    xAODMuon-*                      Event/xAOD
-use xAODEgamma                  xAODEgamma-*                    Event/xAOD
 use xAODBase                    xAODBase-*                      Event/xAOD
-
-use ElectronPhotonSelectorTools ElectronPhotonSelectorTools-*   PhysicsAnalysis/ElectronPhotonID
-use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
-use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
-
 
 #-------------------------------------------------------
 # private
@@ -55,17 +49,16 @@ use xAODCore                    xAODCore-*                      Event/xAOD
 
 use PathResolver                PathResolver-*                  Tools
 
-# pileup reweighting tool
-use PileupReweighting           PileupReweighting-*             PhysicsAnalysis/AnalysisCommon
-
 # DV
-#use DVTools                     DVTools-*                       DV_xAODAnalysis
-#use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis
-#use DVCuts                      DVCuts-*                        DV_xAODAnalysis
+use DVTools                     DVTools-*                       DV_xAODAnalysis
+use DVAnalyses                  DVAnalyses-*                    DV_xAODAnalysis
+use DVCuts                      DVCuts-*                        DV_xAODAnalysis
 
 # muon
 use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
+use MuonPerformanceHistUtils    MuonPerformanceHistUtils-*      PhysicsAnalysis/MuonID/MuonPerformanceAnalysis
 use MuonEfficiencyCorrections   MuonEfficiencyCorrections-*     PhysicsAnalysis/MuonID/MuonIDAnalysis 
+use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
 
 use AtlasROOT                   AtlasROOT-*                     External
 
@@ -73,9 +66,9 @@ use AtlasROOT                   AtlasROOT-*                     External
 use  StoreGate                  StoreGate-*                     Control
 
 # luminosity calculation
-#use xAODRootAccess              xAODRootAccess-*                Control
-#use xAODLuminosity              xAODLuminosity-*                Event/xAOD
-#use xAODLuminosity              xAODLuminosity-*                Event/xAOD
+use xAODRootAccess              xAODRootAccess-*                Control
+use xAODLuminosity              xAODLuminosity-*                Event/xAOD
+use xAODLuminosity              xAODLuminosity-*                Event/xAOD
 
 end_private
 

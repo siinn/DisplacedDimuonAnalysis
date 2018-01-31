@@ -68,7 +68,7 @@ std::string DVUtils::DecayChannel(xAOD::Vertex& dv) {
     if ((dv_muc->size() == 1) and (dv_elc->size() == 1)) decayChannel = "emu";
     if ((dv_muc->size() == 1) and (dv_elc->size() == 0)) decayChannel = "mut";
     if ((dv_muc->size() == 0) and (dv_elc->size() == 1)) decayChannel = "et";
-    if ((dv_muc->size() == 0) and (dv_elc->size() == 0)) decayChannel = "trktrk";
+    if ((dv_muc->size() == 0) and (dv_elc->size() == 0)) decayChannel = "idid";
 
     return decayChannel;
 
@@ -105,7 +105,6 @@ bool DVUtils::TrigMatching(xAOD::Vertex& dv) {
             // evaluate trigger
             if(m_trig->Match(*el, "HLT_g140_loose")) pass = true;
             if(m_trig->Match(*el, "HLT_2g50_loose")) pass = true;
-            if(m_trig->Match(*el, "HLT_2g60_loose_L12EM15VH")) pass = true;
         }
     }
     if (channel == "emu"){
@@ -121,7 +120,6 @@ bool DVUtils::TrigMatching(xAOD::Vertex& dv) {
             // evaluate trigger
             if(m_trig->Match(*el, "HLT_g140_loose")) pass = true;
             if(m_trig->Match(*el, "HLT_2g50_loose")) pass = true;
-            if(m_trig->Match(*el, "HLT_2g60_loose_L12EM15VH")) pass = true;
         }
     }
 
@@ -140,7 +138,6 @@ float DVUtils::getR(const xAOD::Vertex& dv, const xAOD::Vertex& pv) {
 
     // distance in 3d vector
     auto dist = pv_pos - dv_pos;
-    //auto dist = dv_pos;
 
     // return distance in transverse plane
     return dist.perp();
@@ -323,6 +320,35 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV_loose(const DataVector<xAOD::Muon> 
     return nullptr; // return null if there is no match (reco dv is not matched to truth)
 }
 
+
+float DVUtils::TrackMass (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2){
+
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+    TLorentzVector tlv_total;
+
+    tlv_tp0 = tp1.p4();
+    tlv_tp1 = tp2.p4();
+    tlv_total = tlv_tp0 + tlv_tp1;
+
+    return tlv_total.M();
+}
+
+
+float DVUtils::getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2){
+
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+
+    tlv_tp0 = tp1.p4();
+    tlv_tp1 = tp2.p4();
+
+    float deltaR_tlv = tlv_tp0.DeltaR(tlv_tp1);
+
+    return deltaR_tlv;
+}
 
 // get closest truth vertex
 const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv){
@@ -853,36 +879,6 @@ bool DVUtils::IsReconstructedAsIDTrack(const xAOD::TruthParticle& tp) {
 // check if truth particle is signal muon from (Z')
 bool DVUtils::isSignal (const xAOD::TruthParticle* p) {
 
-
-    // not reliable due to bremsstrahlung
-    // start from signal vertex and use FindFinalState
-
-
-
-
-    //if ( (p->status() ==1)
-    //and ( (p->absPdgId() == 13) or (p->absPdgId() == 11))
-    //and (p->barcode() < 200000) ){
-    //    ATH_MSG_INFO("DEBUG: inside isSignal, electron barcode = "
-    //                << p->barcode()
-    //                );
-    //    const xAOD::TruthParticle *parent = p;
-    //    do {
-    //        // move to parent particle
-    //        parent = parent->parent();
-    //        if (parent == NULL) {
-    //            ATH_MSG_INFO("DEBUG: (fail) this electron has no parent");
-    //            return false;
-    //        }
-    //        ATH_MSG_INFO("DEBUG: this electron has a parent");
-    //        if (parent->absPdgId() == 32) {
-    //            ATH_MSG_INFO("DEBUG: (pass) this electron " << parent->barcode() << " has a parent and is Z'");
-    //            return true;
-    //            ATH_MSG_INFO("DEBUG: (pass) this electron has a parent and is Z': return true?");
-    //        }
-    //    } while (parent->parent() != NULL );
-    //ATH_MSG_INFO("DEBUG: (fail) this electron " << parent->barcode() << " has no parent");
-    //} // end of muon
     return false;
 
 } // end of isSignal
@@ -1049,18 +1045,5 @@ bool DVUtils::IsLepton(const xAOD::TrackParticle* tp){
     
     return false;
 }
-
-
-
-// check if event pass RPVLL filter
-bool DVUtils::PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc){
-
-    return false;
-}
-
-
-
-
-
 
 

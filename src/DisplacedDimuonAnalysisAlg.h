@@ -15,8 +15,9 @@
 #include "DDLBase/IEventCuts.h"
 #include "DDLBase/IDVCuts.h"
 #include "DDLBase/IDiLepDVCuts.h"
-#include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
+#include "DDLBase/IDiLepCosmics.h"
+#include "DDLBase/IPhotonMatch.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -24,7 +25,6 @@
 #include "DisplacedDimuonAnalysis/CosmicTools.h"
 
 // GRL
-//#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
 #include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
 
 // Trigger decision tool
@@ -48,7 +48,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         virtual void plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::string channel);
 
         virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
-        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
 
         // cosmic background plots
         virtual void FillCosmicBkg(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, std::string channel);
@@ -56,17 +55,18 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
     private:
 
         // setting tools
-        ToolHandle<DDL::IEventCuts> m_evtc; //!
-        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
-        ToolHandle<DDL::IDVCuts> m_dvc;
-        ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
         ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
-        ToolHandle<DDL::IOverlapRemoval> m_or;
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
+        ToolHandle<DDL::IOverlapRemoval> m_or;
+        ToolHandle<DDL::IEventCuts> m_evtc; //!
+        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
+        ToolHandle<DDL::IDVCuts> m_dvc;
+        ToolHandle<DDL::IDiLepCosmics> m_cos;
+        ToolHandle<DDL::IPhotonMatch> m_phmatch;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
