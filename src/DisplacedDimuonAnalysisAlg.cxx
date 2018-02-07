@@ -525,10 +525,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // get position of DV
         float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
-        float dv_z = m_dvutils->getz( *dv, *pv );                 // z in [mm]
+        float dv_z = std::abs(m_dvutils->getz( *dv, *pv ));       // z in [mm]
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
+
+        // blind signal region
+        if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) continue;
 
         if (channel == "mumu") {
 
@@ -569,14 +572,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // cosmic veto
             //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             //m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
-
-            // track invariant mass cut
-            //if(track_mass < track_mass_min) continue;
-            //m_dv_mumu_cf->Fill("TrackMass", 1);
-
-            // deltaR cut
-            //if(deltaR < deltaR_min) continue;
-            //m_dv_mumu_cf->Fill("#Delta R > 0.04", 1);
 
             // RPVLL filter matching
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
@@ -653,14 +648,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             //m_dv_ee_cf->Fill("R_{CR} > 0.04", 1);
 
-            // track invariant mass cut
-            //if(track_mass < track_mass_min) continue;
-            //m_dv_ee_cf->Fill("TrackMass", 1);
-
-            // deltaR cut
-            //if(deltaR < deltaR_min) continue;
-            //m_dv_ee_cf->Fill("#Delta R > 0.04", 1);
-
             // RPVLL filter matching
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_ee_cf->Fill("FilterMatching", 1);
@@ -732,14 +719,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
             //m_dv_emu_cf->Fill("R_{CR} > 0.04", 1);
 
-            // track invariant mass cut
-            //if(track_mass < track_mass_min) continue;
-            //m_dv_emu_cf->Fill("TrackMass", 1);
-
-            // deltaR cut
-            //if(deltaR < deltaR_min) continue;
-            //m_dv_emu_cf->Fill("#Delta R > 0.04", 1);
-
             // RPVLL filter matching
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_emu_cf->Fill("FilterMatching", 1);
@@ -809,14 +788,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             //m_dv_mut_cf->Fill("R_{CR} > 0.04", 1);
 
-            // track invariant mass cut
-            //if(track_mass < track_mass_min) continue;
-            //m_dv_mut_cf->Fill("TrackMass", 1);
-
-            // deltaR cut
-            //if(deltaR < deltaR_min) continue;
-            //m_dv_mut_cf->Fill("#Delta R > 0.04", 1);
-
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
             m_dv_mut_cf->Fill("R_{DV} > 300 mm", 1);
@@ -877,14 +848,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             //m_dv_et_cf->Fill("R_{CR} > 0.04", 1);
 
-            // track invariant mass cut
-            //if(track_mass < track_mass_min) continue;
-            //m_dv_et_cf->Fill("TrackMass", 1);
-
-            // deltaR cut
-            //if(deltaR < deltaR_min) continue;
-            //m_dv_et_cf->Fill("#Delta R > 0.04", 1);
-
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
             m_dv_et_cf->Fill("R_{DV} > 300 mm", 1);
@@ -940,14 +903,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // cosmic veto (R_CR)
             //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
             //m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
-
-            // track invariant mass cut
-            //if(track_mass < track_mass_min) continue;
-            //m_dv_idid_cf->Fill("TrackMass", 1);
-
-            // deltaR cut
-            //if(deltaR < deltaR_min) continue;
-            //m_dv_idid_cf->Fill("#Delta R > 0.04", 1);
 
             // RPVLL filter matching
             //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;

@@ -31,7 +31,7 @@ StatusCode LeptonSelectionTools::initialize() {
     ServiceHandle<IJobOptionsSvc> josvc("JobOptionsSvc", name());
     ATH_CHECK(josvc->addPropertyToCatalogue("ToolSvc.DVElectronLikelihoodTool", StringProperty("WorkingPoint", "LooseLHNod0Electron")));
 
-    ATH_CHECK(m_elt.retrieve());
+    //ATH_CHECK(m_elt.retrieve());
 
     auto elt_cast = dynamic_cast<AsgElectronLikelihoodTool*>(&*m_elt);
 
@@ -141,22 +141,23 @@ void LeptonSelectionTools::MuonSelection(xAOD::Vertex& dv) {
 
         // retrieve muon ID track 
         auto mu_tr = (*mu)->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-           if(mu_tr == nullptr && (*mu)->muonType() == xAOD::Muon::Combined){
+        if(mu_tr != nullptr && (*mu)->muonType() == xAOD::Muon::Combined){
 
-                // retrieve muon pt
-                float mu_pt = mu_tr->pt() / 1000.;
-                float mu_eta = std::fabs((**mu).eta());
-                
-                // apply muon correction. If fail, erase muon
-                if(!(m_mct->applyCorrection(**mu))) dv_muc->erase(mu);
-                else if(!(m_mst->accept(**mu))) dv_muc->erase(mu);
-                else if(mu_pt < mu_pt_min) dv_muc->erase(mu);
-                else if(mu_eta > mu_eta_max) dv_muc->erase(mu);
-                else if(!((**mu).muonType() == xAOD::Muon::Combined)) dv_muc->erase(mu);
-                else ++mu;
-            }
+            // retrieve muon pt
+            float mu_pt = mu_tr->pt() / 1000.;
+            float mu_eta = std::fabs((**mu).eta());
+            
+            // apply muon correction. If fail, erase muon
+            if(!(m_mct->applyCorrection(**mu))) dv_muc->erase(mu);
+            else if(!(m_mst->accept(**mu))) dv_muc->erase(mu);
+            else if(mu_pt < mu_pt_min) dv_muc->erase(mu);
+            else if(mu_eta > mu_eta_max) dv_muc->erase(mu);
+            else if(!((**mu).muonType() == xAOD::Muon::Combined)) dv_muc->erase(mu);
             else ++mu;
-
+        }
+        else {
+                dv_muc->erase(mu);
+        }
     }
 
     return;
@@ -172,7 +173,7 @@ bool LeptonSelectionTools::MuonSelection(xAOD::Muon& mu) {
 
     // retrieve muon ID track 
     auto mu_tr = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-       if(mu_tr == nullptr && mu.muonType() == xAOD::Muon::Combined){
+    if(mu_tr != nullptr && mu.muonType() == xAOD::Muon::Combined){
 
         // retrieve muon pt
         float mu_pt = mu_tr->pt() / 1000.;
@@ -184,6 +185,8 @@ bool LeptonSelectionTools::MuonSelection(xAOD::Muon& mu) {
         else if(mu_eta > mu_eta_max) pass = false;
         else if(!(mu.muonType() == xAOD::Muon::Combined)) pass = false;
     }
+    else pass = false;
+
 
     return pass;
 }
