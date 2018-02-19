@@ -7,6 +7,7 @@
 #include "../DisplacedDimuonAnalysis/DVUtils.h"
 #include "../DisplacedDimuonAnalysis/LeptonSelectionTools.h"
 #include "../DisplacedDimuonAnalysis/CosmicTools.h"
+#include "../DisplacedDimuonAnalysis/FilterMatchingTools.h"
 
 DECLARE_ALGORITHM_FACTORY( DisplacedDimuonAnalysisAlg )
 DECLARE_ALGORITHM_FACTORY( SUSYSelection )
@@ -14,6 +15,7 @@ DECLARE_ALGORITHM_FACTORY( LowMass )
 DECLARE_TOOL_FACTORY( DVUtils )
 DECLARE_TOOL_FACTORY( LeptonSelectionTools )
 DECLARE_TOOL_FACTORY( CosmicTools )
+DECLARE_TOOL_FACTORY( FilterMatchingTools )
 
 
 #include "../LeptonEfficiency.h"
@@ -44,6 +46,7 @@ DECLARE_ALGORITHM_FACTORY( TrackingSystematics )
 #include "../CosmicBackground.h"
 DECLARE_ALGORITHM_FACTORY( CosmicBackground )
 
+
 DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis ) 
 {
   DECLARE_ALGORITHM( MuonPlots );
@@ -58,4 +61,7 @@ DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis )
   DECLARE_ALGORITHM( TrackingSystematics )
   DECLARE_ALGORITHM( CosmicBackground )
   DECLARE_TOOL( DVUtils )
+  DECLARE_TOOL( LeptonSelectionTools )
+  DECLARE_TOOL( CosmicTools )
+  DECLARE_TOOL( FilterMatchingTools );
 }

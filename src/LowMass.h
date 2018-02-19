@@ -23,6 +23,7 @@
 #include "DisplacedDimuonAnalysis/DVUtils.h"
 #include "DisplacedDimuonAnalysis/LeptonSelectionTools.h"
 #include "DisplacedDimuonAnalysis/CosmicTools.h"
+#include "DisplacedDimuonAnalysis/FilterMatchingTools.h"
 
 // GRL
 //#include "GoodRunsLists/IGoodRunsListSelectionTool.h"
@@ -66,6 +67,7 @@ class LowMass: public ::AthAnalysisAlgorithm {
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
+        ToolHandle<IFilterMatchingTools> m_fmtool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
         ToolHandle<DDL::IPhotonMatch> m_phmatch;
@@ -203,15 +205,18 @@ class LowMass: public ::AthAnalysisAlgorithm {
         // lepton + track plots
         //----------------------------------
             TH1D* m_dv_mut_cf; //!
+            TH1F* m_dv_mut_M_high; //!
             TH1F* m_dv_mut_M; //!
 
             TH1D* m_dv_et_cf; //!
+            TH1F* m_dv_et_M_high; //!
             TH1F* m_dv_et_M; //!
 
         //----------------------------------
         // trk-trk plots
         //----------------------------------
             TH1D* m_dv_idid_cf; //!
+            TH1F* m_dv_idid_M_high; //!
             TH1F* m_dv_idid_M; //!
             TH1F* m_dv_idid_z; //!
             TH1F* m_dv_idid_R; //!

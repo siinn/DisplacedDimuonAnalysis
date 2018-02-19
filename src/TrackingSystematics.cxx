@@ -43,6 +43,7 @@ m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
 //m_matchTool("InDetVertexTruthMatchTool"),
+m_phmatch("DDL::PhotonMatch/PhotonMatch"),
 m_accMass("mass"),
 m_acc_pt("pT")
 {
@@ -58,6 +59,7 @@ m_acc_pt("pT")
     declareProperty("TrigMatchingTool", m_tmt);
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
+    declareProperty("PhotonMatch", m_phmatch);
 }
 
 
@@ -70,7 +72,7 @@ StatusCode TrackingSystematics::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // event cut flow
-    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
+    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 6,0,6);
     CHECK( histSvc->regHist("/DV/tracking_syst/event_cutflow", m_event_cutflow) );
 
     Float_t m_dv_idid_M_bins[] = {0.,50.,100.,150.,200.,250.,300.};
@@ -168,15 +170,60 @@ StatusCode TrackingSystematics::execute() {
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 
-    int mu = evtInfo->actualInteractionsPerCrossing();
+    // pile-up
+    int pileup = evtInfo->actualInteractionsPerCrossing();
 
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
+    // retrieve lepton container
+    const xAOD::MuonContainer* muc = nullptr;
+    CHECK( evtStore()->retrieve( muc, "Muons" ));
+
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
+    const xAOD::PhotonContainer* phc = nullptr;
+    CHECK(evtStore()->retrieve(phc, "Photons"));
+
+    // retrieve primary vertices
+    const xAOD::VertexContainer* pvc = nullptr;
+    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
+
     //bool trig_passed = true;
     bool trig_passed = false;
 
-    m_event_cutflow->Fill("AllEvents", 1);
+    // make copies of leptons
+    auto muc_copy = xAOD::shallowCopyContainer(*muc);
+    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
+
+    auto elc_copy = xAOD::shallowCopyContainer(*elc);
+    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
+
+    // apply overlap removal
+    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
+
+    // perform matching of photons to electrons
+    m_phmatch->MatchPhotons(*phc, *elc_copy.first);
+
+    // retrieve secondary vertices
+    const xAOD::VertexContainer* dvc = nullptr;
+    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
+
+    // make a copy of vertex containers
+    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
+
+    //---------------------------------------
+    // Event cut flow
+    //---------------------------------------
+
+    if(isMC){
+        m_event_cutflow->Fill("AllEvents",1);
+    }
+    else{
+        // all events already passed RPVLL filter
+        m_event_cutflow->Fill("RPVLLFilter", 1);
+    }
 
     // GRL
     if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
@@ -191,39 +238,30 @@ StatusCode TrackingSystematics::execute() {
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
 
     // trigger check
-    if(!trig_passed) return StatusCode::SUCCESS;
+    //if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
 
-    // retrieve lepton container
-    const xAOD::MuonContainer* muc = nullptr;
-    CHECK( evtStore()->retrieve( muc, "Muons" ));
-
-    const xAOD::ElectronContainer* elc = nullptr;
-    CHECK( evtStore()->retrieve( elc, "Electrons" ));
-
-    // make copies of leptons
-    auto muc_copy = xAOD::shallowCopyContainer(*muc);
-    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
-
-    auto elc_copy = xAOD::shallowCopyContainer(*elc);
-    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
-
-    // apply overlap removal
-    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
-
-    // retrieve primary vertices
-    const xAOD::VertexContainer* pvc = nullptr;
-    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
+    // cosmic veto
+    if(!m_cos->PassCosmicEventVeto(*elc, *muc)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("CosmicVeto", 1);
 
     // get primary vertex
     auto pv = m_evtc->GetPV(*pvc);
 
-    // retrieve secondary vertices
-    const xAOD::VertexContainer* dvc = nullptr;
-    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
+    // PV position < 200 mm
+    float pv_z_max = 200.;
 
-    // make a copy of vertex containers
-    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
+    // apply primary vertex position cut
+    if (pv) {
+
+        // get primary vertex position
+        auto pv_pos = pv->position();
+
+        // z_pv cut
+        if(pv_pos.z() > pv_z_max) return StatusCode::SUCCESS;
+    }
+    else return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("z_{PV} < 200 mm", 1);
 
     //=======================================================
     // Ks cutflow
@@ -235,6 +273,9 @@ StatusCode TrackingSystematics::execute() {
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
+
+        // trigger matching
+        m_dilepdvc->DoTriggerMatching(*dv);
 
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
@@ -288,9 +329,11 @@ StatusCode TrackingSystematics::execute() {
             float track_pt_min = 400;   // MeV
             float mass_min = 350;   // MeV
             float mass_max = 650;   // MeV
+            float dv_R_max = 300;   // mm
+            float dv_z_max = 300;   // mm
 
             // idid pair
-            m_dv_idid_cf->Fill("Trk-Trk", 1);
+            m_dv_idid_cf->Fill("xx", 1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*dv)) continue;
@@ -302,7 +345,7 @@ StatusCode TrackingSystematics::execute() {
 
             // charge requirements
             if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_idid_cf->Fill("trk^{+}-trk^{-}", 1);
+            m_dv_idid_cf->Fill("xx", 1);
 
             // disabled module
             if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
@@ -310,11 +353,11 @@ StatusCode TrackingSystematics::execute() {
 
             // material veto (only e)
             if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_idid_cf->Fill("MaterialVeto (Only e)", 1);
+            m_dv_idid_cf->Fill("MaterialVeto", 1);
 
             // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
+            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            //m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
@@ -323,6 +366,14 @@ StatusCode TrackingSystematics::execute() {
             // low mass veto
             if(dv_mass > mass_max) continue;
             m_dv_idid_cf->Fill("m < 650 MeV", 1);
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_idid_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(std::abs(dv_z) > dv_z_max) continue;
+            m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
 
             // Ks candidate selection
             if(!PassKsSelection(*dv, *pv)) continue;
@@ -337,7 +388,7 @@ StatusCode TrackingSystematics::execute() {
             m_dv_idid_z->Fill(dv_z);
             m_dv_idid_l->Fill(dv_l);
             m_dv_idid_pt->Fill(dv_pt);
-            m_dv_idid_mu->Fill(mu);
+            m_dv_idid_mu->Fill(pileup);
             m_dv_idid_DeltaR->Fill(deltaR);
             m_dv_idid_R_M->Fill(dv_R, dv_mass);
 
@@ -384,11 +435,12 @@ StatusCode TrackingSystematics::execute() {
     //=======================================================
     for(auto dv: *dvc_copy.first) {
 
-        // minimum delta R
-        float deltaR_min = 0.5;
-        
         // mass cut
         float mass_min = 10.;
+
+        // vertex position cut
+        float dv_R_max = 300;
+        float dv_z_max = 300;
 
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) continue;
@@ -398,6 +450,9 @@ StatusCode TrackingSystematics::execute() {
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
+
+        // perform filter matching
+        m_dilepdvc->DoFilterMatching(*dv);
 
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
@@ -471,6 +526,15 @@ StatusCode TrackingSystematics::execute() {
             // cosmic veto
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
 
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+
+            // DV z <  300 mm
+            if(std::abs(dv_z) > dv_z_max) continue;
+
             // make histograms from truth-matched Ks
             if(isMC){
                 // find closest truth vertex
@@ -504,7 +568,7 @@ StatusCode TrackingSystematics::beginInputFile() {
 bool TrackingSystematics::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
 
     bool PassCosmicVeto = true;
-    float Rcos_min = 0.04;
+    float Rcos_min = 0.01;
 
     // define TLorentzVector of decay particles
     TLorentzVector tlv_tp0;

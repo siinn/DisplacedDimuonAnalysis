@@ -40,6 +40,7 @@ m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
 m_phmatch("DDL::PhotonMatch/PhotonMatch"),
+m_fmtool("FilterMatchingTools"),
 //m_matchTool("InDetVertexTruthMatchTool"),
 m_accMass("mass")
 {
@@ -56,6 +57,7 @@ m_accMass("mass")
     declareProperty("DiLepBaseCuts", m_dvc);
     declareProperty("DiLepDVCuts", m_dilepdvc);
     declareProperty("PhotonMatch", m_phmatch);
+    declareProperty("FilterMatchingTool", m_fmtool);
     //declareProperty("InDetVertexTruthMatchTool", m_matchTool);
 
 
@@ -83,8 +85,8 @@ StatusCode LowMass::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_mumu_cf = new TH1D( "lowmass_mumu_cf", "Reco dv mumu cutflow", 9,0,9);
-    m_dv_mumu_M = new TH1F("lowmass_mumu_M","Dimuon DV mass in GeV", 8000,0,2000 );
+    m_dv_mumu_cf = new TH1D( "lowmass_mumu_cf", "Reco dv mumu cutflow", 11,0,11);
+    m_dv_mumu_M = new TH1F("lowmass_mumu_M","Dimuon DV mass in GeV", 40,0,10);
     m_dv_mumu_R = new TH1F("lowmass_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("lowmass_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
     m_dv_mumu_z = new TH1F("lowmass_mumu_z","z of dimuon dv [mm]",100,-1000.,1000.);
@@ -151,8 +153,8 @@ StatusCode LowMass::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 9,0,9);
-    m_dv_ee_M = new TH1F("lowmass_ee_M","ee DV mass in GeV",8000, 0, 2000);
+    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 11,0,11);
+    m_dv_ee_M = new TH1F("lowmass_ee_M","ee DV mass in GeV",40,0,10);
     m_dv_ee_R = new TH1F("lowmass_ee_R","R of ee dv [mm]",50,0.,300.);
     m_dv_ee_R_low = new TH1F("lowmass_ee_R_low","R of ee dv [mm], low",50,0.,50.);
     m_dv_ee_z = new TH1F("lowmass_ee_z","z of ee dv [mm]",100,-1000.,1000.);
@@ -217,8 +219,8 @@ StatusCode LowMass::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 9,0,9);
-    m_dv_emu_M = new TH1F("lowmass_emu_M","emu DV mass in GeV",8000,0,2000);
+    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 11,0,11);
+    m_dv_emu_M = new TH1F("lowmass_emu_M","emu DV mass in GeV",40,0,10);
     m_dv_emu_R = new TH1F("lowmass_emu_R","R of emu dv [mm]",50,0.,300.);
     m_dv_emu_R_low = new TH1F("lowmass_emu_R_low","R of emu dv [mm], low",50,0.,50.);
     m_dv_emu_z = new TH1F("lowmass_emu_z","z of emu dv [mm]",100,-1000.,1000.);
@@ -297,7 +299,8 @@ StatusCode LowMass::initialize() {
     // trk-trk vertex plots
     //--------------------------------------------------------
     m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 8,0,8);
-    m_dv_idid_M = new TH1F("lowmass_idid_M","lowmass mass in GeV", 8000, 0, 2000. );
+    m_dv_idid_M = new TH1F("lowmass_idid_M","lowmass mass in GeV", 40, 0, 10. );
+    m_dv_idid_M_high = new TH1F("lowmass_idid_M_high","lowmass mass in GeV", 8000, 0, 2000. );
     m_dv_idid_R = new TH1F("lowmass_idid_R","R [mm]", 60, 0, 300. );
     m_dv_idid_z = new TH1F("lowmass_idid_z","z [mm]", 20, -1000., 1000.);
     m_dv_idid_l = new TH1F("lowmass_idid_l","l [mm]", 20, 0., 1000.);
@@ -313,6 +316,7 @@ StatusCode LowMass::initialize() {
 
     CHECK( histSvc->regHist("/DV/low_mass/dv_idid/dv_idid_cf", m_dv_idid_cf) );
     CHECK( histSvc->regHist("/DV/low_mass/dv_idid/dv_idid_M", m_dv_idid_M) );
+    CHECK( histSvc->regHist("/DV/low_mass/dv_idid/dv_idid_M_high", m_dv_idid_M_high) );
     CHECK( histSvc->regHist("/DV/low_mass/dv_idid/dv_idid_R", m_dv_idid_R) );
     CHECK( histSvc->regHist("/DV/low_mass/dv_idid/dv_idid_z", m_dv_idid_z) );
     CHECK( histSvc->regHist("/DV/low_mass/dv_idid/dv_idid_l", m_dv_idid_l) );
@@ -330,16 +334,20 @@ StatusCode LowMass::initialize() {
     // mu + track, e + track
     //--------------------------------------------------------
     m_dv_mut_cf = new TH1D( "lowmass_dv_mut_cf", "Reco dv mut cutflow", 8,0,8);
-    m_dv_mut_M = new TH1F("lowmass_mut_M","lowmass mass in GeV", 8000, 0, 2000. );
+    m_dv_mut_M = new TH1F("lowmass_mu_M","lowmass mass in GeV", 40, 0, 10. );
+    m_dv_mut_M_high = new TH1F("lowmass_mu_M_high","lowmass mass in GeV", 8000, 0, 2000. );
 
     m_dv_et_cf = new TH1D( "lowmass_dv_et_cf", "Reco dv et cutflow", 8,0,8);
-    m_dv_et_M = new TH1F("lowmass_et_M","lowmass mass in GeV", 8000, 0, 2000. );
+    m_dv_et_M = new TH1F("lowmass_et_M","lowmass mass in GeV", 40, 0, 10. );
+    m_dv_et_M_high = new TH1F("lowmass_et_M_high","lowmass mass in GeV", 8000, 0, 2000. );
 
     CHECK( histSvc->regHist("/DV/low_mass/dv_mut/dv_mut_cf", m_dv_mut_cf) );
     CHECK( histSvc->regHist("/DV/low_mass/dv_mut/dv_mut_M", m_dv_mut_M) );
+    CHECK( histSvc->regHist("/DV/low_mass/dv_mut/dv_mut_M_high", m_dv_mut_M_high) );
 
     CHECK( histSvc->regHist("/DV/low_mass/dv_et/dv_et_cf", m_dv_et_cf) );
     CHECK( histSvc->regHist("/DV/low_mass/dv_et/dv_et_M", m_dv_et_M) );
+    CHECK( histSvc->regHist("/DV/low_mass/dv_et/dv_et_M_high", m_dv_et_M_high) );
 
     return StatusCode::SUCCESS;
 }
@@ -387,9 +395,6 @@ StatusCode LowMass::execute() {
     const xAOD::VertexContainer* pvc = nullptr;
     CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
 
-    //bool trig_passed = true;
-    bool trig_passed = false;
-
     // make copies of leptons
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
     xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
@@ -420,6 +425,8 @@ StatusCode LowMass::execute() {
     // Event cut flow
     //---------------------------------------
 
+    bool trig_passed = false;
+
     if(isMC){
         m_event_cutflow->Fill("AllEvents",1);
         //m_event_cutflow->SetBinContent(1, 20000);
@@ -441,7 +448,8 @@ StatusCode LowMass::execute() {
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
 
     // trigger check
-    if(!trig_passed) return StatusCode::SUCCESS;
+    // no trigger requirement for more statistics
+    //if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
 
     // cosmic veto
@@ -533,8 +541,6 @@ StatusCode LowMass::execute() {
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
 
-        // blind signal region
-        //if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) continue;
 
         if (channel == "mumu") {
 
@@ -542,8 +548,8 @@ StatusCode LowMass::execute() {
             m_dv_mumu_cf->Fill("#mu#mu", 1);
 
             // Trigger matching
-            if(!m_dvutils->TrigMatching(*dv)) continue;
-            m_dv_mumu_cf->Fill("Trig. Matching", 1);
+            //if(!m_dvutils->TrigMatching(*dv)) continue;
+            //m_dv_mumu_cf->Fill("Trig. Matching", 1);
 
             // vertex fit quality
             m_dv_mumu_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
@@ -563,7 +569,7 @@ StatusCode LowMass::execute() {
             m_dv_mumu_cf->Fill("DisabledModule", 1);
 
             // material veto (excluding mu)
-            m_dv_mumu_cf->Fill("MaterialVeto (excluding mu)", 1);
+            //m_dv_mumu_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
             if(dv_mass > mass_min) continue;
@@ -577,8 +583,8 @@ StatusCode LowMass::execute() {
             //m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
 
             // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_mumu_cf->Fill("FilterMatching", 1);
+            //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            //m_dv_mumu_cf->Fill("FilterMatching", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -587,6 +593,10 @@ StatusCode LowMass::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_mumu_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_mumu_cf->Fill("Track kinematic", 1);
 
             // end of cut flow. Now plotting
             ATH_MSG_INFO("Found signal mumu with mass = " << dv_mass << ", runNumber = "
@@ -615,8 +625,8 @@ StatusCode LowMass::execute() {
             m_dv_ee_cf->Fill("ee", 1);
 
             // Trigger matching
-            if(!m_dvutils->TrigMatching(*dv)) continue;
-            m_dv_ee_cf->Fill("Trig. Matching", 1);
+            //if(!m_dvutils->TrigMatching(*dv)) continue;
+            //m_dv_ee_cf->Fill("Trig. Matching", 1);
 
             // vertex fit quality
             m_dv_ee_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
@@ -636,8 +646,8 @@ StatusCode LowMass::execute() {
             m_dv_ee_cf->Fill("DisabledModule", 1);
 
             // material veto
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_ee_cf->Fill("MaterialVeto", 1);
+            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            //m_dv_ee_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
             if(dv_mass > mass_min) continue;
@@ -652,8 +662,8 @@ StatusCode LowMass::execute() {
             //m_dv_ee_cf->Fill("R_{CR} > 0.04", 1);
 
             // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_ee_cf->Fill("FilterMatching", 1);
+            //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            //m_dv_ee_cf->Fill("FilterMatching", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -662,6 +672,10 @@ StatusCode LowMass::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_ee_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_ee_cf->Fill("Track kinematic", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -686,8 +700,8 @@ StatusCode LowMass::execute() {
             m_dv_emu_cf->Fill("e#mu", 1);
 
             // Trigger matching
-            if(!m_dvutils->TrigMatching(*dv)) continue;
-            m_dv_emu_cf->Fill("Trig. Matching", 1);
+            //if(!m_dvutils->TrigMatching(*dv)) continue;
+            //m_dv_emu_cf->Fill("Trig. Matching", 1);
 
             // vertex fit quality
             m_dv_emu_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
@@ -707,8 +721,8 @@ StatusCode LowMass::execute() {
             m_dv_emu_cf->Fill("DisabledModule", 1);
 
             // material veto
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_emu_cf->Fill("MaterialVeto", 1);
+            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            //m_dv_emu_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
             if(dv_mass > mass_min) continue;
@@ -723,8 +737,8 @@ StatusCode LowMass::execute() {
             //m_dv_emu_cf->Fill("R_{CR} > 0.04", 1);
 
             // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_emu_cf->Fill("FilterMatching", 1);
+            //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            //m_dv_emu_cf->Fill("FilterMatching", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -733,6 +747,10 @@ StatusCode LowMass::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_emu_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_emu_cf->Fill("Track kinematic", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -773,11 +791,14 @@ StatusCode LowMass::execute() {
             m_dv_mut_cf->Fill("DisabledModule", 1);
 
             // material veto (excluding mu)
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_mut_cf->Fill("MaterialVeto (excluding mu)", 1);
+            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            //m_dv_mut_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
-            if(dv_mass > mass_min) continue;
+            if(dv_mass > mass_min) {
+                m_dv_mut_M_high->Fill(dv_mass);                    // dimuon mass
+                continue;
+            }
             m_dv_mut_cf->Fill("LowMassVeto", 1);
 
             // RPVLL filter matching
@@ -788,8 +809,8 @@ StatusCode LowMass::execute() {
             FillCosmicBkg(tp1, tp2, channel);
             
             // cosmic veto (R_CR)
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_mut_cf->Fill("R_{CR} > 0.04", 1);
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_mut_cf->Fill("R_{CR} > 0.04", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -799,6 +820,12 @@ StatusCode LowMass::execute() {
             if(dv_z > dv_z_max) continue;
             m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_mut_cf->Fill("Track kinematic", 1);
+
+            // plot vertex distribution
+            plot_dv(*dv, *pv, channel);
 
             // truth match
             if (isMC){
@@ -833,11 +860,14 @@ StatusCode LowMass::execute() {
             m_dv_et_cf->Fill("DisabledModule", 1);
 
             // material veto (excluding mu)
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_et_cf->Fill("MaterialVeto (excluding mu)", 1);
+            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            //m_dv_et_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
-            if(dv_mass > mass_min) continue;
+            if(dv_mass > mass_min) {
+                m_dv_et_M_high->Fill(dv_mass);                    // dimuon mass
+                continue;
+            }
             m_dv_et_cf->Fill("LowMassVeto", 1);
 
             // RPVLL filter matching
@@ -859,6 +889,12 @@ StatusCode LowMass::execute() {
             if(dv_z > dv_z_max) continue;
             m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_et_cf->Fill("Track kinematic", 1);
+
+            // plot vertex distribution
+            plot_dv(*dv, *pv, channel);
 
 
             // truth match
@@ -894,12 +930,16 @@ StatusCode LowMass::execute() {
             m_dv_idid_cf->Fill("DisabledModule", 1);
 
             // material veto (excluding mu)
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_idid_cf->Fill("MaterialVeto (excluding mu)", 1);
+            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            //m_dv_idid_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
-            if(dv_mass > mass_min) continue;
+            if(dv_mass > mass_min) {
+                m_dv_idid_M_high->Fill(dv_mass);                    // dimuon mass
+                continue;
+            }
             m_dv_idid_cf->Fill("LowMassVeto", 1);
+
             // fill cosmic veto background
             FillCosmicBkg(tp1, tp2, channel);
             
@@ -918,6 +958,10 @@ StatusCode LowMass::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_idid_cf->Fill("Track kinematic", 1);
 
 
             //==========================================
@@ -1065,7 +1109,7 @@ void LowMass::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::strin
         m_dv_emu_R_M->Fill(dv_R, dv_mass);
     }
 
-    if (channel == "trktrk"){
+    if (channel == "idid"){
         m_dv_idid_M->Fill(dv_mass);                             // dimuon mass
         m_dv_idid_R->Fill(dv_R);                                
         m_dv_idid_z->Fill(dv_z);                                
@@ -1088,7 +1132,7 @@ void LowMass::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::strin
 bool LowMass::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
 
     bool PassCosmicVeto = true;
-    float Rcos_min = 0.04;
+    float Rcos_min = 0.01;
 
     // define TLorentzVector of decay particles
     TLorentzVector tlv_tp0;
@@ -1188,7 +1232,7 @@ void LowMass::FillCosmicBkg(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1, 
         }
     }
 
-    if (channel == "trktrk"){
+    if (channel == "idid"){
         // plot Rcos after applying deltaR < deltaR_min
         if (deltaR > deltaR_min){
             m_dv_idid_Rcos->Fill(Rcos);

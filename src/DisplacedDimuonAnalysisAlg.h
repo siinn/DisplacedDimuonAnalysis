@@ -22,6 +22,7 @@
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
 #include "DisplacedDimuonAnalysis/LeptonSelectionTools.h"
+#include "DisplacedDimuonAnalysis/FilterMatchingTools.h"
 #include "DisplacedDimuonAnalysis/CosmicTools.h"
 
 // GRL
@@ -59,6 +60,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
+        ToolHandle<IFilterMatchingTools> m_fmtool; //!
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;

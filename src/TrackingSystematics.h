@@ -17,6 +17,7 @@
 #include "DDLBase/IDiLepDVCuts.h"
 #include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
+#include "DDLBase/IPhotonMatch.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -59,6 +60,7 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
+        ToolHandle<DDL::IPhotonMatch> m_phmatch;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

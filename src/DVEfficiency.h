@@ -17,6 +17,7 @@
 #include "DDLBase/IDiLepDVCuts.h"
 #include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
+#include "DDLBase/IPhotonMatch.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -50,7 +51,8 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         
         
     private: 
-        // tool for muon matching to dv
+
+        // setting tools
         ToolHandle<DDL::IEventCuts> m_evtc; //!
         ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
         ToolHandle<DDL::IDVCuts> m_dvc;
@@ -62,6 +64,7 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or; //!
         ToolHandle<CP::IPileupReweightingTool> m_prw; //!
+        ToolHandle<DDL::IPhotonMatch> m_phmatch;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

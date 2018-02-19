@@ -54,6 +54,7 @@ m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_prw("CP::PileupReweightingTool/PileupReweightingTool"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
+m_phmatch("DDL::PhotonMatch/PhotonMatch"),
 m_accMass("mass")
 {
     // initialize tools
@@ -68,6 +69,7 @@ m_accMass("mass")
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
     declareProperty("PileupReweightingTool", m_prw);
+    declareProperty("PhotonMatch", m_phmatch);
 }
 
 
@@ -84,7 +86,7 @@ StatusCode DVEfficiency::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // cutflow
-    m_dv_eff_cutflow = new TH1D("dv cut flow", "dv cut flow", 14,0,14);
+    m_dv_eff_cutflow = new TH1D("dv cut flow", "dv cut flow", 23,0,23);
 
     m_dv_mass = new TH1F( "m_dv_mass", "Invariant mass of all signal vertex", 50, 0, 1500 ); // GeV
 
@@ -172,13 +174,15 @@ StatusCode DVEfficiency::execute() {
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 
-    // get combine weight from pileup reweighting tool
-    p_weight = m_prw->getCombinedWeight(*evtInfo);
-    ATH_MSG_DEBUG("pileup weight = " << p_weight);
+    //// get combine weight from pileup reweighting tool
 
+    //p_weight = m_prw->getCombinedWeight(*evtInfo);
+    //ATH_MSG_DEBUG("pileup weight = " << p_weight);
 
-    // pile-up
-    int mu = evtInfo->actualInteractionsPerCrossing();
+    //// pile-up
+    //int mu = evtInfo->actualInteractionsPerCrossing();
+
+    int mu = 0;
 
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
@@ -202,6 +206,9 @@ StatusCode DVEfficiency::execute() {
 
     // apply overlap removal
     m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
+
+    // perform matching of photons to electrons
+    m_phmatch->MatchPhotons(*phc, *elc_copy.first);
 
     // retrieve primary vertices
     const xAOD::VertexContainer* pvc = nullptr;
@@ -241,9 +248,7 @@ StatusCode DVEfficiency::execute() {
     if (!m_evtc->PassEventCleaning(*evtInfo)) event_passed = false;
     if (event_passed) m_dv_eff_cutflow->Fill("EventCleaning",1);
 
-    // RPVLL filter
-    //if(!m_dvutils->PassRPVLLFilter(*elc, *phc, *muc)) event_passed = false;
-    // trigger check
+    // trigger filter
     bool trig_passed = false;
     
     m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",0);
@@ -273,6 +278,26 @@ StatusCode DVEfficiency::execute() {
 
     if (event_passed) m_dv_eff_cutflow->Fill("TrigFilter",1);
 
+    // cosmic veto
+    if(!m_cos->PassCosmicEventVeto(*elc, *muc)) event_passed = false;
+    if (event_passed) m_dv_eff_cutflow->Fill("CosmicVeto", 1);
+
+    // PV position < 200 mm
+    float pv_z_max = 200.;
+
+    // apply primary vertex position cut
+    if (pv) {
+
+        // get primary vertex position
+        auto pv_pos = pv->position();
+
+        // z_pv cut
+        if(pv_pos.z() > pv_z_max) event_passed = false;
+    }
+    else event_passed = false;
+    if (event_passed) m_dv_eff_cutflow->Fill("z_{PV} < 200 mm", 1);
+
+
     //=================================================
     // vertex cut flow
     //=================================================
@@ -292,8 +317,10 @@ StatusCode DVEfficiency::execute() {
         // access invariant mass
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in GeV
 
-        // mass cut
+        // mass and position cut
         float mass_min = 10.;
+        float dv_R_max = 300;
+        float dv_z_max = 300;
 
         // collect leptons from this dv
         auto dv_muc = m_accMu(*dv);
@@ -304,6 +331,12 @@ StatusCode DVEfficiency::execute() {
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
+
+        // trigger matching
+        m_dilepdvc->DoTriggerMatching(*dv);
+
+        // perform filter matching
+        m_dilepdvc->DoFilterMatching(*dv);
 
         // muon selection tool
         m_leptool->MuonSelection(*dv);
@@ -316,6 +349,10 @@ StatusCode DVEfficiency::execute() {
 
         // Electron identification
         m_leptool->ElectronID(*dv);
+
+        // get position of DV
+        float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+        float dv_z = std::abs(m_dvutils->getz( *dv, *pv ));       // z in [mm]
 
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) continue;
@@ -337,7 +374,7 @@ StatusCode DVEfficiency::execute() {
 
         // minimum distance from pv (from 0 for MC)
         if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-        m_dv_eff_cutflow->Fill("MinDisplacment",1);
+        m_dv_eff_cutflow->Fill("Disp. > 2 mm",1);
 
         // charge requirements
         if(!m_dvc->PassChargeRequirement(*dv)) continue;
@@ -358,7 +395,19 @@ StatusCode DVEfficiency::execute() {
 
         // cosmic veto (R_CR)
         if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-        m_dv_eff_cutflow->Fill("CosmicVeto",1);
+        m_dv_eff_cutflow->Fill("R_{CR} > 0.01",1);
+
+        // RPVLL filter matching
+        if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+        m_dv_eff_cutflow->Fill("FilterMatching", 1);
+
+        // DV R <  300 mm
+        if(dv_R > dv_R_max) continue;
+        m_dv_eff_cutflow->Fill("R_{DV} > 300 mm", 1);
+
+        // DV z <  300 mm
+        if(dv_z > dv_z_max) continue;
+        m_dv_eff_cutflow->Fill("z_{DV} > 300 mm", 1);
 
         // mark this event as reconstructed
         dv_matched = true;
@@ -429,7 +478,7 @@ StatusCode DVEfficiency::execute() {
 bool DVEfficiency::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
 
     bool PassCosmicVeto = true;
-    float Rcos_min = 0.04;
+    float Rcos_min = 0.01;
 
     // define TLorentzVector of decay particles
     TLorentzVector tlv_tp0;

@@ -93,5 +93,6 @@ apply_pattern declare_python_modules files="*.py"
 
 
 
-library DisplacedDimuonAnalysis *.cxx components/*.cxx
+library DisplacedDimuonAnalysis *.cxx components/*.cxx ../Root/*.cxx
 apply_pattern component_library
+
