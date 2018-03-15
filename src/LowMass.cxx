@@ -579,8 +579,8 @@ StatusCode LowMass::execute() {
             FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
-            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            //m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+            m_dv_mumu_cf->Fill("R_{CR} > 0.01", 1);
 
             // RPVLL filter matching
             //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
@@ -658,8 +658,8 @@ StatusCode LowMass::execute() {
             FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
-            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            //m_dv_ee_cf->Fill("R_{CR} > 0.04", 1);
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+            m_dv_ee_cf->Fill("R_{CR} > 0.01", 1);
 
             // RPVLL filter matching
             //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
@@ -733,8 +733,8 @@ StatusCode LowMass::execute() {
             FillCosmicBkg(tp1, tp2, channel);
 
             // cosmic veto
-            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            //m_dv_emu_cf->Fill("R_{CR} > 0.04", 1);
+            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+            m_dv_emu_cf->Fill("R_{CR} > 0.01", 1);
 
             // RPVLL filter matching
             //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
@@ -810,7 +810,7 @@ StatusCode LowMass::execute() {
             
             // cosmic veto (R_CR)
             if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_mut_cf->Fill("R_{CR} > 0.04", 1);
+            m_dv_mut_cf->Fill("R_{CR} > 0.01", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -878,8 +878,8 @@ StatusCode LowMass::execute() {
             FillCosmicBkg(tp1, tp2, channel);
             
             // cosmic veto (R_CR)
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_et_cf->Fill("R_{CR} > 0.04", 1);
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_et_cf->Fill("R_{CR} > 0.01", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -944,8 +944,8 @@ StatusCode LowMass::execute() {
             FillCosmicBkg(tp1, tp2, channel);
             
             // cosmic veto (R_CR)
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_idid_cf->Fill("R_{CR} > 0.01", 1);
 
             // RPVLL filter matching
             //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
@@ -1004,7 +1004,7 @@ bool LowMass::PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVect
 
     bool PassCosmicVeto = true;
 
-    float Rcos_min = 0.04;
+    float Rcos_min = 0.01;
     float deltaR_min = 0.5;
     float deltaPhiMinusPi = m_costool->getDeltaPhiMinusPi(dv_muc, dv_elc, channel);
     float sumEta = m_costool->getSumEta(dv_muc, dv_elc, channel);

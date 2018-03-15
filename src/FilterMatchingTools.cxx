@@ -35,18 +35,9 @@ bool FilterMatchingTools::PassFilter(std::string channel, xAOD::TrackParticle& t
     }
 
     if (channel == "idid") {
-        if (PassSingleEgamma(tp1, tp2)) {
-            ATH_MSG_INFO("DEBUG: Passed SingleEgamma");
-            pass = true;
-            }
-        else if (PassDiEgamma(tp1, tp2)) {
-            pass = true;
-            ATH_MSG_INFO("DEBUG: Passed DiEgamma");
-            }
-        else if (PassSingleMuon(tp1, tp2)) {
-            pass = true;
-            ATH_MSG_INFO("DEBUG: Passed SingleMuon");
-            }
+        if (PassSingleEgamma(tp1, tp2)) pass = true;
+        else if (PassDiEgamma(tp1, tp2)) pass = true;
+        else if (PassSingleMuon(tp1, tp2)) pass = true;
     }
 
     return pass;
@@ -97,6 +88,8 @@ bool FilterMatchingTools::PassSingleMuon(xAOD::TrackParticle& tp1, xAOD::TrackPa
     return pass;
 }
 
+
+
 bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) {
 
     bool pass = true;
@@ -108,6 +101,21 @@ bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::Tra
     // both tracks need to pass pt and eta cut
     if ((tp1.pt() / 1000 < pt_min) || (std::abs(tp1.eta()) > eta_max)) pass = false;
     if ((tp2.pt() / 1000 < pt_min) || (std::abs(tp2.eta()) > eta_max)) pass = false;
+
+    return pass;
+}
+
+
+bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1) {
+
+    bool pass = false;
+
+    // set selection
+    float pt_min = 10.;    // GeV
+    float eta_max = 2.5;
+    
+    // both tracks need to pass pt and eta cut
+    if ((tp1.pt() / 1000 > pt_min) && (std::abs(tp1.eta()) < eta_max)) pass = true;
 
     return pass;
 }

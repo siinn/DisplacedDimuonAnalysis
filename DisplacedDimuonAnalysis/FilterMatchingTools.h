@@ -24,6 +24,8 @@ class FilterMatchingTools : public AthAlgTool, virtual public IFilterMatchingToo
         
         // pt cut for two tracks
         virtual bool PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2);
+        // pt cut for track
+        virtual bool PassTrackKinematic(xAOD::TrackParticle& tp1);
 
 
     private:

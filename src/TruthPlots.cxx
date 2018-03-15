@@ -30,6 +30,7 @@ m_dvutils("DVUtils")
     // initialize tools
     declareProperty("DVUtils", m_dvutils);
     declareProperty("PileupReweightingTool", m_prw);
+    declareProperty("usePRW", m_usePRW = false );
 }
 
 
@@ -46,8 +47,6 @@ StatusCode TruthPlots::initialize() {
     m_pileup = new TH1F("m_pileup", "m_pileup", 100, 0, 100); 
     m_pileup_reweighted = new TH1F("m_pileup_reweighted", "m_pileup_reweighted", 100, 0, 100); 
 
-    // pile-up weights
-    m_p_weight = new TH1F("m_p_weight", "m_p_weight", 100, 0, 100); 
 
     // signal el
     m_el_m = new TH1F("m_el_m", "signal el m", 100, 0, 1.0); // MeV
@@ -106,9 +105,6 @@ StatusCode TruthPlots::initialize() {
     // pile-up
     CHECK( histSvc->regHist("/DV/truth/pileup", m_pileup) );
     CHECK( histSvc->regHist("/DV/truth/pileup_reweighted", m_pileup_reweighted) );
-
-    // pile-up weight
-    CHECK( histSvc->regHist("/DV/truth/p_weight", m_p_weight) );
 
     // signal el
     CHECK( histSvc->regHist("/DV/truth/signal_el/m/el_m", m_el_m) );
@@ -178,23 +174,32 @@ StatusCode TruthPlots::execute() {
     const xAOD::EventInfo* evtInfo = nullptr;
     CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 
-    //  // get combine weight from pileup reweighting tool
-    //  float p_weight = m_prw->getCombinedWeight(*evtInfo);
+    // get combine weight from pileup reweighting tool
+    int mu = 0;
+    if (m_usePRW) {
 
-    //  // pile-up
-    //  int pileup = evtInfo->actualInteractionsPerCrossing();
-    //  m_pileup->Fill(pileup);
-    //  m_pileup_reweighted->Fill(pileup,p_weight);
+        // systematic variation of pileup weight
+        CP::SystematicSet s;
 
-    //  // get pile-up weights
-    //  m_p_weight->SetBinContent(pileup+1,p_weight);
-    //  ATH_MSG_DEBUG("mu = " << pileup << ", weight = " << p_weight << ", bin center = " << m_p_weight->GetBinCenter(pileup+1));
+        // get pileup weight
+        s.insert( CP::SystematicVariation("PRW_DATASF",0) );
+        m_prw->applySystematicVariation(s);
+        p_weight = m_prw->getCombinedWeight(*evtInfo);
+
+        // pile-up
+        mu = evtInfo->actualInteractionsPerCrossing();
+    }
+
+    // fill pile-up distribution
+    m_pileup->Fill(mu);
+    m_pileup_reweighted->Fill(mu, p_weight);
 
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     CHECK( evtStore()->retrieve( tru_vc, "TruthVertices"));
 
     // loop over the truth vertex container
     for (auto tru_v: *tru_vc){
+
         if (!m_dvutils->isSignalVertex(tru_v)) continue;
 
         // get lowset pt muon
@@ -202,38 +207,42 @@ StatusCode TruthPlots::execute() {
 
         // fill lepton plots
         for (unsigned int i=0; i < tru_v->nOutgoingParticles(); i++){
+
             const xAOD::TruthParticle* signal_lep = m_dvutils->FindFinalState(tru_v->outgoingParticle(i));
+
+            // skip if particle is not charged (to remove neutrino)
+            if (signal_lep->isNeutral()) continue;
 
             //------------------------------
             // signal el basic plots
             //------------------------------
             if (std::abs(signal_lep->pdgId()) == 11){
-                m_el_m->Fill(signal_lep->m()); // MeV
-                m_el_eta->Fill(signal_lep->eta());
-                m_el_pdgId->Fill(signal_lep->pdgId());
-                m_el_phi->Fill(signal_lep->phi());
-                m_el_R->Fill(tru_v->perp());
-                m_el_z->Fill(tru_v->z());
-                m_el_d0->Fill(signal_lep->auxdata< float >("d0"));
-                m_el_z0->Fill(signal_lep->auxdata< float >("z0"));
-                m_el_pt->Fill( signal_lep->pt() / 1000.);
-                m_el_pt_low->Fill( signal_lep->pt() / 1000. );
+                m_el_m->Fill(signal_lep->m(), p_weight); // MeV
+                m_el_eta->Fill(signal_lep->eta(), p_weight);
+                m_el_pdgId->Fill(signal_lep->pdgId(), p_weight);
+                m_el_phi->Fill(signal_lep->phi(), p_weight);
+                m_el_R->Fill(tru_v->perp(), p_weight);
+                m_el_z->Fill(tru_v->z(), p_weight);
+                m_el_d0->Fill(signal_lep->auxdata< float >("d0"), p_weight);
+                m_el_z0->Fill(signal_lep->auxdata< float >("z0"), p_weight);
+                m_el_pt->Fill( signal_lep->pt() / 1000., p_weight);
+                m_el_pt_low->Fill( signal_lep->pt() / 1000. , p_weight);
             }
 
             //------------------------------
             // signal muon basic plots
             //------------------------------
             if (std::abs(signal_lep->pdgId()) == 13){
-                m_muon_m->Fill(signal_lep->m() / 1000.); // GeV
-                m_muon_eta->Fill(signal_lep->eta());
-                m_muon_pdgId->Fill(signal_lep->pdgId());
-                m_muon_phi->Fill(signal_lep->phi());
-                m_muon_R->Fill(tru_v->perp());
-                m_muon_z->Fill(tru_v->z());
-                m_muon_d0->Fill(signal_lep->auxdata< float >("d0"));
-                m_muon_z0->Fill(signal_lep->auxdata< float >("z0"));
-                m_muon_pt->Fill( signal_lep->pt() / 1000.);
-                m_muon_pt_low->Fill( signal_lep->pt() / 1000. );
+                m_muon_m->Fill(signal_lep->m() / 1000., p_weight); // GeV
+                m_muon_eta->Fill(signal_lep->eta(), p_weight);
+                m_muon_pdgId->Fill(signal_lep->pdgId(), p_weight);
+                m_muon_phi->Fill(signal_lep->phi(), p_weight);
+                m_muon_R->Fill(tru_v->perp(), p_weight);
+                m_muon_z->Fill(tru_v->z(), p_weight);
+                m_muon_d0->Fill(signal_lep->auxdata< float >("d0"), p_weight);
+                m_muon_z0->Fill(signal_lep->auxdata< float >("z0"), p_weight);
+                m_muon_pt->Fill( signal_lep->pt() / 1000., p_weight);
+                m_muon_pt_low->Fill( signal_lep->pt() / 1000. , p_weight);
 
                 // fill signal muon plots
                 m_muon_pt_vs_prodVtxR->Fill( tru_v->perp(), signal_lep->pt() / 1000.);
@@ -254,9 +263,9 @@ StatusCode TruthPlots::execute() {
         float dilep_pt = m_dvutils->TruthPt(tru_v);
         float dilep_dr = m_dvutils->Truth_dr(tru_v);
 
-        m_dilep_m->Fill(dilep_m / 1000.);
-        m_dilep_pt->Fill(dilep_pt / 1000.);
-        m_dilep_dr->Fill(dilep_dr);
+        m_dilep_m->Fill(dilep_m / 1000., p_weight);
+        m_dilep_pt->Fill(dilep_pt / 1000., p_weight);
+        m_dilep_dr->Fill(dilep_dr, p_weight);
 
         //------------------------------
         // fill Z' plots
@@ -274,30 +283,30 @@ StatusCode TruthPlots::execute() {
         float zp_ctau0 = zp_l / sqrt((zp_e/zp_m)*(zp_e/zp_m) - 1);
 
         // basic plots
-        m_zp_m->Fill(zp_m / 1000.);
-        m_zp_pt->Fill(zp_pt / 1000.);
-        m_zp_eta->Fill(zp_eta);
-        m_zp_phi->Fill(zp_phi);
-        m_zp_pdgId->Fill(tru_v->incomingParticle(0)->pdgId());
-        m_zp_beta->Fill(zp_beta);
-        m_zp_ctau0->Fill(zp_ctau0);
+        m_zp_m->Fill(zp_m / 1000., p_weight);
+        m_zp_pt->Fill(zp_pt / 1000., p_weight);
+        m_zp_eta->Fill(zp_eta, p_weight);
+        m_zp_phi->Fill(zp_phi, p_weight);
+        m_zp_pdgId->Fill(tru_v->incomingParticle(0)->pdgId(), p_weight);
+        m_zp_beta->Fill(zp_beta, p_weight);
+        m_zp_ctau0->Fill(zp_ctau0, p_weight);
 
-        m_zp_R->Fill(zp_R);
-        m_zp_R_low->Fill(zp_R);
-        m_zp_l->Fill(zp_l);
-        m_zp_z->Fill(zp_z);
+        m_zp_R->Fill(zp_R, p_weight);
+        m_zp_R_low->Fill(zp_R, p_weight);
+        m_zp_l->Fill(zp_l, p_weight);
+        m_zp_z->Fill(zp_z, p_weight);
 
         // 2D eta vs r distribution
         m_zp_eta_vs_prodVtxR->Fill( zp_R, zp_eta);
 
         // Delta t (time shift) due to long lifetime
-        if (std::abs(zp_eta) < 1) m_zp_t_barrel->Fill(zp_t);
-        if (std::abs(zp_eta) > 1 and std::abs(zp_eta) < 2.5) m_zp_t_endcap->Fill(zp_t);
+        if (std::abs(zp_eta) < 1) m_zp_t_barrel->Fill(zp_t, p_weight);
+        if (std::abs(zp_eta) > 1 and std::abs(zp_eta) < 2.5) m_zp_t_endcap->Fill(zp_t, p_weight);
 
         // count fraction of Z' within 2 mm
         bool NotPass_R = false;
         if (zp_R < 2) NotPass_R = true;
-        m_fraction_dv_cut->Fill("fraction", NotPass_R);
+        m_fraction_dv_cut->Fill("fraction", NotPass_R, p_weight);
 
         // find ratio between Z's that pass acceptance (eta <2.4) to all Z'
         bool zp_passed = false;

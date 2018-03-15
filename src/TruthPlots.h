@@ -25,12 +25,15 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         ToolHandle<IDVUtils>  m_dvutils; //!
         ToolHandle<CP::IPileupReweightingTool> m_prw; //!
 
+        // use PRW?
+        bool m_usePRW;
+
+        // pileup weight
+        float p_weight = 1;
+
         // pile-up distribution
         TH1F* m_pileup; //!
         TH1F* m_pileup_reweighted; //!
-
-        // pile-up weight
-        TH1F* m_p_weight; //!
 
         // signal el distribution
         TH1F* m_el_pt; //!

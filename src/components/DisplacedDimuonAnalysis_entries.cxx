@@ -25,6 +25,11 @@ DECLARE_ALGORITHM_FACTORY( LeptonEfficiency )
 #include "../DVEfficiency.h"
 DECLARE_ALGORITHM_FACTORY( DVEfficiency )
 
+#include "../EfficiencyStudy.h"
+DECLARE_ALGORITHM_FACTORY( EfficiencyStudy )
+
+#include "../LeptonCount.h"
+DECLARE_ALGORITHM_FACTORY( LeptonCount )
 
 #include "../LRTValidation.h"
 DECLARE_ALGORITHM_FACTORY( LRTValidation )
@@ -54,6 +59,8 @@ DECLARE_FACTORY_ENTRIES( DisplacedDimuonAnalysis )
   DECLARE_ALGORITHM( VertexRes );
   DECLARE_ALGORITHM( LRTValidation );
   DECLARE_ALGORITHM( DVEfficiency );
+  DECLARE_ALGORITHM( EfficiencyStudy );
+  DECLARE_ALGORITHM( LeptonCount );
   DECLARE_ALGORITHM( LeptonEfficiency );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )
   DECLARE_ALGORITHM( SUSYSelection )

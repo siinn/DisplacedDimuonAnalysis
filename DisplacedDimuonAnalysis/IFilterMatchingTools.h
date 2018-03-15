@@ -27,6 +27,9 @@ class IFilterMatchingTools: virtual public IAlgTool {
 
         // pt cut for two tracks
         virtual bool PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) = 0;
+        
+        // pt cut for track
+        virtual bool PassTrackKinematic(xAOD::TrackParticle& tp1) = 0;
     
     private:
 

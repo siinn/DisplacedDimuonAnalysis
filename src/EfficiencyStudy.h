@@ -1,5 +1,5 @@
-#ifndef DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H
-#define DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H 1
+#ifndef DISPLACEDDIMUONANALYSIS_EFFICIENCYSTUDY_H
+#define DISPLACEDDIMUONANALYSIS_EFFICIENCYSTUDY_H 1
 
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
 
@@ -37,10 +37,10 @@
 // pile-up reweighting
 #include "AsgAnalysisInterfaces/IPileupReweightingTool.h"
 
-class DVEfficiency: public ::AthAnalysisAlgorithm { 
+class EfficiencyStudy: public ::AthAnalysisAlgorithm { 
     public: 
-        DVEfficiency( const std::string& name, ISvcLocator* pSvcLocator );
-        virtual ~DVEfficiency(); 
+        EfficiencyStudy( const std::string& name, ISvcLocator* pSvcLocator );
+        virtual ~EfficiencyStudy(); 
         
         virtual StatusCode  initialize();
         virtual StatusCode  execute();
@@ -72,62 +72,57 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
 
         // use PRW?
-        bool m_usePRW;
+        bool m_usePRW = false;
 
         // number of events processed
         int n_events = 0;
 
         // pileup weight
         float p_weight = 1;
-        float p_weight_up = 1;
-        float p_weight_down = 1;
 
         // cut flow
-        TH1D* m_dv_eff_cutflow; //!
+        TH1D* m_dv_reco_cutflow; //!
 
-        // efficiency as a function of track parameters
-        TEfficiency* m_dv_eff_eta; //! 
-        TEfficiency* m_dv_eff_phi; //! 
-        TEfficiency* m_dv_eff_mass; //! 
-        TEfficiency* m_dv_eff_R; //! 
-        TEfficiency* m_dv_eff_z; //! 
-        TEfficiency* m_dv_eff_d0; //! 
-        TEfficiency* m_dv_eff_DeltaR; //! 
-        
-        // efficiency as a function of Z' parameters
-        TEfficiency* m_dv_eff_zp_eta; //! 
-        TEfficiency* m_dv_eff_zp_beta; //! 
-        TEfficiency* m_dv_eff_zp_pt; //! 
+        // efficiency for different eta
+        TEfficiency* m_dv_eff_pt_eta1_mass1; //! 
+        TEfficiency* m_dv_eff_pt_eta2_mass1; //! 
+        TEfficiency* m_dv_eff_pt_eta3_mass1; //! 
+        TEfficiency* m_dv_eff_pt_eta1_mass2; //! 
+        TEfficiency* m_dv_eff_pt_eta2_mass2; //! 
+        TEfficiency* m_dv_eff_pt_eta3_mass2; //! 
+        TEfficiency* m_dv_eff_pt_eta1_mass3; //! 
+        TEfficiency* m_dv_eff_pt_eta2_mass3; //! 
+        TEfficiency* m_dv_eff_pt_eta3_mass3; //! 
+        TEfficiency* m_dv_eff_pt_eta1_mass4; //! 
+        TEfficiency* m_dv_eff_pt_eta2_mass4; //! 
+        TEfficiency* m_dv_eff_pt_eta3_mass4; //! 
+        TEfficiency* m_dv_eff_pt_eta1_mass5; //! 
+        TEfficiency* m_dv_eff_pt_eta2_mass5; //! 
+        TEfficiency* m_dv_eff_pt_eta3_mass5; //! 
 
-        // efficiency as a function of pile-up
-        TEfficiency* m_dv_eff_mu; //! 
+        // efficiency in DeltaR
+        TEfficiency* m_dv_eff_deltaR; //! 
+        TH2D* m_truth_yields_map_pt_deltaR; //! 
+        TH2D* m_reco_yields_map_pt_deltaR; //! 
 
-        // trigger efficiency
-        TH1D* m_dv_eff_trig; //! 
+        // truth vertex yields at mass peak
+        TH2D* m_truth_yields_map_pt_eta_1; //! 
+        TH2D* m_truth_yields_map_pt_eta_2; //! 
+        TH2D* m_truth_yields_map_pt_eta_3; //! 
+        TH2D* m_truth_yields_map_pt_eta_4; //! 
+        TH2D* m_truth_yields_map_pt_eta_5; //! 
 
-        // efficiency map (eta vs mu) for reweighting
-        TH2F* m_dv_eff_map_mu_eta_num; //! 
-        TH2F* m_dv_eff_map_mu_eta_den; //! 
-        TH2F* m_dv_eff_map_mu_eta; //! 
+        // reco vertex yields at mass peak
+        TH2D* m_reco_yields_map_pt_eta_1; //! 
+        TH2D* m_reco_yields_map_pt_eta_2; //! 
+        TH2D* m_reco_yields_map_pt_eta_3; //! 
+        TH2D* m_reco_yields_map_pt_eta_4; //! 
+        TH2D* m_reco_yields_map_pt_eta_5; //! 
 
-        // efficiency map
-        TH2F* m_dv_eff_map_pt_eta_num; //! 
-        TH2F* m_dv_eff_map_pt_eta_den; //! 
-        TH2F* m_dv_eff_map_pt_eta; //! 
-
-        // efficiency map (pile up systematic variation, Up)
-        TH2F* m_dv_eff_map_up_pt_eta_num; //! 
-        TH2F* m_dv_eff_map_up_pt_eta_den; //! 
-        TH2F* m_dv_eff_map_up_pt_eta; //! 
-
-        // efficiency map (pile up systematic variation, Down)
-        TH2F* m_dv_eff_map_down_pt_eta_num; //! 
-        TH2F* m_dv_eff_map_down_pt_eta_den; //! 
-        TH2F* m_dv_eff_map_down_pt_eta; //! 
-
-        // invariant mass of all signal truth vertex
-        TH1F* m_dv_mass; //!
+        // truth distribution of long-lived particle
+        TH1F* m_truth_m; //!
+        TH1F* m_truth_DeltaR; //!
     
 }; 
 
-#endif //> !DISPLACEDDIMUONANALYSIS_DVEFFICIENCY_H
+#endif //> !DISPLACEDDIMUONANALYSIS_EFFICIENCYSTUDY_H

@@ -29,7 +29,9 @@ StatusCode LeptonSelectionTools::initialize() {
 
 
     ServiceHandle<IJobOptionsSvc> josvc("JobOptionsSvc", name());
-    ATH_CHECK(josvc->addPropertyToCatalogue("ToolSvc.DVElectronLikelihoodTool", StringProperty("WorkingPoint", "LooseLHNod0Electron")));
+    ATH_CHECK(josvc->addPropertyToCatalogue("ToolSvc.ElectronLikelihoodTool",
+        StringProperty("ConfigFile", "ElectronPhotonSelectorTools/offline/mc15_20160512/ElectronLikelihoodLooseOfflineConfig2016_Smooth_NoD0.conf")));
+
 
     //ATH_CHECK(m_elt.retrieve());
 

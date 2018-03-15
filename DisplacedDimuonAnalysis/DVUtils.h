@@ -116,6 +116,8 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         float TruthMass (const xAOD::TruthVertex* v);
         // calculate pt of truth vertex
         float TruthPt (const xAOD::TruthVertex* v);
+        // calculate eta of truth vertex
+        float TruthEta (const xAOD::TruthVertex* v);
         // calculate dr of truth vertex
         float Truth_dr (const xAOD::TruthVertex* v);
 

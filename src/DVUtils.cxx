@@ -353,7 +353,8 @@ float DVUtils::getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParti
 // get closest truth vertex
 const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv){
     
-    double maxDistance = 0.7;
+    double maxDistance = 1.0;
+    //double maxDistance = 5.0;
     
     double minDistance = std::numeric_limits<double>::max();
     const xAOD::TruthVertex *tvClosest{0};
@@ -363,20 +364,24 @@ const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv){
     evtStore()->retrieve( tru_vc, "TruthVertices");
     
     for (const auto tv : *tru_vc) {
-    
-        double distTvPv =
+
+        // select only signal vertex
+        if(!isSignalVertex(tv)) continue;
+   
+        // find distance between reco and truth vertex
+        double dist =
         sqrt(
         pow(tv->x() - rv->x(), 2) +
         pow(tv->y() - rv->y(), 2) +
         pow(tv->z() - rv->z(), 2));
     
-        if (distTvPv < minDistance) {
-            minDistance = distTvPv;
+        if (dist < minDistance) {
+            minDistance = dist;
             tvClosest = tv;
         }
     }
     
-    // return truth vertex only if distance < 1. mm
+    // return truth vertex only if distance < maxDistance
     if (minDistance < maxDistance) {
         ATH_MSG_DEBUG("truth vertex distance from reco vertex (closest) = " << minDistance );
         return tvClosest;
@@ -890,8 +895,6 @@ bool DVUtils::isSignalVertex (const xAOD::TruthVertex* v) {
 
     bool signal = true;
 
-    ATH_MSG_DEBUG("DEBUG: 0, nIncoming = " << v->nIncomingParticles() << ", nOutgoing = " << v->nOutgoingParticles());
-
     if (!(v->nIncomingParticles() == 1)) signal = false;
     if (!((v->nOutgoingParticles() == 2) or (v->nOutgoingParticles() == 3)))
     {
@@ -900,13 +903,13 @@ bool DVUtils::isSignalVertex (const xAOD::TruthVertex* v) {
 
     // access parent
     const xAOD::TruthParticle* parent = v->incomingParticle(0);
-    ATH_MSG_DEBUG("DEBUG: 1, parent->absPdgId() = " << parent->absPdgId());
-    if (!((parent->absPdgId() ==32) or (parent->absPdgId() ==1000022)))
-    {
-        signal = false;
+    if (parent) {
+        if (!((parent->absPdgId() ==32) or (parent->absPdgId() ==1000022)))
+        {
+            signal = false;
+        }
     }
 
-    ATH_MSG_DEBUG("DEBUG: 2, signal = " << signal);
     return signal;
 
 } // end of isSignal
@@ -952,20 +955,52 @@ float DVUtils::TruthPt (const xAOD::TruthVertex* v) {
     return outgoing_tlv.Pt(); // return pt in MeV
 } // end of TruthPt
 
+// calculate eta of truth vertex
+float DVUtils::TruthEta (const xAOD::TruthVertex* v) {
+
+    // Lorentz vector to calculate eta of truth vertex
+    TLorentzVector outgoing_tlv;
+
+    for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
+
+        const xAOD::TruthParticle* p = v->outgoingParticle(i);
+
+        // skip if particle is not charged (to remove neutrino from mass calculation)
+        if (p->isNeutral()) continue;
+
+        outgoing_tlv += TLorentzVector( p->px(), p->py(), p->pz(), p->e());
+    } // end of outgoingn particle loop
+
+    return outgoing_tlv.Eta(); // return eta 
+} // end of TruthEta
+
+
 // calculate dr of truth vertex
 float DVUtils::Truth_dr (const xAOD::TruthVertex* v) {
 
-    const xAOD::TruthParticle* tp0 = FindFinalState(v->outgoingParticle(0));
-    const xAOD::TruthParticle* tp1 = FindFinalState(v->outgoingParticle(1));
+    std::vector<const xAOD::TruthParticle*> outgoingParticles;
+
+    for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
+
+        const xAOD::TruthParticle* p = v->outgoingParticle(i);
+
+        // skip if particle is not charged (to remove neutrino from mass calculation)
+        if (p->isNeutral()) continue;
+
+        // add chareged particle to vector
+        outgoingParticles.push_back(p);
+
+    } // end of outgoingn particle loop
 
     // define TLorentzVector of muons
-    TLorentzVector tlv_p0 = tp0->p4();
-    TLorentzVector tlv_p1 = tp1->p4();
+    TLorentzVector tlv_p0 = outgoingParticles.at(0)->p4();
+    TLorentzVector tlv_p1 = outgoingParticles.at(1)->p4();
 
     float deltaR_tlv = tlv_p0.DeltaR(tlv_p1);
 
     return deltaR_tlv;
 } // end of Truth_dr
+
 
 
 //-------------------------------------------------------------

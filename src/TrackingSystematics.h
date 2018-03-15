@@ -32,6 +32,9 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 
+// pile-up reweighting
+#include "AsgAnalysisInterfaces/IPileupReweightingTool.h"
+
 
 class TrackingSystematics: public ::AthAnalysisAlgorithm { 
     public: 
@@ -61,6 +64,7 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IOverlapRemoval> m_or;
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
         ToolHandle<DDL::IPhotonMatch> m_phmatch;
+        ToolHandle<CP::IPileupReweightingTool> m_prw; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
@@ -68,10 +72,28 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
 
+        // use PRW
+        bool m_usePRW;
+
+        // use secondary vertex. 
+        // True by default. False for samples with no LRT+VrtSecInclusive
+        bool m_useSV;
+
+        // use PV
+        // True by default. False for MC samples with no PV
+        bool m_usePV;
+
+        // pileup weight
+        float p_weight = 1;
+
+        // pileup
+        TH1F* m_pileup;
+        TH1F* m_pileup_reweighted;
+
         // output
         TH1D* m_event_cutflow; //!
 
-        // Ks candidate from VrtSecInclusive
+        // Ks candidate from VrtSecInclusive using LRT
         TH1D* m_dv_idid_cf; //!
         TH1F* m_dv_idid_M; //!
         TH1F* m_dv_idid_R; //!
@@ -81,6 +103,13 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_dv_idid_mu; //!
         TH1F* m_dv_idid_DeltaR; //!
         TH2F* m_dv_idid_R_M; //!
+        TH1F* m_dv_idid_track_pt; //!
+
+        // Ks candidate without using LRT
+        TH1F* m_dv_idid_M_ST; //!
+
+        // Ks candidate using both LRT and ST
+        TH1F* m_dv_idid_M_ST_LRT; //!
 
         // mass plot in bins of R
         TH1F* m_dv_idid_M_1; //!
@@ -91,9 +120,6 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_dv_idid_M_6; //!
         TH1F* m_dv_idid_M_7; //!
         TH1F* m_dv_idid_M_8; //!
-
-        // ratio plot (Ri / R0)
-        TH1F* m_dv_idid_ratio_R; //!
 
 
         // truth-matched Ks, Z' comparison
@@ -109,7 +135,21 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_zp_z; //!
         TH1F* m_zp_DeltaR; //!
 
+        // Ks candidate from PrimaryVertices
+        TH1D* m_pv_idid_cf; //!
+        TH1F* m_pv_idid_M; //!
+        TH1F* m_pv_idid_R; //!
+        TH1F* m_pv_idid_z; //!
+        TH1F* m_pv_idid_l; //!
+        TH1F* m_pv_idid_pt; //!
+        TH1F* m_pv_idid_DeltaR; //!
+        TH2F* m_pv_idid_R_M; //!
+        TH1F* m_pv_idid_track_pt; //!
 
+        // count LRT and standard vertex
+        int n_standard = 0;
+        int n_lrt = 0;
+        int n_lrt_standard = 0;
 
 }; 
 
