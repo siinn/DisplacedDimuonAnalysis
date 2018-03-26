@@ -71,6 +71,21 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
+    // initialize tools
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_tmt.retrieve());
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_leptool.retrieve());
+    ATH_CHECK(m_fmtool.retrieve());
+    ATH_CHECK(m_costool.retrieve());
+    ATH_CHECK(m_grlTool.retrieve());
+    ATH_CHECK(m_or.retrieve());
+    ATH_CHECK(m_cos.retrieve());
+    ATH_CHECK(m_evtc.retrieve());
+    ATH_CHECK(m_dvc.retrieve());
+    ATH_CHECK(m_dilepdvc.retrieve());
+    ATH_CHECK(m_phmatch.retrieve());
+
     // event cut flow
     m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 5,0,5);
     CHECK( histSvc->regHist("/DV/event_cutflow", m_event_cutflow) );
@@ -442,7 +457,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
 
     // trigger check
-    if(!trig_passed) return StatusCode::SUCCESS;
+    if(!trig_passed) {
+        ATH_MSG_DEBUG("Trigger failed. Event number = " << evtInfo->eventNumber());
+        return StatusCode::SUCCESS;
+    }
     m_event_cutflow->Fill("Trig", 1);
 
     // cosmic veto
@@ -462,7 +480,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         auto pv_pos = pv->position();
 
         // z_pv cut
-        if(std::fabs(pv_pos.z()) > pv_z_max) return StatusCode::SUCCESS;
+        if(std::abs(pv_pos.z()) > pv_z_max) return StatusCode::SUCCESS;
     }
     else return StatusCode::SUCCESS;
     m_event_cutflow->Fill("z_{PV} < 200 mm", 1);
@@ -494,7 +512,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         float dv_z_max = 300;
 
         // access invariant mass
-        float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in MeV
+        float dv_mass = std::abs(m_accMass(*dv)) / 1000.; // in MeV
 
         // collect leptons from this dv
         auto dv_muc = m_accMu(*dv);
@@ -504,87 +522,77 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         n_dv_all++;
 
         // channel
-        if(dv_elc->size() < 2) ee_candidate = false;
-        if (ee_candidate) m_dv_ee_cf->Fill("ee candidate",1);
-        else m_dv_ee_cf->Fill("ee candidate",0);
+        if(!(dv_elc->size() >= 2)) ee_candidate = false;
+        m_dv_ee_cf->Fill("ee candidate", ee_candidate);
 
-        if((dv_elc->size() < 1) && (dv_muc->size() < 1)) emu_candidate = false;
-        if (emu_candidate) m_dv_emu_cf->Fill("e#mu candidate",1);
-        else m_dv_emu_cf->Fill("e#mu candidate",0);
+        if(!((dv_elc->size() >= 1) && (dv_muc->size() >= 1))) emu_candidate = false;
+        m_dv_emu_cf->Fill("e#mu candidate", emu_candidate);
 
-        if(dv_muc->size() < 2) mumu_candidate = false;
-        if (mumu_candidate) m_dv_mumu_cf->Fill("#mu#mu candidate",1);
-        else m_dv_mumu_cf->Fill("#mu#mu candidate",0);
+        if(!(dv_muc->size() >= 2)) mumu_candidate = false;
+        m_dv_mumu_cf->Fill("#mu#mu candidate", mumu_candidate);
+
+
+        if (mumu_candidate) ATH_MSG_INFO("candidate mumu, " << evtInfo->eventNumber());
+        if (ee_candidate) ATH_MSG_INFO("candidate ee, " << evtInfo->eventNumber());
+        if (emu_candidate) ATH_MSG_INFO("candidate emu, " << evtInfo->eventNumber());
+
 
         // Electron identification
         m_leptool->ElectronID(*dv);
 
-        if(dv_elc->size() < 2) ee_candidate = false;
-        if (ee_candidate) m_dv_ee_cf->Fill("ElectronID",1);
-        else m_dv_ee_cf->Fill("ElectronID",0);
+        if(!(dv_elc->size() >= 2)) ee_candidate = false;
+        m_dv_ee_cf->Fill("ElectronID",ee_candidate);
 
-        if((dv_elc->size() < 1) && (dv_muc->size() < 1)) emu_candidate = false;
-        if (emu_candidate) m_dv_emu_cf->Fill("ElectronID",1);
-        else m_dv_emu_cf->Fill("ElectronID",0);
+        if(!((dv_elc->size() >= 1) && (dv_muc->size() >= 1))) emu_candidate = false;
+        m_dv_emu_cf->Fill("ElectronID",emu_candidate);
 
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
 
-        if(dv_elc->size() < 2) ee_candidate = false;
-        if (ee_candidate) m_dv_ee_cf->Fill("BadCluster",1);
-        else m_dv_ee_cf->Fill("BadCluster",0);
+        if(!(dv_elc->size() >= 2)) ee_candidate = false;
+        m_dv_ee_cf->Fill("BadCluster",ee_candidate);
 
-        if((dv_elc->size() < 1) && (dv_muc->size() < 1)) emu_candidate = false;
-        if (emu_candidate) m_dv_emu_cf->Fill("BadCluster",1);
-        else m_dv_emu_cf->Fill("BadCluster",0);
+        if(!((dv_elc->size() >= 1) && (dv_muc->size() >= 1))) emu_candidate = false;
+        m_dv_emu_cf->Fill("BadCluster",emu_candidate);
 
         // kinematic cut
         m_leptool->ElectronKinematicCut(*dv);
 
-        if(dv_elc->size() < 2) ee_candidate = false;
-        if (ee_candidate) m_dv_ee_cf->Fill("p_{T} > 10 GeV, #eta < 2.47",1);
-        else m_dv_ee_cf->Fill("p_{T} > 10 GeV, #eta < 2.47",0);
+        if(!(dv_elc->size() >= 2)) ee_candidate = false;
+        m_dv_ee_cf->Fill("p_{T} > 10 GeV, #eta < 2.47", ee_candidate);
 
-        if((dv_elc->size() < 1) && (dv_muc->size() < 1)) emu_candidate = false;
-        if (emu_candidate) m_dv_emu_cf->Fill("p_{T} > 10 GeV, #eta < 2.47",1);
-        else m_dv_emu_cf->Fill("p_{T} > 10 GeV, #eta < 2.47",0);
+        if(!((dv_elc->size() >= 1) && (dv_muc->size() >= 1))) emu_candidate = false;
+        m_dv_emu_cf->Fill("p_{T} > 10 GeV, #eta < 2.47", emu_candidate);
 
         // muon selection tool
         m_leptool->MuonSelection(*dv);
 
-        if(dv_muc->size() < 2) mumu_candidate = false;
-        if (mumu_candidate) m_dv_mumu_cf->Fill("MuonID+Kinematic",1);
-        else m_dv_mumu_cf->Fill("MuonID+Kinematic",0);
+        if(!(dv_muc->size() >= 2)) mumu_candidate = false;
+        m_dv_mumu_cf->Fill("MuonID+Kinematic", mumu_candidate);
 
         // remove overlapping muon
         m_dilepdvc->ApplyOverlapRemoval(*dv);
 
-        if(dv_elc->size() < 2) ee_candidate = false;
-        if (ee_candidate) m_dv_ee_cf->Fill("OverlapRemoval",1);
-        else m_dv_ee_cf->Fill("OverlapRemoval",0);
+        if(!(dv_elc->size() >= 2)) ee_candidate = false;
+        m_dv_ee_cf->Fill("OverlapRemoval", ee_candidate);
 
-        if((dv_elc->size() < 1) && (dv_muc->size() < 1)) emu_candidate = false;
-        if (emu_candidate) m_dv_emu_cf->Fill("OverlapRemoval",1);
-        else m_dv_emu_cf->Fill("OverlapRemoval",0);
+        if(!((dv_elc->size() >= 1) && (dv_muc->size() >= 1))) emu_candidate = false;
+        m_dv_emu_cf->Fill("OverlapRemoval", emu_candidate);
 
-        if(dv_muc->size() < 2) mumu_candidate = false;
-        if (mumu_candidate) m_dv_mumu_cf->Fill("OverlapRemoval",1);
-        else m_dv_mumu_cf->Fill("OverlapRemoval",0);
+        if(!(dv_muc->size() >= 2)) mumu_candidate = false;
+        m_dv_mumu_cf->Fill("OverlapRemoval", mumu_candidate);
 
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) continue;
 
-        if(dv_elc->size() < 2) ee_candidate = false;
-        if (ee_candidate) m_dv_ee_cf->Fill("nTracks=2",1);
-        else m_dv_ee_cf->Fill("nTracks=2",0);
+        if(!(dv_elc->size() >= 2)) ee_candidate = false;
+        m_dv_ee_cf->Fill("nTracks=2", ee_candidate);
 
-        if((dv_elc->size() < 1) && (dv_muc->size() < 1)) emu_candidate = false;
-        if (emu_candidate) m_dv_emu_cf->Fill("nTracks=2",1);
-        else m_dv_emu_cf->Fill("nTracks=2",0);
+        if(!((dv_elc->size() >= 1) && (dv_muc->size() >= 1))) emu_candidate = false;
+        m_dv_emu_cf->Fill("nTracks=2", emu_candidate);
 
-        if(dv_muc->size() < 2) mumu_candidate = false;
-        if (mumu_candidate) m_dv_mumu_cf->Fill("nTracks=2",1);
-        else m_dv_mumu_cf->Fill("nTracks=2",0);
+        if(!(dv_muc->size() >= 2)) mumu_candidate = false;
+        m_dv_mumu_cf->Fill("nTracks=2", mumu_candidate);
 
         // trigger matching
         m_dilepdvc->DoTriggerMatching(*dv);
@@ -617,6 +625,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         }
 
         if (channel == "mumu") {
+
+            // continue if this pair didn't pass previous cut
+            if(!mumu_candidate) continue;
 
             // Trigger matching
             if(!m_dvutils->TrigMatching(*dv)) continue;
@@ -654,8 +665,21 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             //m_dv_mumu_cf->Fill("R_{CR} > 0.01", 1);
 
             // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            if(!m_dilepdvc->PassFilterMatching(*dv)) {
+                //ATH_MSG_INFO("FM fail, z = " << dv_z << ", run = " << evtInfo->runNumber() 
+                //                << ", eventNumber = " << evtInfo->eventNumber()
+                //                << ", pt1 = " << tp1.pt() / 1000.
+                //                << ", pt2 = " << tp2.pt() / 1000.
+                //                << ", eta1 = " << tp1.eta() 
+                //                << ", eta2 = " << tp2.eta() 
+                //                << ", d01 = " << tp1.d0() 
+                //                << ", d02 = " << tp2.d0() 
+                //                
+                //                );
+                continue;
+            }
             m_dv_mumu_cf->Fill("FilterMatching", 1);
+
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -686,320 +710,326 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             }
         } // end of mumu
 
-        if (channel == "ee") {
+        //if (channel == "ee") {
 
-            // Trigger matching
-            if(!m_dvutils->TrigMatching(*dv)) continue;
-            m_dv_ee_cf->Fill("Trig. Matching", 1);
+        //    // continue if this pair didn't pass previous cut
+        //    if(!ee_candidate) continue;
 
-            // vertex fit quality
-            m_dv_ee_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
-            if(!m_dvc->PassChisqCut(*dv)) continue;
-            m_dv_ee_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+        //    // Trigger matching
+        //    if(!m_dvutils->TrigMatching(*dv)) continue;
+        //    m_dv_ee_cf->Fill("Trig. Matching", 1);
 
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-            m_dv_ee_cf->Fill("Disp. > 2 mm", 1);
+        //    // vertex fit quality
+        //    m_dv_ee_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+        //    if(!m_dvc->PassChisqCut(*dv)) continue;
+        //    m_dv_ee_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_ee_cf->Fill("e^{+}e^{-}", 1);
+        //    // minimum distance from pv (from 0 for MC)
+        //    if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        //    m_dv_ee_cf->Fill("Disp. > 2 mm", 1);
 
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
-            m_dv_ee_cf->Fill("DisabledModule", 1);
+        //    // charge requirements
+        //    if(!m_dvc->PassChargeRequirement(*dv)) continue;
+        //    m_dv_ee_cf->Fill("e^{+}e^{-}", 1);
 
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_ee_cf->Fill("MaterialVeto", 1);
+        //    // disabled module
+        //    if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        //    m_dv_ee_cf->Fill("DisabledModule", 1);
 
-            // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_ee_cf->Fill("m > 10 GeV", 1);
-            //m_dv_ee_cf->Fill("m < 10 GeV", 1);
+        //    // material veto
+        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        //    m_dv_ee_cf->Fill("MaterialVeto", 1);
 
-            // fill cosmic veto background
-            FillCosmicBkg(tp1, tp2, channel);
+        //    // low mass veto
+        //    if(dv_mass < mass_min) continue;
+        //    m_dv_ee_cf->Fill("m > 10 GeV", 1);
+        //    //m_dv_ee_cf->Fill("m < 10 GeV", 1);
 
-            // cosmic veto
-            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            //m_dv_ee_cf->Fill("R_{CR} > 0.01", 1);
+        //    // fill cosmic veto background
+        //    FillCosmicBkg(tp1, tp2, channel);
 
-            // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_ee_cf->Fill("FilterMatching", 1);
+        //    // cosmic veto
+        //    //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+        //    //m_dv_ee_cf->Fill("R_{CR} > 0.01", 1);
 
-            // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
-            m_dv_ee_cf->Fill("R_{DV} > 300 mm", 1);
+        //    // RPVLL filter matching
+        //    if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+        //    m_dv_ee_cf->Fill("FilterMatching", 1);
 
-            // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
-            m_dv_ee_cf->Fill("z_{DV} > 300 mm", 1);
+        //    // DV R <  300 mm
+        //    if(dv_R > dv_R_max) continue;
+        //    m_dv_ee_cf->Fill("R_{DV} > 300 mm", 1);
 
-            // plot dv distributions
-            plot_dv(*dv, *pv, channel);
+        //    // DV z <  300 mm
+        //    if(dv_z > dv_z_max) continue;
+        //    m_dv_ee_cf->Fill("z_{DV} > 300 mm", 1);
 
-            // plot muon kinematics
-            plot_signal_tp(*dv_muc, *dv_elc, channel);
+        //    // plot dv distributions
+        //    plot_dv(*dv, *pv, channel);
 
-            // truth match
-            if (isMC){
-                // create truth vertex for matching
-                const xAOD::TruthVertex *tru_matched = nullptr;
+        //    // plot muon kinematics
+        //    plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
-                if(tru_matched) m_dv_ee_cf->Fill("Truth matched", 1);
-            }
+        //    // truth match
+        //    if (isMC){
+        //        // create truth vertex for matching
+        //        const xAOD::TruthVertex *tru_matched = nullptr;
 
-        } // end of ee
+        //        tru_matched = m_dvutils->getClosestTruthVertex(dv);
+        //        if(tru_matched) m_dv_ee_cf->Fill("Truth matched", 1);
+        //    }
 
-        if (channel == "emu") {
+        //} // end of ee
 
-            // Trigger matching
-            if(!m_dvutils->TrigMatching(*dv)) continue;
-            m_dv_emu_cf->Fill("Trig. Matching", 1);
+        //if (channel == "emu") {
 
-            // vertex fit quality
-            m_dv_emu_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
-            if(!m_dvc->PassChisqCut(*dv)) continue;
-            m_dv_emu_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+        //    // continue if this pair didn't pass previous cut
+        //    if(!emu_candidate) continue;
 
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-            m_dv_emu_cf->Fill("Disp. > 2 mm", 1);
+        //    // Trigger matching
+        //    if(!m_dvutils->TrigMatching(*dv)) continue;
+        //    m_dv_emu_cf->Fill("Trig. Matching", 1);
 
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_emu_cf->Fill("e^{+}#mu^{-}, e^{-}#mu^{+}", 1);
+        //    // vertex fit quality
+        //    m_dv_emu_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+        //    if(!m_dvc->PassChisqCut(*dv)) continue;
+        //    m_dv_emu_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
-            m_dv_emu_cf->Fill("DisabledModule", 1);
+        //    // minimum distance from pv (from 0 for MC)
+        //    if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        //    m_dv_emu_cf->Fill("Disp. > 2 mm", 1);
 
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_emu_cf->Fill("MaterialVeto", 1);
+        //    // charge requirements
+        //    if(!m_dvc->PassChargeRequirement(*dv)) continue;
+        //    m_dv_emu_cf->Fill("e^{+}#mu^{-}, e^{-}#mu^{+}", 1);
 
-            // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_emu_cf->Fill("m > 10 GeV", 1);
-            //m_dv_emu_cf->Fill("m < 10 GeV", 1);
+        //    // disabled module
+        //    if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        //    m_dv_emu_cf->Fill("DisabledModule", 1);
 
-            // fill cosmic veto background
-            FillCosmicBkg(tp1, tp2, channel);
+        //    // material veto
+        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        //    m_dv_emu_cf->Fill("MaterialVeto", 1);
 
-            // cosmic veto
-            //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            //m_dv_emu_cf->Fill("R_{CR} > 0.01", 1);
+        //    // low mass veto
+        //    if(dv_mass < mass_min) continue;
+        //    m_dv_emu_cf->Fill("m > 10 GeV", 1);
+        //    //m_dv_emu_cf->Fill("m < 10 GeV", 1);
 
-            // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_emu_cf->Fill("FilterMatching", 1);
+        //    // fill cosmic veto background
+        //    FillCosmicBkg(tp1, tp2, channel);
 
-            // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
-            m_dv_emu_cf->Fill("R_{DV} > 300 mm", 1);
+        //    // cosmic veto
+        //    //if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
+        //    //m_dv_emu_cf->Fill("R_{CR} > 0.01", 1);
 
-            // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
-            m_dv_emu_cf->Fill("z_{DV} > 300 mm", 1);
+        //    // RPVLL filter matching
+        //    if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+        //    m_dv_emu_cf->Fill("FilterMatching", 1);
 
-            // plot dv distributions
-            plot_dv(*dv, *pv, channel);
+        //    // DV R <  300 mm
+        //    if(dv_R > dv_R_max) continue;
+        //    m_dv_emu_cf->Fill("R_{DV} > 300 mm", 1);
 
-            // plot muon kinematics
-            plot_signal_tp(*dv_muc, *dv_elc, channel);
+        //    // DV z <  300 mm
+        //    if(dv_z > dv_z_max) continue;
+        //    m_dv_emu_cf->Fill("z_{DV} > 300 mm", 1);
 
-            // truth match
-            if (isMC){
-                // create truth vertex for matching
-                const xAOD::TruthVertex *tru_matched = nullptr;
+        //    // plot dv distributions
+        //    plot_dv(*dv, *pv, channel);
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
-                if(tru_matched) m_dv_emu_cf->Fill("Truth matched", 1);
-            }
+        //    // plot muon kinematics
+        //    plot_signal_tp(*dv_muc, *dv_elc, channel);
 
-        } // end of emu
+        //    // truth match
+        //    if (isMC){
+        //        // create truth vertex for matching
+        //        const xAOD::TruthVertex *tru_matched = nullptr;
 
-        if (channel == "mut") {
+        //        tru_matched = m_dvutils->getClosestTruthVertex(dv);
+        //        if(tru_matched) m_dv_emu_cf->Fill("Truth matched", 1);
+        //    }
 
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*dv)) continue;
-            m_dv_mut_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+        //} // end of emu
 
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-            m_dv_mut_cf->Fill("Disp. > 2 mm", 1);
+        //if (channel == "mut") {
 
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_mut_cf->Fill("#mu^{+,-}-trk^{-,+}", 1);
+        //    // vertex fit quality
+        //    if(!m_dvc->PassChisqCut(*dv)) continue;
+        //    m_dv_mut_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
-            m_dv_mut_cf->Fill("DisabledModule", 1);
+        //    // minimum distance from pv (from 0 for MC)
+        //    if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        //    m_dv_mut_cf->Fill("Disp. > 2 mm", 1);
 
-            // material veto (excluding mu)
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_mut_cf->Fill("MaterialVeto (excluding mu)", 1);
+        //    // charge requirements
+        //    if(!m_dvc->PassChargeRequirement(*dv)) continue;
+        //    m_dv_mut_cf->Fill("#mu^{+,-}-trk^{-,+}", 1);
 
-            // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_mut_cf->Fill("m > 10 GeV", 1);
+        //    // disabled module
+        //    if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        //    m_dv_mut_cf->Fill("DisabledModule", 1);
 
-            // fill cosmic veto background
-            FillCosmicBkg(tp1, tp2, channel);
-            
-            // cosmic veto (R_CR)
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_mut_cf->Fill("R_{CR} > 0.01", 1);
+        //    // material veto (excluding mu)
+        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        //    m_dv_mut_cf->Fill("MaterialVeto (excluding mu)", 1);
 
-            // RPVLL filter matching
-            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
-            m_dv_mut_cf->Fill("FilterMatching", 1);
+        //    // low mass veto
+        //    if(dv_mass < mass_min) continue;
+        //    m_dv_mut_cf->Fill("m > 10 GeV", 1);
 
-            // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
-            m_dv_mut_cf->Fill("R_{DV} > 300 mm", 1);
+        //    // fill cosmic veto background
+        //    FillCosmicBkg(tp1, tp2, channel);
+        //    
+        //    // cosmic veto (R_CR)
+        //    //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+        //    //m_dv_mut_cf->Fill("R_{CR} > 0.01", 1);
 
-            // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
-            m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
+        //    // RPVLL filter matching
+        //    if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+        //    m_dv_mut_cf->Fill("FilterMatching", 1);
 
+        //    // DV R <  300 mm
+        //    if(dv_R > dv_R_max) continue;
+        //    m_dv_mut_cf->Fill("R_{DV} > 300 mm", 1);
 
-            // truth match
-            if (isMC){
-                // create truth vertex for matching
-                const xAOD::TruthVertex *tru_matched = nullptr;
+        //    // DV z <  300 mm
+        //    if(dv_z > dv_z_max) continue;
+        //    m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
-                if(tru_matched) m_dv_mut_cf->Fill("Truth matched", 1);
-            }
 
-        }
+        //    // truth match
+        //    if (isMC){
+        //        // create truth vertex for matching
+        //        const xAOD::TruthVertex *tru_matched = nullptr;
 
-        if (channel == "et") {
+        //        tru_matched = m_dvutils->getClosestTruthVertex(dv);
+        //        if(tru_matched) m_dv_mut_cf->Fill("Truth matched", 1);
+        //    }
 
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*dv)) continue;
-            m_dv_et_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+        //}
 
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-            m_dv_et_cf->Fill("Disp. > 2 mm", 1);
+        //if (channel == "et") {
 
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_et_cf->Fill("#mu^{+,-}-trk^{-,+}", 1);
+        //    // vertex fit quality
+        //    if(!m_dvc->PassChisqCut(*dv)) continue;
+        //    m_dv_et_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
-            m_dv_et_cf->Fill("DisabledModule", 1);
+        //    // minimum distance from pv (from 0 for MC)
+        //    if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        //    m_dv_et_cf->Fill("Disp. > 2 mm", 1);
 
-            // material veto (excluding mu)
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_et_cf->Fill("MaterialVeto (excluding mu)", 1);
+        //    // charge requirements
+        //    if(!m_dvc->PassChargeRequirement(*dv)) continue;
+        //    m_dv_et_cf->Fill("#mu^{+,-}-trk^{-,+}", 1);
 
-            // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_et_cf->Fill("m > 10 GeV", 1);
+        //    // disabled module
+        //    if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        //    m_dv_et_cf->Fill("DisabledModule", 1);
 
-            // RPVLL filter matching
-            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
-            m_dv_et_cf->Fill("FilterMatching", 1);
+        //    // material veto (excluding mu)
+        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        //    m_dv_et_cf->Fill("MaterialVeto (excluding mu)", 1);
 
-            // fill cosmic veto background
-            FillCosmicBkg(tp1, tp2, channel);
-            
-            // cosmic veto (R_CR)
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_et_cf->Fill("R_{CR} > 0.01", 1);
+        //    // low mass veto
+        //    if(dv_mass < mass_min) continue;
+        //    m_dv_et_cf->Fill("m > 10 GeV", 1);
 
-            // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
-            m_dv_et_cf->Fill("R_{DV} > 300 mm", 1);
+        //    // RPVLL filter matching
+        //    if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+        //    m_dv_et_cf->Fill("FilterMatching", 1);
 
-            // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
-            m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
+        //    // fill cosmic veto background
+        //    FillCosmicBkg(tp1, tp2, channel);
+        //    
+        //    // cosmic veto (R_CR)
+        //    //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+        //    //m_dv_et_cf->Fill("R_{CR} > 0.01", 1);
 
+        //    // DV R <  300 mm
+        //    if(dv_R > dv_R_max) continue;
+        //    m_dv_et_cf->Fill("R_{DV} > 300 mm", 1);
 
+        //    // DV z <  300 mm
+        //    if(dv_z > dv_z_max) continue;
+        //    m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
 
-            // truth match
-            if (isMC){
-                // create truth vertex for matching
-                const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
-                if(tru_matched) m_dv_et_cf->Fill("Truth matched", 1);
-            }
 
-        }
+        //    // truth match
+        //    if (isMC){
+        //        // create truth vertex for matching
+        //        const xAOD::TruthVertex *tru_matched = nullptr;
 
-        if (channel == "idid") {
+        //        tru_matched = m_dvutils->getClosestTruthVertex(dv);
+        //        if(tru_matched) m_dv_et_cf->Fill("Truth matched", 1);
+        //    }
 
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*dv)) continue;
-            m_dv_idid_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+        //}
 
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
-            m_dv_idid_cf->Fill("Disp. > 2 mm", 1);
+        //if (channel == "idid") {
 
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*dv)) continue;
-            m_dv_idid_cf->Fill("x^{+}x^{-}", 1);
+        //    // vertex fit quality
+        //    if(!m_dvc->PassChisqCut(*dv)) continue;
+        //    m_dv_idid_cf->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
-            m_dv_idid_cf->Fill("DisabledModule", 1);
+        //    // minimum distance from pv (from 0 for MC)
+        //    if(!m_dvc->PassDistCut(*dv, *pvc)) continue;
+        //    m_dv_idid_cf->Fill("Disp. > 2 mm", 1);
 
-            // material veto (excluding mu)
-            if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            m_dv_idid_cf->Fill("MaterialVeto (excluding mu)", 1);
+        //    // charge requirements
+        //    if(!m_dvc->PassChargeRequirement(*dv)) continue;
+        //    m_dv_idid_cf->Fill("x^{+}x^{-}", 1);
 
-            // low mass veto
-            if(dv_mass < mass_min) continue;
-            m_dv_idid_cf->Fill("m > 10 GeV", 1);
-            // fill cosmic veto background
-            FillCosmicBkg(tp1, tp2, channel);
-            
-            // cosmic veto (R_CR)
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_idid_cf->Fill("R_{CR} > 0.01", 1);
+        //    // disabled module
+        //    if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
+        //    m_dv_idid_cf->Fill("DisabledModule", 1);
 
-            // RPVLL filter matching
-            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
-            m_dv_idid_cf->Fill("FilterMatching", 1);
+        //    // material veto (excluding mu)
+        //    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+        //    m_dv_idid_cf->Fill("MaterialVeto (excluding mu)", 1);
 
-            // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
-            m_dv_idid_cf->Fill("R_{DV} > 300 mm", 1);
+        //    // low mass veto
+        //    if(dv_mass < mass_min) continue;
+        //    m_dv_idid_cf->Fill("m > 10 GeV", 1);
+        //    // fill cosmic veto background
+        //    FillCosmicBkg(tp1, tp2, channel);
+        //    
+        //    // cosmic veto (R_CR)
+        //    //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+        //    //m_dv_idid_cf->Fill("R_{CR} > 0.01", 1);
 
-            // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
-            m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
+        //    // RPVLL filter matching
+        //    if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+        //    m_dv_idid_cf->Fill("FilterMatching", 1);
 
+        //    // DV R <  300 mm
+        //    if(dv_R > dv_R_max) continue;
+        //    m_dv_idid_cf->Fill("R_{DV} > 300 mm", 1);
 
-            //==========================================
-            // plot xx distributions
-            //==========================================
-            plot_dv(*dv, *pv, channel);
-            m_dv_idid_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+        //    // DV z <  300 mm
+        //    if(dv_z > dv_z_max) continue;
+        //    m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
 
-            n_dv_passed_cut++;
 
-            // truth match
-            if (isMC){
-                // create truth vertex for matching
-                const xAOD::TruthVertex *tru_matched = nullptr;
+        //    //==========================================
+        //    // plot xx distributions
+        //    //==========================================
+        //    plot_dv(*dv, *pv, channel);
+        //    m_dv_idid_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
-                if(tru_matched) m_dv_idid_cf->Fill("Truth matched", 1);
-            }
+        //    n_dv_passed_cut++;
 
-        }
+        //    // truth match
+        //    if (isMC){
+        //        // create truth vertex for matching
+        //        const xAOD::TruthVertex *tru_matched = nullptr;
+
+        //        tru_matched = m_dvutils->getClosestTruthVertex(dv);
+        //        if(tru_matched) m_dv_idid_cf->Fill("Truth matched", 1);
+        //    }
+
+        //}
 
     } // end of dv loop
 
@@ -1082,7 +1112,7 @@ void DisplacedDimuonAnalysisAlg::plot_signal_tp(const DataVector<xAOD::Muon> dv_
 void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::string channel) {
 
     // access invariant mass
-    float dv_mass = std::fabs(m_accMass(dv)) / 1000.; // in MeV
+    float dv_mass = std::abs(m_accMass(dv)) / 1000.; // in MeV
     ATH_MSG_DEBUG("At fill, m = " << dv_mass);
 
     // fill dimuon vertex
@@ -1145,7 +1175,7 @@ bool DisplacedDimuonAnalysisAlg::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, x
     tlv_tp0 = tr0.p4();
     tlv_tp1 = tr1.p4();
 
-    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float deltaPhiMinusPi = std::abs(std::abs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
     float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
 
@@ -1167,7 +1197,7 @@ void DisplacedDimuonAnalysisAlg::FillCosmicBkg(xAOD::TrackParticle& tr0, xAOD::T
     float Rcos_min = 0.04;
     float deltaR_min = 0.5;
 
-    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float deltaPhiMinusPi = std::abs(std::abs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
     float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
     float deltaR = tlv_tp0.DeltaR(tlv_tp1);

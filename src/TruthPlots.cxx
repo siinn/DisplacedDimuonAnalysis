@@ -38,6 +38,11 @@ TruthPlots::~TruthPlots() {}
 
 
 StatusCode TruthPlots::initialize() {
+
+    // initialize tools
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_prw.retrieve());
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 

@@ -71,6 +71,22 @@ CosmicBackground::~CosmicBackground() {}
 
 
 StatusCode CosmicBackground::initialize() {
+
+    // initialize tools
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_leptool.retrieve());
+    ATH_CHECK(m_costool.retrieve());
+    ATH_CHECK(m_evtc.retrieve());
+    ATH_CHECK(m_dvc.retrieve());
+    ATH_CHECK(m_grlTool.retrieve());
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_tmt.retrieve());
+    ATH_CHECK(m_trig.retrieve());
+    ATH_CHECK(m_or.retrieve());
+    ATH_CHECK(m_cos.retrieve());
+
+
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());

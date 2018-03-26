@@ -77,6 +77,22 @@ DVEfficiency::~DVEfficiency() {}
 
 
 StatusCode DVEfficiency::initialize() {
+
+    // initialize tools
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_leptool.retrieve());
+    ATH_CHECK(m_costool.retrieve());
+    ATH_CHECK(m_evtc.retrieve());
+    ATH_CHECK(m_dvc.retrieve());
+    ATH_CHECK(m_grlTool.retrieve());
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_cos.retrieve());
+    ATH_CHECK(m_or.retrieve());
+    ATH_CHECK(m_prw.retrieve());
+    ATH_CHECK(m_phmatch.retrieve());
+
+
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     //--------------------------------------------------------
@@ -91,18 +107,24 @@ StatusCode DVEfficiency::initialize() {
     m_dv_mass = new TH1F( "m_dv_mass", "Invariant mass of all signal vertex", 50, 0, 1500 ); // GeV
 
     // efficiency plots
-    m_dv_eff_eta = new TEfficiency( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 20, -3.0, 3.0);
+    // custom binning
+    Double_t m_eta_bins_d[] = {0,0.5,1.0,1.5,2.5,4.0};
+    //Double_t m_pt_bins_d[] = {0,150,300,500,1000};
+    Double_t m_pt_bins_d[] = {0,100,200,300,400,500,600,700,800,900,1000};
+    Double_t m_R_bins_d[] = {0,100,150,200,250,300};
+
+    m_dv_eff_eta = new TEfficiency( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 5, m_eta_bins_d);
     m_dv_eff_phi = new TEfficiency( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 20, -M_PI, M_PI);
     m_dv_eff_mass = new TEfficiency( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 150, 0, 1500); // GeV
-    m_dv_eff_R = new TEfficiency( "m_dv_eff_R", "DV reconstruction efficiency vs R", 20, 0, 400); // mm
+    m_dv_eff_R = new TEfficiency( "m_dv_eff_R", "DV reconstruction efficiency vs R", 5, m_R_bins_d); // mm
     m_dv_eff_z = new TEfficiency( "m_dv_eff_z", "DV reconstruction efficiency vs z", 20, -1000, 1000); // mm
     m_dv_eff_d0 = new TEfficiency( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 30, 0, 400); // mm
     m_dv_eff_DeltaR = new TEfficiency( "m_dv_eff_DeltaR", "DV reconstruction efficiency vs DeltaR", 10, 0, 2*M_PI); // mm
 
     // efficiency as a function of Z' parameters
-    m_dv_eff_zp_eta = new TEfficiency("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 30, -3.0, 3.0);
+    m_dv_eff_zp_eta = new TEfficiency("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 5, m_eta_bins_d);
     m_dv_eff_zp_beta = new TEfficiency("m_dv_eff_zp_beta", "DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
-    m_dv_eff_zp_pt = new TEfficiency("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 25, 0, 500); // GeV
+    m_dv_eff_zp_pt = new TEfficiency("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 10, m_pt_bins_d); // GeV
 
     // efficiency as a function of mu
     m_dv_eff_mu = new TEfficiency("m_dv_eff_mu", "DV reconstruction efficiency vs #mu", 50, 0, 50);
@@ -110,30 +132,30 @@ StatusCode DVEfficiency::initialize() {
     // trigger effieicny test
     m_dv_eff_trig = new TH1D("m_dv_eff_trig", "Trigger efficiency", 4, 0, 4);
 
-    // efficiency map (Z' eta and pileup)
-    m_dv_eff_map_mu_eta_den = new TH2F("m_dv_eff_map_mu_eta_den", "DV reconstruction efficiency map, mu vs eta (den)", 50, 0., 50., 30, -3.0, 3.0); // GeV
-    m_dv_eff_map_mu_eta_num = new TH2F("m_dv_eff_map_mu_eta_num", "DV reconstruction efficiency map, mu vs eta (num)", 50, 0., 50., 30, -3.0, 3.0); // GeV
-    m_dv_eff_map_mu_eta = new TH2F("m_dv_eff_map_mu_eta", "DV reconstruction efficiency map, mu vs eta", 50, 0., 50., 30, -3.0, 3.0); // GeV
 
     // efficiency map (Z' pt and eta)
     // custom binning
-    Float_t m_eta_bins[] = {0,0.5,1.5,2.5,4.0};
-    //Float_t m_pt_bins[] = {0,50,100,200,300,400,500,1000};
-    Float_t m_pt_bins[] = {0,150,300,500,1000};
+    Float_t m_eta_bins[] = {0,0.5,1.0,1.5,2.5,4.0};
+    //Float_t m_pt_bins[] = {0,150,300,500,1000};
+    Float_t m_pt_bins[] = {0,100,200,300,400,500,600,700,800,900,1000};
 
-    m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 4,m_pt_bins, 4,m_eta_bins); // GeV
-    m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 4,m_pt_bins, 4,m_eta_bins); // GeV
-    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 4,m_pt_bins, 4,m_eta_bins); // GeV
+    m_dv_eff_map_mu_eta_den = new TH2F("m_dv_eff_map_mu_eta_den", "DV reconstruction efficiency map, mu vs eta (den)", 50, 0., 50., 10, 0, 3.0); // GeV
+    m_dv_eff_map_mu_eta_num = new TH2F("m_dv_eff_map_mu_eta_num", "DV reconstruction efficiency map, mu vs eta (num)", 50, 0., 50., 10, 0, 3.0); // GeV
+    m_dv_eff_map_mu_eta = new TH2F("m_dv_eff_map_mu_eta", "DV reconstruction efficiency map, mu vs eta", 50, 0., 50., 10, 0, 3.0); // GeV
+
+    m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 10, m_pt_bins, 5, m_eta_bins); // GeV
+    m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 10, m_pt_bins, 5, m_eta_bins); // GeV
+    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, m_pt_bins, 4,m_eta_bins); // GeV
 
     // pile up systematic variation, up 
-    m_dv_eff_map_up_pt_eta_den = new TH2F("m_dv_eff_map_up_pt_eta_den", "DV reconstruction efficiency map_up, pt vs eta (den)", 10, 0., 1000., 3, 0, 3.0); // GeV
-    m_dv_eff_map_up_pt_eta_num = new TH2F("m_dv_eff_map_up_pt_eta_num", "DV reconstruction efficiency map_up, pt vs eta (num)", 10, 0., 1000., 3, 0, 3.0); // GeV
-    m_dv_eff_map_up_pt_eta = new TH2F("m_dv_eff_map_up_pt_eta", "DV reconstruction efficiency map_up, pt vs eta", 10, 0., 1000., 3, 0, 3.0); // GeV
+    m_dv_eff_map_up_pt_eta_den = new TH2F("m_dv_eff_map_up_pt_eta_den", "DV reconstruction efficiency map_up, pt vs eta (den)", 10, m_pt_bins, 5, m_eta_bins); // GeV
+    m_dv_eff_map_up_pt_eta_num = new TH2F("m_dv_eff_map_up_pt_eta_num", "DV reconstruction efficiency map_up, pt vs eta (num)", 10, m_pt_bins, 5, m_eta_bins); // GeV
+    m_dv_eff_map_up_pt_eta = new TH2F("m_dv_eff_map_up_pt_eta", "DV reconstruction efficiency map_up, pt vs eta", 10, m_pt_bins, 5, m_eta_bins); // GeV
 
     // pile up systematic variation, down 
-    m_dv_eff_map_down_pt_eta_den = new TH2F("m_dv_eff_map_down_pt_eta_den", "DV reconstruction efficiency map_down, pt vs eta (den)", 10, 0., 1000., 3, 0, 3.0); // GeV
-    m_dv_eff_map_down_pt_eta_num = new TH2F("m_dv_eff_map_down_pt_eta_num", "DV reconstruction efficiency map_down, pt vs eta (num)", 10, 0., 1000., 3, 0, 3.0); // GeV
-    m_dv_eff_map_down_pt_eta = new TH2F("m_dv_eff_map_down_pt_eta", "DV reconstruction efficiency map_down, pt vs eta", 10, 0., 1000., 3, 0, 3.0); // GeV
+    m_dv_eff_map_down_pt_eta_den = new TH2F("m_dv_eff_map_down_pt_eta_den", "DV reconstruction efficiency map_down, pt vs eta (den)", 10, m_pt_bins, 5, m_eta_bins); // GeV
+    m_dv_eff_map_down_pt_eta_num = new TH2F("m_dv_eff_map_down_pt_eta_num", "DV reconstruction efficiency map_down, pt vs eta (num)", 10, m_pt_bins, 5, m_eta_bins); // GeV
+    m_dv_eff_map_down_pt_eta = new TH2F("m_dv_eff_map_down_pt_eta", "DV reconstruction efficiency map_down, pt vs eta", 10, m_pt_bins, 5, m_eta_bins); // GeV
 
 
     // output
@@ -371,7 +393,7 @@ StatusCode DVEfficiency::execute() {
         auto pv_pos = pv->position();
 
         // z_pv cut
-        if(pv_pos.z() > pv_z_max) event_passed = false;
+        if(std::abs(pv_pos.z()) > pv_z_max) event_passed = false;
     }
     else event_passed = false;
 
@@ -545,32 +567,32 @@ StatusCode DVEfficiency::execute() {
         m_dv_eff_DeltaR->FillWeighted(dv_matched,p_weight, dv_dr);
 
         // efficiency as a function of Z'
-        float zp_eta = tru_v->incomingParticle(0)->eta();
-        float zp_pt = tru_v->incomingParticle(0)->pt();
+        float zp_eta = std::abs(tru_v->incomingParticle(0)->eta());
+        float zp_pt = tru_v->incomingParticle(0)->pt() / 1000.; // GeV
         float zp_m = tru_v->incomingParticle(0)->m();
         float zp_e = tru_v->incomingParticle(0)->e();
         float zp_beta = sqrt(1 - (zp_m/zp_e)*(zp_m/zp_e));
 
         m_dv_eff_zp_eta->FillWeighted(dv_matched, p_weight, zp_eta);
         m_dv_eff_zp_beta->FillWeighted(dv_matched, p_weight, zp_beta);
-        m_dv_eff_zp_pt->FillWeighted(dv_matched, p_weight, zp_pt / 1000.);
+        m_dv_eff_zp_pt->FillWeighted(dv_matched, p_weight, zp_pt);
         m_dv_eff_mu->FillWeighted(dv_matched, p_weight, mu);
 
         // fill efficiency map
-        m_dv_eff_map_pt_eta_den->Fill(zp_pt / 1000., zp_eta, p_weight);
+        m_dv_eff_map_pt_eta_den->Fill(zp_pt, zp_eta, p_weight);
         m_dv_eff_map_mu_eta_den->Fill(mu, zp_eta, p_weight);
 
         // systematic variation
-        m_dv_eff_map_up_pt_eta_den->Fill(zp_pt / 1000., zp_eta, p_weight_up);
-        m_dv_eff_map_down_pt_eta_den->Fill(zp_pt / 1000., zp_eta, p_weight_down);
+        m_dv_eff_map_up_pt_eta_den->Fill(zp_pt, zp_eta, p_weight_up);
+        m_dv_eff_map_down_pt_eta_den->Fill(zp_pt, zp_eta, p_weight_down);
 
         if (dv_matched) {
-            m_dv_eff_map_pt_eta_num->Fill(zp_pt / 1000., zp_eta, p_weight); 
+            m_dv_eff_map_pt_eta_num->Fill(zp_pt, zp_eta, p_weight); 
             m_dv_eff_map_mu_eta_num->Fill(mu, zp_eta, p_weight); 
 
             // systematic variation
-            m_dv_eff_map_up_pt_eta_num->Fill(zp_pt / 1000., zp_eta, p_weight_up); 
-            m_dv_eff_map_down_pt_eta_num->Fill(zp_pt / 1000., zp_eta, p_weight_down); 
+            m_dv_eff_map_up_pt_eta_num->Fill(zp_pt, zp_eta, p_weight_up); 
+            m_dv_eff_map_down_pt_eta_num->Fill(zp_pt, zp_eta, p_weight_down); 
         }
 
 

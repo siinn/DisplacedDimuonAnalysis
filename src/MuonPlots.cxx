@@ -25,6 +25,10 @@ MuonPlots::~MuonPlots() {}
 
 
 StatusCode MuonPlots::initialize() {
+
+    // initialize tools
+    ATH_CHECK(m_tmt.retrieve());
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());

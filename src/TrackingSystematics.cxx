@@ -73,6 +73,23 @@ TrackingSystematics::~TrackingSystematics() {}
 
 
 StatusCode TrackingSystematics::initialize() {
+
+    // initialize tools
+    ATH_CHECK(m_dilepdvc.retrieve());
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_leptool.retrieve());
+    ATH_CHECK(m_cos.retrieve());
+    ATH_CHECK(m_evtc.retrieve());
+    ATH_CHECK(m_dvc.retrieve());
+    ATH_CHECK(m_grlTool.retrieve());
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_tmt.retrieve());
+    ATH_CHECK(m_costool.retrieve());
+    ATH_CHECK(m_or.retrieve());
+    ATH_CHECK(m_phmatch.retrieve());
+    ATH_CHECK(m_prw.retrieve());
+
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
@@ -94,48 +111,136 @@ StatusCode TrackingSystematics::initialize() {
     m_dv_idid_R = new TH1F("dv_idid_R","K_{S} candidate R", 300,0,300);
     m_dv_idid_z = new TH1F("dv_idid_z","K_{S} candidate z", 100,-1000,1000);
     m_dv_idid_l = new TH1F("dv_idid_l","K_{S} candidate decay length", 100,0,1000);
-    m_dv_idid_pt = new TH1F("dv_idid_pt","K_{S} candidate pt", 100,0,100);
+    m_dv_idid_pt = new TH1F("dv_idid_pt","K_{S} candidate pt", 100,0,10);
+    m_dv_idid_eta = new TH1F("dv_idid_eta","K_{S} candidate eta", 50, 0, 3.0);
     m_dv_idid_mu = new TH1F("dv_idid_mu","K_{S} candidate vs inst. mu", 50,0,50);
     m_dv_idid_DeltaR = new TH1F("dv_idid_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
     m_dv_idid_track_pt = new TH1F("dv_idid_track_pt","K_{S} candidate track_pt", 500,0,50);
     m_dv_idid_R_M = new TH2F("dv_idid_R_M","K_{S} position R vs M", 50,0,300,100,0,1000);
     
-    m_dv_idid_M_1 = new TH1F("dv_idid_M_1","K_{S} candidate mass in MeV (R_1)", 400,0,1000 );
-    m_dv_idid_M_2 = new TH1F("dv_idid_M_2","K_{S} candidate mass in MeV (R_2)", 400,0,1000 );
-    m_dv_idid_M_3 = new TH1F("dv_idid_M_3","K_{S} candidate mass in MeV (R_3)", 400,0,1000 );
-    m_dv_idid_M_4 = new TH1F("dv_idid_M_4","K_{S} candidate mass in MeV (R_4)", 400,0,1000 );
-    m_dv_idid_M_5 = new TH1F("dv_idid_M_5","K_{S} candidate mass in MeV (R_5)", 400,0,1000 );
-    m_dv_idid_M_6 = new TH1F("dv_idid_M_6","K_{S} candidate mass in MeV (R_6)", 400,0,1000 );
-    m_dv_idid_M_7 = new TH1F("dv_idid_M_7","K_{S} candidate mass in MeV (R_7)", 400,0,1000 );
-    m_dv_idid_M_8 = new TH1F("dv_idid_M_8","K_{S} candidate mass in MeV (R_8)", 400,0,1000 );
+    // Ks using only LRT tracks
+    m_dv_LRT_M = new TH1F("dv_LRT_M","K_{S} candidate mass in MeV", 100, 350, 650 );
+    m_dv_LRT_M_R1 = new TH1F("dv_LRT_M_R1","K_{S} candidate mass in MeV (R_1)", 100, 350, 650 );
+    m_dv_LRT_M_R2 = new TH1F("dv_LRT_M_R2","K_{S} candidate mass in MeV (R_2)", 100, 350, 650 );
+    m_dv_LRT_M_R3 = new TH1F("dv_LRT_M_R3","K_{S} candidate mass in MeV (R_3)", 100, 350, 650 );
+    m_dv_LRT_M_R4 = new TH1F("dv_LRT_M_R4","K_{S} candidate mass in MeV (R_4)", 100, 350, 650 );
+    m_dv_LRT_M_R5 = new TH1F("dv_LRT_M_R5","K_{S} candidate mass in MeV (R_5)", 100, 350, 650 );
 
-    // Ks only using standard tracks
-    m_dv_idid_M_ST = new TH1F("dv_idid_M_ST","K_{S} candidate mass in MeV (ST)", 100, 350, 650 );
-    m_dv_idid_M_ST_LRT = new TH1F("dv_idid_M_ST_LRT","K_{S} candidate mass in MeV (LRT +ST)", 100, 350, 650 );
+    m_dv_LRT_M_pt1 = new TH1F("dv_LRT_M_pt1","K_{S} candidate mass in MeV (pt_1)", 100, 350, 650 );
+    m_dv_LRT_M_pt2 = new TH1F("dv_LRT_M_pt2","K_{S} candidate mass in MeV (pt_2)", 100, 350, 650 );
+    m_dv_LRT_M_pt3 = new TH1F("dv_LRT_M_pt3","K_{S} candidate mass in MeV (pt_3)", 100, 350, 650 );
+    m_dv_LRT_M_pt4 = new TH1F("dv_LRT_M_pt4","K_{S} candidate mass in MeV (pt_4)", 100, 350, 650 );
 
+    m_dv_LRT_M_eta1 = new TH1F("dv_LRT_M_eta1","K_{S} candidate mass in MeV (eta_1)", 100, 350, 650 );
+    m_dv_LRT_M_eta2 = new TH1F("dv_LRT_M_eta2","K_{S} candidate mass in MeV (eta_2)", 100, 350, 650 );
+    m_dv_LRT_M_eta3 = new TH1F("dv_LRT_M_eta3","K_{S} candidate mass in MeV (eta_3)", 100, 350, 650 );
+    m_dv_LRT_M_eta4 = new TH1F("dv_LRT_M_eta4","K_{S} candidate mass in MeV (eta_4)", 100, 350, 650 );
+
+    // Ks using only ST tracks
+    m_dv_ST_M = new TH1F("dv_ST_M","K_{S} candidate mass in MeV (ST+ST)", 100, 350, 650 );
+    m_dv_ST_M_R1 = new TH1F("dv_ST_M_R1","K_{S} candidate mass in MeV (R_1),(ST+ST)", 100, 350, 650 );
+    m_dv_ST_M_R2 = new TH1F("dv_ST_M_R2","K_{S} candidate mass in MeV (R_2),(ST+ST)", 100, 350, 650 );
+    m_dv_ST_M_R3 = new TH1F("dv_ST_M_R3","K_{S} candidate mass in MeV (R_3),(ST+ST)", 100, 350, 650 );
+    m_dv_ST_M_R4 = new TH1F("dv_ST_M_R4","K_{S} candidate mass in MeV (R_4),(ST+ST)", 100, 350, 650 );
+    m_dv_ST_M_R5 = new TH1F("dv_ST_M_R5","K_{S} candidate mass in MeV (R_5),(ST+ST)", 100, 350, 650 );
+
+    m_dv_ST_M_pt1 = new TH1F("dv_ST_M_pt1","K_{S} candidate mass in MeV (pt_1)", 100, 350, 650 );
+    m_dv_ST_M_pt2 = new TH1F("dv_ST_M_pt2","K_{S} candidate mass in MeV (pt_2)", 100, 350, 650 );
+    m_dv_ST_M_pt3 = new TH1F("dv_ST_M_pt3","K_{S} candidate mass in MeV (pt_3)", 100, 350, 650 );
+    m_dv_ST_M_pt4 = new TH1F("dv_ST_M_pt4","K_{S} candidate mass in MeV (pt_4)", 100, 350, 650 );
+
+    m_dv_ST_M_eta1 = new TH1F("dv_ST_M_eta1","K_{S} candidate mass in MeV (eta_1)", 100, 350, 650 );
+    m_dv_ST_M_eta2 = new TH1F("dv_ST_M_eta2","K_{S} candidate mass in MeV (eta_2)", 100, 350, 650 );
+    m_dv_ST_M_eta3 = new TH1F("dv_ST_M_eta3","K_{S} candidate mass in MeV (eta_3)", 100, 350, 650 );
+    m_dv_ST_M_eta4 = new TH1F("dv_ST_M_eta4","K_{S} candidate mass in MeV (eta_4)", 100, 350, 650 );
+
+    // Ks using ST and LRT tracks
+    m_dv_STLRT_M = new TH1F("dv_STLRT_M","K_{S} candidate mass in MeV (LRT +ST)", 100, 350, 650 );
+    m_dv_STLRT_M_R1 = new TH1F("dv_STLRT_M_R1","K_{S} candidate mass in MeV (R_1),(ST+LRT)", 100, 350, 650 );
+    m_dv_STLRT_M_R2 = new TH1F("dv_STLRT_M_R2","K_{S} candidate mass in MeV (R_2),(ST+LRT)", 100, 350, 650 );
+    m_dv_STLRT_M_R3 = new TH1F("dv_STLRT_M_R3","K_{S} candidate mass in MeV (R_3),(ST+LRT)", 100, 350, 650 );
+    m_dv_STLRT_M_R4 = new TH1F("dv_STLRT_M_R4","K_{S} candidate mass in MeV (R_4),(ST+LRT)", 100, 350, 650 );
+    m_dv_STLRT_M_R5 = new TH1F("dv_STLRT_M_R5","K_{S} candidate mass in MeV (R_5),(ST+LRT)", 100, 350, 650 );
+
+    m_dv_STLRT_M_pt1 = new TH1F("dv_STLRT_M_pt1","K_{S} candidate mass in MeV (pt_1)", 100, 350, 650 );
+    m_dv_STLRT_M_pt2 = new TH1F("dv_STLRT_M_pt2","K_{S} candidate mass in MeV (pt_2)", 100, 350, 650 );
+    m_dv_STLRT_M_pt3 = new TH1F("dv_STLRT_M_pt3","K_{S} candidate mass in MeV (pt_3)", 100, 350, 650 );
+    m_dv_STLRT_M_pt4 = new TH1F("dv_STLRT_M_pt4","K_{S} candidate mass in MeV (pt_4)", 100, 350, 650 );
+
+    m_dv_STLRT_M_eta1 = new TH1F("dv_STLRT_M_eta1","K_{S} candidate mass in MeV (eta_1)", 100, 350, 650 );
+    m_dv_STLRT_M_eta2 = new TH1F("dv_STLRT_M_eta2","K_{S} candidate mass in MeV (eta_2)", 100, 350, 650 );
+    m_dv_STLRT_M_eta3 = new TH1F("dv_STLRT_M_eta3","K_{S} candidate mass in MeV (eta_3)", 100, 350, 650 );
+    m_dv_STLRT_M_eta4 = new TH1F("dv_STLRT_M_eta4","K_{S} candidate mass in MeV (eta_4)", 100, 350, 650 );
+
+
+    // output histograms
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_cf", m_dv_idid_cf) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_M", m_dv_idid_M) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_R", m_dv_idid_R) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_z", m_dv_idid_z) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_l", m_dv_idid_l) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_pt", m_dv_idid_pt) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_eta", m_dv_idid_eta) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_mu", m_dv_idid_mu) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_DeltaR", m_dv_idid_DeltaR) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_track_pt", m_dv_idid_track_pt) );
-
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_R_M", m_dv_idid_R_M) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_1", m_dv_idid_M_1) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_2", m_dv_idid_M_2) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_3", m_dv_idid_M_3) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_4", m_dv_idid_M_4) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_5", m_dv_idid_M_5) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_6", m_dv_idid_M_6) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_7", m_dv_idid_M_7) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/m/dv_idid_M_8", m_dv_idid_M_8) );
 
-    // Ks only using standard tracks
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_M_ST", m_dv_idid_M_ST) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/dv_idid/dv_idid_M_ST_LRT", m_dv_idid_M_ST_LRT) );
+    // Ks using only LRT tracks
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/dv_LRT_M", m_dv_LRT_M) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_R1", m_dv_LRT_M_R1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_R2", m_dv_LRT_M_R2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_R3", m_dv_LRT_M_R3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_R4", m_dv_LRT_M_R4) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_R5", m_dv_LRT_M_R5) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_pt1", m_dv_LRT_M_pt1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_pt2", m_dv_LRT_M_pt2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_pt3", m_dv_LRT_M_pt3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_pt4", m_dv_LRT_M_pt4) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_eta1", m_dv_LRT_M_eta1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_eta2", m_dv_LRT_M_eta2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_eta3", m_dv_LRT_M_eta3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_eta4", m_dv_LRT_M_eta4) );
+
+    // Ks using only ST tracks
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/dv_ST_M", m_dv_ST_M) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_R1", m_dv_ST_M_R1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_R2", m_dv_ST_M_R2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_R3", m_dv_ST_M_R3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_R4", m_dv_ST_M_R4) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_R5", m_dv_ST_M_R5) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_pt1", m_dv_ST_M_pt1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_pt2", m_dv_ST_M_pt2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_pt3", m_dv_ST_M_pt3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_pt4", m_dv_ST_M_pt4) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta1", m_dv_ST_M_eta1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta2", m_dv_ST_M_eta2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta3", m_dv_ST_M_eta3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta4", m_dv_ST_M_eta4) );
+
+    // Ks using ST and LRT tracks
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/dv_STLRT_M", m_dv_STLRT_M) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_R1", m_dv_STLRT_M_R1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_R2", m_dv_STLRT_M_R2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_R3", m_dv_STLRT_M_R3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_R4", m_dv_STLRT_M_R4) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_R5", m_dv_STLRT_M_R5) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_pt1", m_dv_STLRT_M_pt1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_pt2", m_dv_STLRT_M_pt2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_pt3", m_dv_STLRT_M_pt3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_pt4", m_dv_STLRT_M_pt4) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_eta1", m_dv_STLRT_M_eta1) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_eta2", m_dv_STLRT_M_eta2) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_eta3", m_dv_STLRT_M_eta3) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_eta4", m_dv_STLRT_M_eta4) );
+
+
 
     // truth-matched Ks and Z' comparison
     m_Ks_r = new TH1F("dv_Ks_r","K_{S} candidate r", 60,0,300);
@@ -161,27 +266,6 @@ StatusCode TrackingSystematics::initialize() {
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_pt", m_zp_pt) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_eta", m_zp_eta) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_DeltaR", m_zp_DeltaR) );
-
-    // Ks candidate from primary vertex
-    m_pv_idid_cf = new TH1D( "m_pv_idid_cf", "Reco pv idid cutflow", 10,0,10);
-    m_pv_idid_M = new TH1F("pv_idid_M","K_{S} candidate mass in MeV", 100, 350 ,650 );
-    m_pv_idid_R = new TH1F("pv_idid_R","K_{S} candidate R", 1000,0,0.05);
-    m_pv_idid_z = new TH1F("pv_idid_z","K_{S} candidate z", 300,-300,300);
-    m_pv_idid_l = new TH1F("pv_idid_l","K_{S} candidate decay length", 500,0,500);
-    m_pv_idid_pt = new TH1F("pv_idid_pt","K_{S} candidate pt", 100,0,100);
-    m_pv_idid_DeltaR = new TH1F("pv_idid_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
-    m_pv_idid_track_pt = new TH1F("pv_idid_track_pt","K_{S} candidate track_pt", 500,0,50);
-    m_pv_idid_R_M = new TH2F("pv_idid_R_M","K_{S} position R vs M", 1000,0,0.05,100,350,650);
-
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_cf", m_pv_idid_cf) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_M", m_pv_idid_M) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_R", m_pv_idid_R) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_z", m_pv_idid_z) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_l", m_pv_idid_l) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_pt", m_pv_idid_pt) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_DeltaR", m_pv_idid_DeltaR) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_track_pt", m_pv_idid_track_pt) );
-    CHECK( histSvc->regHist("/DV/tracking_syst/pv_idid/pv_idid_R_M", m_pv_idid_R_M) );
 
     return StatusCode::SUCCESS;
 }
@@ -303,7 +387,7 @@ StatusCode TrackingSystematics::execute() {
         auto pv_pos = pv->position();
 
         // z_pv cut
-        if(pv_pos.z() > pv_z_max) return StatusCode::SUCCESS;
+        if(std::abs(pv_pos.z()) > pv_z_max) return StatusCode::SUCCESS;
     }
     if ((m_usePV) && (!pv)) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("z_{PV} < 200 mm", p_weight);
@@ -324,33 +408,9 @@ StatusCode TrackingSystematics::execute() {
 
         for(auto dv: *dvc_copy.first) {
 
-            //// perform lepton matching
-            //m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
-
-            //// remove overlapping muon
-            //m_dilepdvc->ApplyOverlapRemoval(*dv);
-
-            //// trigger matching
-            //m_dilepdvc->DoTriggerMatching(*dv);
-
-            //// remove bad electrons
-            //m_leptool->BadClusterRemoval(*dv);
-
-            // kinematic cut
-            //m_leptool->ElectronKinematicCut(*dv);
-
-            //// Electron identification
-            //m_leptool->ElectronID(*dv);
-
-            //// muon selection tool
-            //m_leptool->MuonSelection(*dv);
-
             // select only vertex with tracks
             if(dv->trackParticleLinks().size() != 2) continue;
 
-            // access invariant mass, pt, eta
-            float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
-            float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
 
             // access tracks from vertex
             auto tpLinks = dv->trackParticleLinks();
@@ -372,7 +432,11 @@ StatusCode TrackingSystematics::execute() {
             float dv_R = m_dvutils->getR( *dv, *pv ); // R in [mm]
             float dv_z = m_dvutils->getz( *dv, *pv ); // z in [mm]
             float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
-            float dv_eta = m_dvutils->getEta( *dv, *pv ); // r in [mm]
+            float dv_eta = std::abs(m_dvutils->getEta( *dv, *pv )); // r in [mm]
+
+            // access invariant mass, pt, eta
+            float dv_mass = std::abs(m_accMass(*dv)); // in MeV
+            float dv_pt = std::abs(m_acc_pt(*dv)) / 1000.; // in GeV
 
             //// collect leptons from this dv
             ////auto dv_muc = m_accMu(*dv);
@@ -409,10 +473,6 @@ StatusCode TrackingSystematics::execute() {
                 if(!m_dvc->PassMaterialVeto(*dv)) continue;
                 m_dv_idid_cf->Fill("MaterialVeto", p_weight);
 
-                // cosmic veto (R_CR)
-                //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-                //m_dv_idid_cf->Fill("R_{CR} > 0.04", p_weight);
-
                 // mass window cut
                 if(dv_mass < mass_min) continue;
                 m_dv_idid_cf->Fill("m > 350 MeV", p_weight);
@@ -437,41 +497,48 @@ StatusCode TrackingSystematics::execute() {
                 // fill histogram
                 //-----------------------------------
 
+                // fill vertex parameters
+                m_dv_idid_M->Fill(dv_mass,p_weight);
+                m_dv_idid_R->Fill(dv_R,p_weight);
+                m_dv_idid_z->Fill(dv_z,p_weight);
+                m_dv_idid_l->Fill(dv_l,p_weight);
+                m_dv_idid_pt->Fill(dv_pt,p_weight);
+                m_dv_idid_eta->Fill(dv_eta,p_weight);
+                m_dv_idid_mu->Fill(pileup,p_weight);
+                m_dv_idid_DeltaR->Fill(deltaR,p_weight);
+                m_dv_idid_R_M->Fill(dv_R, dv_mass,p_weight);
+
+                // fill track parameter
+                m_dv_idid_track_pt->Fill(tp1.pt() / 1000.,p_weight);
+                m_dv_idid_track_pt->Fill(tp2.pt() / 1000.,p_weight);
+
                 // if both tracks are reconstructed by LRT
                 if ((m_dvutils->isLargeD0Track(&tp1)) && (m_dvutils->isLargeD0Track(&tp2))) { 
 
                     // count lrt vertex
                     n_lrt++;
 
-                    // fill vertex parameters
-                    m_dv_idid_M->Fill(dv_mass,p_weight);
-                    m_dv_idid_R->Fill(dv_R,p_weight);
-                    m_dv_idid_z->Fill(dv_z,p_weight);
-                    m_dv_idid_l->Fill(dv_l,p_weight);
-                    m_dv_idid_pt->Fill(dv_pt,p_weight);
-                    m_dv_idid_mu->Fill(pileup,p_weight);
-                    m_dv_idid_DeltaR->Fill(deltaR,p_weight);
-                    m_dv_idid_R_M->Fill(dv_R, dv_mass,p_weight);
+                    // fill LRT vertex
+                    m_dv_LRT_M->Fill(dv_mass, p_weight);
 
-                    // fill track parameter
-                    m_dv_idid_track_pt->Fill(tp1.pt() / 1000.,p_weight);
-                    m_dv_idid_track_pt->Fill(tp2.pt() / 1000.,p_weight);
+                    // fill mass plot in bins of R
+                    if (dv_R < 100) m_dv_LRT_M_R1->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 100) and (dv_R < 150)) m_dv_LRT_M_R2->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 150) and (dv_R < 200)) m_dv_LRT_M_R3->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 200) and (dv_R < 250)) m_dv_LRT_M_R4->Fill(dv_mass,p_weight);
+                    else if (dv_R >= 250) m_dv_LRT_M_R5->Fill(dv_mass,p_weight);
 
-                    // fill mass plot
-                    if (dv_R < 100)   m_dv_idid_M_1->Fill(dv_mass,p_weight);
-                    if ((dv_R >= 100) and (dv_R < 150))  m_dv_idid_M_2->Fill(dv_mass,p_weight);
-                    if ((dv_R >= 150) and (dv_R < 200)) m_dv_idid_M_3->Fill(dv_mass,p_weight);
-                    if ((dv_R >= 200) and (dv_R < 250)) m_dv_idid_M_4->Fill(dv_mass,p_weight);
-                    if ((dv_R >= 250) and (dv_R < 300)) m_dv_idid_M_5->Fill(dv_mass,p_weight);
+                    // fill mass plot in bins of eta
+                    if (dv_eta < 0.5) m_dv_LRT_M_eta1->Fill(dv_mass,p_weight);
+                    else if ((dv_eta >= 0.5) and (dv_eta < 1.0)) m_dv_LRT_M_eta2->Fill(dv_mass,p_weight);
+                    else if ((dv_eta >= 1.0) and (dv_eta < 1.5)) m_dv_LRT_M_eta3->Fill(dv_mass,p_weight);
+                    else m_dv_LRT_M_eta4->Fill(dv_mass,p_weight);
 
-                    //if (dv_R < 20)   m_dv_idid_M_1->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 20) and (dv_R < 60))  m_dv_idid_M_2->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 60) and (dv_R < 100)) m_dv_idid_M_3->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 100) and (dv_R < 140)) m_dv_idid_M_4->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 140) and (dv_R < 180)) m_dv_idid_M_5->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 180) and (dv_R < 220)) m_dv_idid_M_6->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 220) and (dv_R < 260)) m_dv_idid_M_7->Fill(dv_mass,p_weight);
-                    //if ((dv_R >= 260) and (dv_R < 300)) m_dv_idid_M_8->Fill(dv_mass,p_weight);
+                    // fill mass plot in bins of pt
+                    if (dv_pt < 2.5) m_dv_LRT_M_pt1->Fill(dv_mass,p_weight);
+                    else if ((dv_pt >= 2.5) and (dv_pt < 3.0)) m_dv_LRT_M_pt2->Fill(dv_mass,p_weight);
+                    else if ((dv_pt >= 3.0) and (dv_pt < 4.0)) m_dv_LRT_M_pt3->Fill(dv_mass,p_weight);
+                    else m_dv_LRT_M_pt4->Fill(dv_mass,p_weight);
 
                 }
 
@@ -482,7 +549,26 @@ StatusCode TrackingSystematics::execute() {
                     n_standard++;
 
                     // fill standard vertex
-                    m_dv_idid_M_ST->Fill(dv_mass, p_weight);
+                    m_dv_ST_M->Fill(dv_mass, p_weight);
+
+                    // fill mass plot in bins of R
+                    if (dv_R < 100) m_dv_ST_M_R1->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 100) and (dv_R < 150)) m_dv_ST_M_R2->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 150) and (dv_R < 200)) m_dv_ST_M_R3->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 200) and (dv_R < 250)) m_dv_ST_M_R4->Fill(dv_mass,p_weight);
+                    else if (dv_R >= 250) m_dv_ST_M_R5->Fill(dv_mass,p_weight);
+
+                    // fill mass plot in bins of eta
+                    if (dv_eta < 0.5) m_dv_ST_M_eta1->Fill(dv_mass,p_weight);
+                    else if ((dv_eta >= 0.5) and (dv_eta < 1.0)) m_dv_ST_M_eta2->Fill(dv_mass,p_weight);
+                    else if ((dv_eta >= 1.0) and (dv_eta < 1.5)) m_dv_ST_M_eta3->Fill(dv_mass,p_weight);
+                    else m_dv_ST_M_eta4->Fill(dv_mass,p_weight);
+
+                    // fill mass plot in bins of pt
+                    if (dv_pt < 2.5) m_dv_ST_M_pt1->Fill(dv_mass,p_weight);
+                    else if ((dv_pt >= 2.5) and (dv_pt < 3.0)) m_dv_ST_M_pt2->Fill(dv_mass,p_weight);
+                    else if ((dv_pt >= 3.0) and (dv_pt < 4.0)) m_dv_ST_M_pt3->Fill(dv_mass,p_weight);
+                    else m_dv_ST_M_pt4->Fill(dv_mass,p_weight);
                 }
 
                 // if one track is reconstructed by ST and the other track is reconstructed by LRT
@@ -492,7 +578,26 @@ StatusCode TrackingSystematics::execute() {
                     n_lrt_standard++;
 
                     // fill standard vertex
-                    m_dv_idid_M_ST_LRT->Fill(dv_mass, p_weight);
+                    m_dv_STLRT_M->Fill(dv_mass, p_weight);
+
+                    // fill mass plot in bins of R
+                    if (dv_R < 100) m_dv_STLRT_M_R1->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 100) and (dv_R < 150)) m_dv_STLRT_M_R2->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 150) and (dv_R < 200)) m_dv_STLRT_M_R3->Fill(dv_mass,p_weight);
+                    else if ((dv_R >= 200) and (dv_R < 250)) m_dv_STLRT_M_R4->Fill(dv_mass,p_weight);
+                    else if (dv_R >= 250) m_dv_STLRT_M_R5->Fill(dv_mass,p_weight);
+
+                    // fill mass plot in bins of eta
+                    if (dv_eta < 0.5) m_dv_STLRT_M_eta1->Fill(dv_mass,p_weight);
+                    else if ((dv_eta >= 0.5) and (dv_eta < 1.0)) m_dv_STLRT_M_eta2->Fill(dv_mass,p_weight);
+                    else if ((dv_eta >= 1.0) and (dv_eta < 1.5)) m_dv_STLRT_M_eta3->Fill(dv_mass,p_weight);
+                    else m_dv_STLRT_M_eta4->Fill(dv_mass,p_weight);
+
+                    // fill mass plot in bins of pt
+                    if (dv_pt < 2.5) m_dv_STLRT_M_pt1->Fill(dv_mass,p_weight);
+                    else if ((dv_pt >= 2.5) and (dv_pt < 3.0)) m_dv_STLRT_M_pt2->Fill(dv_mass,p_weight);
+                    else if ((dv_pt >= 3.0) and (dv_pt < 4.0)) m_dv_STLRT_M_pt3->Fill(dv_mass,p_weight);
+                    else m_dv_STLRT_M_pt4->Fill(dv_mass,p_weight);
                 }
 
                 
@@ -571,8 +676,8 @@ StatusCode TrackingSystematics::execute() {
             std::string channel = m_dvutils->DecayChannel(*dv);
 
             // retrieve mass, pt and eta of DV
-            float dv_mass = std::fabs(m_accMass(*dv)); // in MeV
-            float dv_pt = std::fabs(m_acc_pt(*dv)) / 1000.; // in GeV
+            float dv_mass = std::abs(m_accMass(*dv)); // in MeV
+            float dv_pt = std::abs(m_acc_pt(*dv)) / 1000.; // in GeV
 
             // access tracks from vertex
             auto tpLinks = dv->trackParticleLinks();
@@ -660,136 +765,6 @@ StatusCode TrackingSystematics::execute() {
         } // end of Z' DV loop
     }
 
-    //=======================================================
-    // Ks in primary vertex container for normalization
-    //=======================================================
-    if (m_usePV){
-        for(auto pv: *pvc) {
-       
-            // all PV
-            m_pv_idid_cf->Fill("pv", p_weight);
-
-            // get primary vertex with largest SUM
-            auto pv0 = m_evtc->GetPV(*pvc);
-        
-            // get 3D position vector
-            const TVector3 pv0_pos(pv0->x(), pv0->y(), pv0->z());
-            const TVector3 pv_pos(pv->x(), pv->y(), pv->z());
-             
-            // vector from PV to Ks
-            TLorentzVector KsFlightDirection(0.,0.,0.,0.);
-            KsFlightDirection.SetVect(pv_pos - pv0_pos);
-
-            // Ks selection
-            float mass_min = 350;   // MeV
-            float mass_max = 650;   // MeV
-            float chi2DOF_max = 5;
-            float track_pt_min = 450.; // MeV
-            float track_d0_max = 100.; // mm
-            float track_z0_max = 100.; // mm
-            float pv_l_min = 15.0; // mm
-            //float pv_R_min = 0.005; // mm
-            float pv_R_min = 0.000; // mm
-            float delta_z0_max = 2.0;
-            float cos_min = 0.;
-
-            // select only 2-track PV
-            if (!(pv->nTrackParticles() == 2)) continue;
-            m_pv_idid_cf->Fill("xx", p_weight);
-
-            // access tracks from vertex
-            auto tpLinks = pv->trackParticleLinks();
-
-            // check if track particle links are valid
-            if (!(tpLinks[0].isValid() && tpLinks[1].isValid())) continue;
-            m_pv_idid_cf->Fill("Valid Track", p_weight);
-
-            // retrieve tracks at vertex
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
-
-            // define lorentz vector to calculate delta R
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-            TLorentzVector tlv_total;
-
-            // set TLorentzVector of decay particles
-            tlv_tp0 = tp1.p4();
-            tlv_tp1 = tp2.p4();
-            tlv_total = tlv_tp0 + tlv_tp1;
-
-            // PV parameters
-            float chi2DOF = pv->chiSquared() / pv->numberDoF();
-            float pv_mass = m_dvutils->TrackMass(tp1,tp2); // MeV
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-            float pv_pt = tlv_total.Pt() / 1000.; // GeV
-
-            float pv_R = std::sqrt(pv->x()*pv->x() + pv->y()*pv->y());
-            float pv_l = std::sqrt(pv_R*pv_R + pv->z()*pv->z());
-            float pv_z = pv->z();
-
-            // chi2 cut
-            if (!(chi2DOF < chi2DOF_max)) continue;
-            m_pv_idid_cf->Fill("#chi^{2}_{PV} / DOF < 5", p_weight);
-        
-            // opposite charge
-            if (!(tp1.charge() * tp2.charge() == -1)) continue;
-            m_pv_idid_cf->Fill("OppoCharge", p_weight);
-            
-            // mass window cut
-            if(pv_mass < mass_min) continue;
-            m_pv_idid_cf->Fill("m > 350 MeV", p_weight);
-
-            // mass window cut
-            if(pv_mass > mass_max) continue;
-            m_pv_idid_cf->Fill("m < 650 MeV", p_weight);
-
-            // track pt cut
-            if (!((tp1.pt() > track_pt_min) && (tp2.pt() > track_pt_min))) continue;
-            m_pv_idid_cf->Fill("Track pt > 450 MeV", p_weight);
-
-            // track d0 cut
-            if (!((tp1.d0() < track_d0_max) && (tp2.d0() < track_d0_max))) continue;
-            m_pv_idid_cf->Fill("Track d0 < 100 mm", p_weight);
-
-            // track z0 cut
-            if (!((tp1.z0() < track_z0_max) && (tp2.z0() < track_z0_max))) continue;
-            m_pv_idid_cf->Fill("Track z0 < 100 mm", p_weight);
-
-            // decay length cut
-            if (!(pv_l > pv_l_min)) continue;
-            m_pv_idid_cf->Fill("DecayLength > 15 mm", p_weight);
-
-            // decay length in R
-            if (!(pv_R > pv_R_min)) continue;
-            m_pv_idid_cf->Fill("R > 0.005 mm", p_weight);
-
-            // require Ks candidates to be aligned with DV - PV
-            if( std::abs(std::cos(tlv_total.Angle(KsFlightDirection.Vect()))) < cos_min ) continue;
-            m_pv_idid_cf->Fill("FlightDirection", p_weight);
-
-            // Fill Ks from PrimaryVertices
-            m_pv_idid_M->Fill(pv_mass,p_weight);
-            m_pv_idid_R->Fill(pv_R,p_weight);
-            m_pv_idid_z->Fill(pv_z,p_weight);
-            m_pv_idid_l->Fill(pv_l,p_weight);
-            m_pv_idid_pt->Fill(pv_pt,p_weight);
-            m_pv_idid_DeltaR->Fill(deltaR,p_weight);
-            m_pv_idid_R_M->Fill(pv_R, pv_mass, p_weight);
-
-            // fill track parameter
-            m_pv_idid_track_pt->Fill(tp1.pt() / 1000.,p_weight);
-            m_pv_idid_track_pt->Fill(tp2.pt() / 1000.,p_weight);
-
-            ATH_MSG_DEBUG("PV: track1 charge = " << tp1.charge());
-            ATH_MSG_DEBUG("PV: track2 charge = " << tp2.charge());
-            ATH_MSG_DEBUG("PV: n tracks = " << pv->nTrackParticles());
-            ATH_MSG_DEBUG("PV: chi2/DOF = " << pv->chiSquared() / pv->numberDoF());
-            ATH_MSG_DEBUG("PV: mass = " << pv_mass);
-            ATH_MSG_DEBUG("PV: pt = " << pv_pt);
-        
-        }
-    }
 
 
 
@@ -811,7 +786,7 @@ bool TrackingSystematics::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::Tr
     tlv_tp0 = tr0.p4();
     tlv_tp1 = tr1.p4();
 
-    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float deltaPhiMinusPi = std::abs(std::abs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
     float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
 

@@ -57,7 +57,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
 
         // setting tools
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
-        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<Trig::ITrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<IFilterMatchingTools> m_fmtool; //!

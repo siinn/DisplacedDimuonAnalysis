@@ -57,7 +57,7 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDVCuts> m_dvc;
         ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
-        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<Trig::ITrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
@@ -100,27 +100,65 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_dv_idid_z; //!
         TH1F* m_dv_idid_l; //!
         TH1F* m_dv_idid_pt; //!
+        TH1F* m_dv_idid_eta; //!
         TH1F* m_dv_idid_mu; //!
         TH1F* m_dv_idid_DeltaR; //!
         TH2F* m_dv_idid_R_M; //!
         TH1F* m_dv_idid_track_pt; //!
 
-        // Ks candidate without using LRT
-        TH1F* m_dv_idid_M_ST; //!
-
-        // Ks candidate using both LRT and ST
-        TH1F* m_dv_idid_M_ST_LRT; //!
-
         // mass plot in bins of R
-        TH1F* m_dv_idid_M_1; //!
-        TH1F* m_dv_idid_M_2; //!
-        TH1F* m_dv_idid_M_3; //!
-        TH1F* m_dv_idid_M_4; //!
-        TH1F* m_dv_idid_M_5; //!
-        TH1F* m_dv_idid_M_6; //!
-        TH1F* m_dv_idid_M_7; //!
-        TH1F* m_dv_idid_M_8; //!
+        TH1F* m_dv_LRT_M; //!
+        TH1F* m_dv_LRT_M_R1; //!
+        TH1F* m_dv_LRT_M_R2; //!
+        TH1F* m_dv_LRT_M_R3; //!
+        TH1F* m_dv_LRT_M_R4; //!
+        TH1F* m_dv_LRT_M_R5; //!
 
+        TH1F* m_dv_LRT_M_pt1; //!
+        TH1F* m_dv_LRT_M_pt2; //!
+        TH1F* m_dv_LRT_M_pt3; //!
+        TH1F* m_dv_LRT_M_pt4; //!
+
+        TH1F* m_dv_LRT_M_eta1; //!
+        TH1F* m_dv_LRT_M_eta2; //!
+        TH1F* m_dv_LRT_M_eta3; //!
+        TH1F* m_dv_LRT_M_eta4; //!
+
+        // Ks candidate (ST+ST)
+        TH1F* m_dv_ST_M; //!
+        TH1F* m_dv_ST_M_R1; //!
+        TH1F* m_dv_ST_M_R2; //!
+        TH1F* m_dv_ST_M_R3; //!
+        TH1F* m_dv_ST_M_R4; //!
+        TH1F* m_dv_ST_M_R5; //!
+
+        TH1F* m_dv_ST_M_pt1; //!
+        TH1F* m_dv_ST_M_pt2; //!
+        TH1F* m_dv_ST_M_pt3; //!
+        TH1F* m_dv_ST_M_pt4; //!
+
+        TH1F* m_dv_ST_M_eta1; //!
+        TH1F* m_dv_ST_M_eta2; //!
+        TH1F* m_dv_ST_M_eta3; //!
+        TH1F* m_dv_ST_M_eta4; //!
+
+        // Ks candidate (ST+LRT)
+        TH1F* m_dv_STLRT_M; //!
+        TH1F* m_dv_STLRT_M_R1; //!
+        TH1F* m_dv_STLRT_M_R2; //!
+        TH1F* m_dv_STLRT_M_R3; //!
+        TH1F* m_dv_STLRT_M_R4; //!
+        TH1F* m_dv_STLRT_M_R5; //!
+
+        TH1F* m_dv_STLRT_M_pt1; //!
+        TH1F* m_dv_STLRT_M_pt2; //!
+        TH1F* m_dv_STLRT_M_pt3; //!
+        TH1F* m_dv_STLRT_M_pt4; //!
+
+        TH1F* m_dv_STLRT_M_eta1; //!
+        TH1F* m_dv_STLRT_M_eta2; //!
+        TH1F* m_dv_STLRT_M_eta3; //!
+        TH1F* m_dv_STLRT_M_eta4; //!
 
         // truth-matched Ks, Z' comparison
         TH1F* m_Ks_pt; //!
@@ -134,17 +172,6 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_zp_r; //!
         TH1F* m_zp_z; //!
         TH1F* m_zp_DeltaR; //!
-
-        // Ks candidate from PrimaryVertices
-        TH1D* m_pv_idid_cf; //!
-        TH1F* m_pv_idid_M; //!
-        TH1F* m_pv_idid_R; //!
-        TH1F* m_pv_idid_z; //!
-        TH1F* m_pv_idid_l; //!
-        TH1F* m_pv_idid_pt; //!
-        TH1F* m_pv_idid_DeltaR; //!
-        TH2F* m_pv_idid_R_M; //!
-        TH1F* m_pv_idid_track_pt; //!
 
         // count LRT and standard vertex
         int n_standard = 0;

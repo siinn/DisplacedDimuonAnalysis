@@ -36,6 +36,13 @@ LeptonEfficiency::~LeptonEfficiency() {}
 
 
 StatusCode LeptonEfficiency::initialize() {
+
+
+    // initialize tools
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_dvutils.retrieve());
+
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
     
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());

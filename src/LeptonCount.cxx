@@ -200,7 +200,7 @@ StatusCode LeptonCount::execute() {
     if (pv) {
 
         // z_pv cut
-        if(pv_pos.z() > pv_z_max) return StatusCode::SUCCESS;
+        if(std::abs(pv_pos.z()) > pv_z_max) return StatusCode::SUCCESS;
         
     }
     else return StatusCode::SUCCESS;

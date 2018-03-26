@@ -58,7 +58,7 @@ class EfficiencyStudy: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDVCuts> m_dvc;
         ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
-        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<Trig::ITrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
@@ -122,6 +122,22 @@ class EfficiencyStudy: public ::AthAnalysisAlgorithm {
         // truth distribution of long-lived particle
         TH1F* m_truth_m; //!
         TH1F* m_truth_DeltaR; //!
+
+        // weight distribution to investigate discrepancy in specific bins
+        TH1F* m_weight1; //!
+        TH1F* m_weight2; //!
+        TH1F* m_weight3; //!
+
+        // \DeltaR distribution to investigate discrepancy in specific bins
+        TH1F* m_DeltaR1; //!
+        TH1F* m_DeltaR2; //!
+        TH1F* m_DeltaR3; //!
+        
+        // lepton pt distribution to investigate discrepancy in specific bins
+        TH1F* m_lepton_eta1; //!
+        TH1F* m_lepton_eta2; //!
+        TH1F* m_lepton_eta3; //!
+
     
 }; 
 

@@ -77,6 +77,26 @@ EfficiencyStudy::~EfficiencyStudy() {}
 
 
 StatusCode EfficiencyStudy::initialize() {
+
+    // initialize tools
+    ATH_CHECK(m_dilepdvc.retrieve());
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_leptool.retrieve());
+    ATH_CHECK(m_costool.retrieve());
+    ATH_CHECK(m_evtc.retrieve());
+    ATH_CHECK(m_dvc.retrieve());
+    ATH_CHECK(m_grlTool.retrieve());
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_cos.retrieve());
+    ATH_CHECK(m_or.retrieve());
+    ATH_CHECK(m_prw.retrieve());
+    ATH_CHECK(m_phmatch.retrieve());
+
+
+
+
+
+
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     //--------------------------------------------------------
@@ -134,7 +154,20 @@ StatusCode EfficiencyStudy::initialize() {
     m_truth_yields_map_pt_deltaR = new TH2D("m_truth_yields_map_pt_deltaR", "truth vertex yields map pt, eta, 1", 4, m_pt_bins, 13, m_deltaR_bins); // GeV
     m_reco_yields_map_pt_deltaR = new TH2D("m_reco_yields_map_pt_deltaR", "reco vertex yields map pt, eta, 1", 4, m_pt_bins, 13, m_deltaR_bins); // GeV
 
+    // weight distribution for specific bins
+    m_weight1 = new TH1F("m_weight1", "weight1", 50., 0, 50.); // GeV
+    m_weight2 = new TH1F("m_weight2", "weight2", 50., 0, 50.); // GeV
+    m_weight3 = new TH1F("m_weight3", "weight3", 50., 0, 50.); // GeV
 
+    // DeltaR distribution for specific bins
+    m_DeltaR1 = new TH1F("m_DeltaR1", "DeltaR1", 50., 0, 6); // GeV
+    m_DeltaR2 = new TH1F("m_DeltaR2", "DeltaR2", 50., 0, 6); // GeV
+    m_DeltaR3 = new TH1F("m_DeltaR3", "DeltaR3", 50., 0, 6); // GeV
+
+    // lepton eta for specific bins
+    m_lepton_eta1 = new TH1F("m_eta1", "eta1", 50., 0, 4); // GeV
+    m_lepton_eta2 = new TH1F("m_eta2", "eta2", 50., 0, 4); // GeV
+    m_lepton_eta3 = new TH1F("m_eta3", "eta3", 50., 0, 4); // GeV
 
     // output
 
@@ -179,6 +212,17 @@ StatusCode EfficiencyStudy::initialize() {
     CHECK( histSvc->regHist("/DV/EfficiencyStudy/reco/reco_yields_map_pt_eta_3", m_reco_yields_map_pt_eta_3) );
     CHECK( histSvc->regHist("/DV/EfficiencyStudy/reco/reco_yields_map_pt_eta_4", m_reco_yields_map_pt_eta_4) );
     CHECK( histSvc->regHist("/DV/EfficiencyStudy/reco/reco_yields_map_pt_eta_5", m_reco_yields_map_pt_eta_5) );
+
+    // weight distribution
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_weight1", m_weight1) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_weight2", m_weight2) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_weight3", m_weight3) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_DeltaR1", m_DeltaR1) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_DeltaR2", m_DeltaR2) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_DeltaR3", m_DeltaR3) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_eta1", m_lepton_eta1) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_eta2", m_lepton_eta2) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_eta3", m_lepton_eta3) );
 
 
     // Use weighted events in TEfficiency class
@@ -332,7 +376,7 @@ StatusCode EfficiencyStudy::execute() {
         auto pv_pos = pv->position();
 
         // z_pv cut
-        if(pv_pos.z() > pv_z_max) event_passed = false;
+        if(std::abs(pv_pos.z()) > pv_z_max) event_passed = false;
     }
     else event_passed = false;
 
@@ -489,12 +533,18 @@ StatusCode EfficiencyStudy::execute() {
         // only select mumu channel
         //---------------------------------------------------------
         bool isMuMu = true;
+        std::vector<float> lepton_eta = {};
         
         for (unsigned int i = 0; i < tru_v->nOutgoingParticles(); i++){
 
             // set isMuMu to false if there is an electron 
             const xAOD::TruthParticle* truth_child = tru_v->outgoingParticle(i);
             if ((truth_child->absPdgId() == 11)) isMuMu = false;
+
+            // get eta of muon
+            if ((truth_child->absPdgId() == 13)) {
+                lepton_eta.push_back(std::abs(truth_child->eta()));
+            }
     
         }
    
@@ -594,10 +644,20 @@ StatusCode EfficiencyStudy::execute() {
             // fill efficiency
             if (dv_eta < eta1) m_dv_eff_pt_eta1_mass3->FillWeighted(isReconstructed, p_weight, dv_pt);
             else if (dv_eta < eta2) m_dv_eff_pt_eta2_mass3->FillWeighted(isReconstructed, p_weight, dv_pt);
-            else if (dv_eta < eta3) m_dv_eff_pt_eta3_mass3->FillWeighted(isReconstructed, p_weight, dv_pt);
+            else if (dv_eta < eta3) {
+
+                m_dv_eff_pt_eta3_mass3->FillWeighted(isReconstructed, p_weight, dv_pt);
+
+                if ((dv_pt > 300.) && (dv_pt < 500.)) m_weight1->Fill(p_weight);
+                if ((dv_pt > 300.) && (dv_pt < 500.)) m_DeltaR1->Fill(dv_dr);
+                if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta1->Fill(lepton_eta.at(0));
+                if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta1->Fill(lepton_eta.at(1));
+            }
         }
 
         if( (dv_mass > mass_4 - 3*Gamma_4) && (dv_mass < mass_4 + 3*Gamma_4) ) {
+
+            if ((lepton_eta.at(0) > 0.4) && (lepton_eta.at(1) > 0.4)){
 
             // truth yield
             m_truth_yields_map_pt_eta_4->Fill(dv_pt, dv_eta, p_weight);
@@ -607,11 +667,22 @@ StatusCode EfficiencyStudy::execute() {
 
             // fill efficiency
             if (dv_eta < eta1) m_dv_eff_pt_eta1_mass4->FillWeighted(isReconstructed, p_weight, dv_pt);
-            else if (dv_eta < eta2) m_dv_eff_pt_eta2_mass4->FillWeighted(isReconstructed, p_weight, dv_pt);
+            else if (dv_eta < eta2) {
+                    m_dv_eff_pt_eta2_mass4->FillWeighted(isReconstructed, p_weight, dv_pt);
+
+                    if ((dv_pt > 300.) && (dv_pt < 500.)) m_weight2->Fill(p_weight);
+                    if ((dv_pt > 300.) && (dv_pt < 500.)) m_DeltaR2->Fill(dv_dr);
+                    if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta2->Fill(lepton_eta.at(0));
+                    if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta2->Fill(lepton_eta.at(1));
+
+            }
             else if (dv_eta < eta3) m_dv_eff_pt_eta3_mass4->FillWeighted(isReconstructed, p_weight, dv_pt);
+
+            }
         }
 
         if( (dv_mass > mass_5 - 3*Gamma_5) && (dv_mass < mass_5 + 3*Gamma_5) ) {
+            if ((lepton_eta.at(0) > 0.4) && (lepton_eta.at(1) > 0.4)){
 
             // truth yield
             m_truth_yields_map_pt_eta_5->Fill(dv_pt, dv_eta, p_weight);
@@ -622,7 +693,15 @@ StatusCode EfficiencyStudy::execute() {
             // fill efficiency
             if (dv_eta < eta1) m_dv_eff_pt_eta1_mass5->FillWeighted(isReconstructed, p_weight, dv_pt);
             else if (dv_eta < eta2) m_dv_eff_pt_eta2_mass5->FillWeighted(isReconstructed, p_weight, dv_pt);
-            else if (dv_eta < eta3) m_dv_eff_pt_eta3_mass5->FillWeighted(isReconstructed, p_weight, dv_pt);
+            else if (dv_eta < eta3) {
+                m_dv_eff_pt_eta3_mass5->FillWeighted(isReconstructed, p_weight, dv_pt);
+
+                if (dv_pt < 150.) m_weight3->Fill(p_weight);
+                if (dv_pt < 150.) m_DeltaR3->Fill(dv_dr);
+                if (dv_pt < 150.) m_lepton_eta3->Fill(lepton_eta.at(0));
+                if (dv_pt < 150.) m_lepton_eta3->Fill(lepton_eta.at(1));
+            }
+            }
         }
 
 

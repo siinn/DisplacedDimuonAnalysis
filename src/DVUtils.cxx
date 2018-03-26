@@ -43,6 +43,12 @@ DVUtils::~DVUtils() {}
 
 
 StatusCode DVUtils::initialize() {
+    // initialize tools
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_tmt.retrieve());
+    ATH_CHECK(m_dilepdvc.retrieve());
+    ATH_CHECK(m_mc.retrieve());
+    ATH_CHECK(m_trig.retrieve());
     return StatusCode::SUCCESS;
 }
 
@@ -97,7 +103,8 @@ bool DVUtils::TrigMatching(xAOD::Vertex& dv) {
             lep_trigCheck.push_back(mu);
 
             // evaluate trigger
-            if(m_tmt->match(lep_trigCheck,"HLT_mu60_0eta105_msonly")) pass = true;
+            //if(m_tmt->match(lep_trigCheck,"HLT_mu60_0eta105_msonly")) pass = true;
+            if(m_trig->Match(*mu, "HLT_mu60_0eta105_msonly")) pass = true;
         }
     }
     if (channel == "ee"){

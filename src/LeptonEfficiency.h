@@ -29,7 +29,7 @@ class LeptonEfficiency: public ::AthAnalysisAlgorithm {
     private: 
 
         ToolHandle<IDVUtils>  m_dvutils; //!
-        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<Trig::ITrigDecisionTool> m_tdt; //!
 
         int m_event_count;
         int signal_mu_truth;

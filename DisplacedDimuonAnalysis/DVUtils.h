@@ -143,7 +143,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc; //!
         ToolHandle<Trig::IMatchingTool> m_tmt;
         ToolHandle<DDL::ITrigMatch> m_trig;
-        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<Trig::ITrigDecisionTool> m_tdt; //!
 
 
 };
