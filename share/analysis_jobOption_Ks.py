@@ -10,8 +10,6 @@ from AthenaCommon.GlobalFlags import globalflags
 import glob   
 
 theApp.EvtMax = -1
-#theApp.EvtMax = 5000
-
 ServiceMgr.EventSelector.SkipEvents = 0
 
 #--------------------------------------------
@@ -50,7 +48,7 @@ dir_noskim = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zmumu_noskim/"
 #svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"user.sche.mc15_13TeV.308264.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m100t100.merge.DAOD_SUSY15.e4125_s2698_r8788_p2952.r1_EXT0/*.root*")
 #svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"user.sche.mc15_13TeV.308265.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m100t250.merge.DAOD_SUSY15.e4125_s2698_r8788_p2952.r1_EXT0/*.root*")
 #svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"user.sche.mc15_13TeV.308266.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m100t500.merge.DAOD_SUSY15.e4125_s2698_r8788_p2952.r1_EXT0/*.root*")
-svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"mc15_13TeV.301911.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t100.merge.DAOD_SUSY15.e4125_s2698_r8788_p2877/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"mc15_13TeV.301911.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t100.merge.DAOD_SUSY15.e4125_s2698_r8788_p2877/*.root*")
 #svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"mc15_13TeV.301912.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t250.merge.DAOD_SUSY15.e4125_s2698_r8788_p2877/*.root*")
 #svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"mc15_13TeV.301913.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m250t500.merge.DAOD_SUSY15.e4125_s2698_r8788_p2877/*.root*")
 #svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"mc15_13TeV.301914.Pythia8EvtGen_A14NNPDF23LO_LLzprimemumu_m500t100.merge.DAOD_SUSY15.e4125_s2698_r8788_p2877/*.root*")
@@ -66,49 +64,13 @@ svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim+"mc15_13TeV.301911
 
 
 # SUSY15, no skim, ee
-dir_noskim_ee = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zee_noskim"
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309539.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m100t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309540.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m100t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309541.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m100t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309542.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m250t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309543.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m250t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309544.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m250t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309545.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m500t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309546.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m500t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309547.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m500t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309548.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m750t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309549.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m750t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309550.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m750t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309551.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m1000t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309552.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m1000t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_ee+"user.sche.mc15_13TeV.309553.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m1000t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
+dir_ee_noskim = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zee_noskim/"
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_ee_noskim+"user.sche.mc15_13TeV.309539.Pythia8EvtGen_A14NNPDF23LO_LLzprimeee_m100t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
+
 
 
 # SUSY15, no skim, emu
-dir_noskim_emu = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zemu_noskim"
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309554.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m100t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309555.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m100t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309556.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m100t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309557.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m250t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309558.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m250t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309559.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m250t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309560.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m500t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309561.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m500t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309562.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m500t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309563.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m750t100.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309564.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m750t250.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309565.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m750t500.recon.DAOD_SUSY15.e6545_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309566.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m1000t100.reco.DAOD_SUSY15.e6559_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309567.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m1000t250.recon.DAOD_SUSY15.e6559_s2726_r8788.r1_EXT0/*.root*")
-#svcMgr.EventSelector.InputCollections += glob.glob(dir_noskim_emu+"user.sche.mc15_13TeV.309568.Pythia8EvtGen_A14NNPDF23LO_LLzprimemue_m1000t500.recon.DAOD_SUSY15.e6559_s2726_r8788.r1_EXT0/*.root*")
-
-
-
-
-
-
-
-
+dir_emu_noskim = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/zemu_noskim"
 
 #--------------------------------------------
 # Signal MC samples (no skim) m = 250 GeV, ctau= 250 mm
@@ -154,10 +116,38 @@ dir_bkg = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/background/"
 # SUSY dilepton samples
 #--------------------------------------------
 # samples with ctau = 100 mm
-#svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402804.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_100.merge.DAOD_SUSY15.e4332_s2608_s2183_r8788_p3187/*.root*')
-#svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402810.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_100.merge.DAOD_SUSY15.e4634_s2726_r8788_p3187/*.root*')
-#svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402818.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_100.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*')
-#svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402823.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_100.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*')
+svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402804.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_100.merge.DAOD_SUSY15.e4332_s2608_s2183_r8788_p3187/*.root*')
+svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402810.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_100.merge.DAOD_SUSY15.e4634_s2726_r8788_p3187/*.root*')
+svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402818.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_100.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*')
+svcMgr.EventSelector.InputCollections += glob.glob( '/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/mc15_13TeV.402823.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_100.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*')
+
+
+
+
+#--------------------------------------------
+# All SUSY samples
+#--------------------------------------------
+dir_susy = "/n/atlas05/userdata/sche/MC15/DAOD_SUSY15/SUSY/"
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402803.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_10.merge.DAOD_SUSY15.e4332_s2608_s2183_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402804.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_100.merge.DAOD_SUSY15.e4332_s2608_s2183_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402805.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_1000.merge.DAOD_SUSY15.e4332_s2608_s2183_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402809.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_10.merge.DAOD_SUSY15.e4634_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402810.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_100.merge.DAOD_SUSY15.e4634_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402811.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_1000.merge.DAOD_SUSY15.e4634_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402812.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_30.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402813.MGPy8EG_A14N23LO_SS_RPVDV_700_500_lam12k_300.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402814.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_30.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402815.MGPy8EG_A14N23LO_SS_RPVDV_700_50_lam12k_300.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402816.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_10.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402817.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_30.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402818.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_100.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402819.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_300.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402820.MGPy8EG_A14N23LO_SS_RPVDV_1600_1300_lam12k_1000.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402821.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_10.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402822.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_30.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402823.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_100.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402824.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_300.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
+#svcMgr.EventSelector.InputCollections += glob.glob(dir_susy+"mc15_13TeV.402825.MGPy8EG_A14N23LO_SS_RPVDV_1600_50_lam12k_1000.merge.DAOD_SUSY15.e5539_s2726_r8788_p3187/*.root*")
 
 
 # Local SUSY15 test
@@ -191,8 +181,8 @@ algseq += CfgMgr.DisplacedDimuonAnalysisAlg()
 #algseq += CfgMgr.LRTValidation()
 
 # use pileup reweighting?
-usePRW = True
-#usePRW = False
+#usePRW = True
+usePRW = False
 
 #---------------------------------------------------------------
 # including the tools /cuts needed by the algorithm, and configuring them
@@ -207,14 +197,9 @@ svcMgr.THistSvc.Output += ["DV DATAFILE='output.root' OPT='RECREATE'"]
 svcMgr.THistSvc.OutputLevel = INFO
 #svcMgr.THistSvc.OutputLevel = DEBUG
 
-# Main analysis
-ToolSvc += CfgMgr.DisplacedDimuonAnalysisAlg("DisplacedDimuonAnalysisAlg",
-                                 usePRW = usePRW)
-
 # Efficiency
 ToolSvc += CfgMgr.DVEfficiency("DVEfficiency",
-                                 usePRW = usePRW
-                                 )
+                                 usePRW = usePRW)
 
 # Tracking and vertexing systematics
 ToolSvc += CfgMgr.TrackingSystematics("TrackingSystematics",
@@ -236,12 +221,6 @@ ToolSvc.DiLepBaseCuts.distMin  = 2. # mm
 ToolSvc.DiLepBaseCuts.DisabledModuleMapFile = "DisabledModuleMap_Run2_v2.root"
 ToolSvc.DiLepBaseCuts.MaterialMapFile = "materialMap3D_Run2_v2.1.1.root"
 
-# EventCuts
-ToolSvc += CfgMgr.DDL__EventCuts("DiLepEventCuts")
-ToolSvc.DiLepEventCuts.TriggerNames = [ "HLT_mu60_0eta105_msonly",
-                                        "HLT_g140_loose",
-                                        "HLT_2g50_loose",
-                                        ]
 
 # DESD Filter
 ToolSvc += CfgMgr.DDL__DiLepDESD("DiLepDESD",
@@ -304,21 +283,16 @@ from TrigDecisionTool.TrigDecisionToolConf import Trig__TrigDecisionTool
 ToolSvc += Trig__TrigDecisionTool( "TrigDecisionTool" )
 ToolSvc.TrigDecisionTool.OutputLevel = INFO
 
-# set up VxWeights
-ToolSvc += CfgMgr.DDL__VxWeights("VxWeights",
-                                 TrigEffFile = "TrigEff.root")
-
-
 if (usePRW):
     # pile-up reweighting tool
     ToolSvc += CfgMgr.CP__PileupReweightingTool("PileupReweightingTool",
                                                 #ConfigFiles = ["prw.mumu.*.root"],
-                                                ConfigFiles = ["prw.mumu_noskim.m250t100.root"],
-                                                #ConfigFiles = ["prw.mumu_noskim.m1000t500.root"],
-                                                #ConfigFiles = ["prw.mumu_noskim.m100t100.root"],
-                                                #ConfigFiles = ["prw.ttbar.root"],
-                                                #ConfigFiles = ["prw.susy.700_500_100.root"],
-                                                #ConfigFiles = [""],
+                                                #ConfigFiles = ["prw.mumu_noskim.m250t100.root"],
+                                                #ConfigFiles = ["prw.mumu_noskim.m500t500.root"],
+                                                #ConfigFiles = ["prw.mumu_noskim.m750t500.root"],
+                                                ConfigFiles = ["prw.ee.m100t100.root"],
+                                                #ConfigFiles = ["prw.susy.700_500.root"],
+                                                #ConfigFiles = ["prw.llll.root"],
                                                 #ConfigFiles = [""],
                                                 #ConfigFiles = [""],
                                                 LumiCalcFiles = ["ilumicalc_histograms_None_297730-311481_OflLumi-13TeV-009_DAOD_RPVLL_r8669.root"],
