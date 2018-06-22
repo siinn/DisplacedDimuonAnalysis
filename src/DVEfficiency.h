@@ -18,6 +18,7 @@
 #include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
 #include "DDLBase/IPhotonMatch.h"
+#include "DDLBase/IVxWeights.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -65,6 +66,7 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IOverlapRemoval> m_or; //!
         ToolHandle<CP::IPileupReweightingTool> m_prw; //!
         ToolHandle<DDL::IPhotonMatch> m_phmatch;
+        ToolHandle<DDL::IVxWeights> m_vxwght; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
@@ -86,24 +88,52 @@ class DVEfficiency: public ::AthAnalysisAlgorithm {
         TH1D* m_dv_eff_cutflow; //!
 
         // efficiency as a function of track parameters
-        TEfficiency* m_dv_eff_eta; //! 
-        TEfficiency* m_dv_eff_phi; //! 
-        TEfficiency* m_dv_eff_mass; //! 
-        TEfficiency* m_dv_eff_R; //! 
-        TEfficiency* m_dv_eff_z; //! 
-        TEfficiency* m_dv_eff_d0; //! 
-        TEfficiency* m_dv_eff_DeltaR; //! 
+        TH1F* m_dv_eff_eta; //! 
+        TH1F* m_dv_eff_phi; //! 
+        TH1F* m_dv_eff_mass; //! 
+        TH1F* m_dv_eff_R; //! 
+        TH1F* m_dv_eff_z; //! 
+        TH1F* m_dv_eff_d0; //! 
+        TH1F* m_dv_eff_DeltaR; //! 
+        
+        TH1F* m_dv_eff_eta_den; //! 
+        TH1F* m_dv_eff_phi_den; //! 
+        TH1F* m_dv_eff_mass_den; //! 
+        TH1F* m_dv_eff_R_den; //! 
+        TH1F* m_dv_eff_z_den; //! 
+        TH1F* m_dv_eff_d0_den; //! 
+        TH1F* m_dv_eff_DeltaR_den; //! 
+
+        TH1F* m_dv_eff_eta_num; //! 
+        TH1F* m_dv_eff_phi_num; //! 
+        TH1F* m_dv_eff_mass_num; //! 
+        TH1F* m_dv_eff_R_num; //! 
+        TH1F* m_dv_eff_z_num; //! 
+        TH1F* m_dv_eff_d0_num; //! 
+        TH1F* m_dv_eff_DeltaR_num; //! 
         
         // efficiency as a function of Z' parameters
-        TEfficiency* m_dv_eff_zp_eta; //! 
-        TEfficiency* m_dv_eff_zp_beta; //! 
-        TEfficiency* m_dv_eff_zp_pt; //! 
+        TH1F* m_dv_eff_zp_eta; //! 
+        TH1F* m_dv_eff_zp_beta; //! 
+        TH1F* m_dv_eff_zp_pt; //! 
+
+        TH1F* m_dv_eff_zp_eta_den; //! 
+        TH1F* m_dv_eff_zp_beta_den; //! 
+        TH1F* m_dv_eff_zp_pt_den; //! 
+        
+        TH1F* m_dv_eff_zp_eta_num; //! 
+        TH1F* m_dv_eff_zp_beta_num; //! 
+        TH1F* m_dv_eff_zp_pt_num; //! 
 
         // efficiency as a function of pile-up
-        TEfficiency* m_dv_eff_mu; //! 
+        TH1F* m_dv_eff_mu; //! 
+        TH1F* m_dv_eff_mu_den; //! 
+        TH1F* m_dv_eff_mu_num; //! 
 
         // trigger efficiency
-        TH1D* m_dv_eff_trig; //! 
+        TH1F* m_dv_eff_trig; //! 
+        TH1F* m_dv_eff_trig_den; //! 
+        TH1F* m_dv_eff_trig_num; //! 
 
         // efficiency map (eta vs mu) for reweighting
         TH2F* m_dv_eff_map_mu_eta_num; //! 

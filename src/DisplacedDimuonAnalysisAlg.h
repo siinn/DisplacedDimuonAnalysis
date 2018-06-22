@@ -18,6 +18,7 @@
 #include "DDLBase/IOverlapRemoval.h"
 #include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IPhotonMatch.h"
+#include "DDLBase/IVxWeights.h"
 
 // DVUtil
 #include "DisplacedDimuonAnalysis/DVUtils.h"
@@ -31,6 +32,9 @@
 // Trigger decision tool
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
+
+// pile-up reweighting
+#include "AsgAnalysisInterfaces/IPileupReweightingTool.h"
 
 class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm { 
     public: 
@@ -69,17 +73,26 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDVCuts> m_dvc;
         ToolHandle<DDL::IDiLepCosmics> m_cos;
         ToolHandle<DDL::IPhotonMatch> m_phmatch;
+        ToolHandle<CP::IPileupReweightingTool> m_prw; //!
+        ToolHandle<DDL::IVxWeights> m_vxwght; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
+        SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> m_accTr;
 
         // output
         TH1D* m_event_cutflow; //!
 
         // pile-up distribution
         TH1F* m_pileup; //!
+
+        // use PRW?
+        bool m_usePRW;
+
+        // pileup weight
+        float p_weight = 1;
 
         //----------------------------------
         // mumu plots
@@ -229,6 +242,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             int n_dvc_copy = 0;
             int n_dv_all = 0;
             int n_dv_passed_cut = 0;
+
     
 }; 
 

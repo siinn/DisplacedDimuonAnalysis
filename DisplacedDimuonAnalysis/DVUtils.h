@@ -62,7 +62,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         float getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2);
 
         // get closest truth DV
-        const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv);
+        const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv, bool reqSignal);
 
         // truth tools --------------------------
 
@@ -136,6 +136,9 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         // accessors for leptons associated to a DV
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
+
+        // DV mass accessor
+        SG::AuxElement::ConstAccessor<float> m_accMass;
 
     private:
 

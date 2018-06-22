@@ -165,9 +165,14 @@ StatusCode EfficiencyStudy::initialize() {
     m_DeltaR3 = new TH1F("m_DeltaR3", "DeltaR3", 50., 0, 6); // GeV
 
     // lepton eta for specific bins
-    m_lepton_eta1 = new TH1F("m_eta1", "eta1", 50., 0, 4); // GeV
-    m_lepton_eta2 = new TH1F("m_eta2", "eta2", 50., 0, 4); // GeV
-    m_lepton_eta3 = new TH1F("m_eta3", "eta3", 50., 0, 4); // GeV
+    m_lepton_eta1 = new TH1F("m_eta1", "eta1", 20., 0, 4); // GeV
+    m_lepton_eta2 = new TH1F("m_eta2", "eta2", 20., 0, 4); // GeV
+    m_lepton_eta3 = new TH1F("m_eta3", "eta3", 20., 0, 4); // GeV
+
+    // lepton eta for specific bins
+    m_lepton_pt1 = new TH1F("m_pt1", "pt1", 50., 0, 1000); // GeV
+    m_lepton_pt2 = new TH1F("m_pt2", "pt2", 50., 0, 1000); // GeV
+    m_lepton_pt3 = new TH1F("m_pt3", "pt3", 50., 0, 1000); // GeV
 
     // output
 
@@ -223,6 +228,9 @@ StatusCode EfficiencyStudy::initialize() {
     CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_eta1", m_lepton_eta1) );
     CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_eta2", m_lepton_eta2) );
     CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_eta3", m_lepton_eta3) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_pt1", m_lepton_pt1) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_pt2", m_lepton_pt2) );
+    CHECK( histSvc->regHist("/DV/EfficiencyStudy/specific_bin/m_lepton_pt3", m_lepton_pt3) );
 
 
     // Use weighted events in TEfficiency class
@@ -444,6 +452,10 @@ StatusCode EfficiencyStudy::execute() {
         float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
         float dv_z = std::abs(m_dvutils->getz( *dv, *pv ));       // z in [mm]
 
+        // posotion w.r.t beam spot
+        float dv_R_wrt_beam = (*dv).position().perp();    // R in [mm]
+        float dv_z_wrt_beam = std::abs((*dv).position().z());       // z in [mm]
+
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) vertex_passed = false;
 
@@ -492,19 +504,21 @@ StatusCode EfficiencyStudy::execute() {
         if(vertex_passed) m_dv_reco_cutflow->Fill("FilterMatching", 1);
 
         // DV R <  300 mm
-        if(dv_R > dv_R_max) vertex_passed = false;
+        if(dv_R_wrt_beam > dv_R_max) vertex_passed = false;
         if(vertex_passed) m_dv_reco_cutflow->Fill("R_{DV} > 300 mm", 1);
 
         // DV z <  300 mm
-        if(dv_z > dv_z_max) vertex_passed = false;
+        if(dv_z_wrt_beam > dv_z_max) vertex_passed = false;
         if(vertex_passed) m_dv_reco_cutflow->Fill("z_{DV} > 300 mm", 1);
 
         // mark this event as reconstructed
         //dv_matched = true;
     
         // find closest truth vertex by position
-        const xAOD::TruthVertex* matched_truth = m_dvutils->getClosestTruthVertex(dv);
-        if(matched_truth) matched_truth->auxdecor<bool>("reconstructed") = 1;
+        if(vertex_passed) {
+            const xAOD::TruthVertex* matched_truth = m_dvutils->getClosestTruthVertex(dv, true);
+            if(matched_truth) matched_truth->auxdecor<bool>("reconstructed") = 1;
+        }
 
     } // end of dv loop
     
@@ -529,12 +543,14 @@ StatusCode EfficiencyStudy::execute() {
         // only selecting signal truth
         if (!m_dvutils->isSignalVertex(tru_v)) continue;
 
-        //---------------------------------------------------------
-        // only select mumu channel
-        //---------------------------------------------------------
+        // flag to mark if this is mumu vertex
         bool isMuMu = true;
+
+        // store lepton pt and eta for investigating specific bins
         std::vector<float> lepton_eta = {};
-        
+        std::vector<float> lepton_pt = {};
+       
+        // loop over outgoing particles
         for (unsigned int i = 0; i < tru_v->nOutgoingParticles(); i++){
 
             // set isMuMu to false if there is an electron 
@@ -544,15 +560,18 @@ StatusCode EfficiencyStudy::execute() {
             // get eta of muon
             if ((truth_child->absPdgId() == 13)) {
                 lepton_eta.push_back(std::abs(truth_child->eta()));
+                lepton_pt.push_back(truth_child->pt() / 1000.); // GeV
             }
     
         }
-   
+  
+        // only select mumu channel
         if (!isMuMu) continue;
 
-        //---------------------------------------------------------
-        // filter by DeltaR
-        //---------------------------------------------------------
+        // lepton eta fiducial cut
+        //float lepton_eta_max = 2.5;
+        //if ((lepton_eta.at(0) > lepton_eta_max) or (lepton_eta.at(0) > lepton_eta_max)) continue;
+
         // get opening angle
         float dv_dr = m_dvutils->Truth_dr(tru_v);
 
@@ -563,8 +582,6 @@ StatusCode EfficiencyStudy::execute() {
 
         // fill DeltaR distribution
         m_truth_DeltaR->Fill(dv_dr, p_weight);
-
-        //---------------------------------------------------------
 
         // mass of dv, not counting neutral particle
         float dv_mass = m_dvutils->TruthMass(tru_v) / 1000.;
@@ -652,12 +669,12 @@ StatusCode EfficiencyStudy::execute() {
                 if ((dv_pt > 300.) && (dv_pt < 500.)) m_DeltaR1->Fill(dv_dr);
                 if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta1->Fill(lepton_eta.at(0));
                 if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta1->Fill(lepton_eta.at(1));
+                if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_pt1->Fill(lepton_pt.at(0));
+                if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_pt1->Fill(lepton_pt.at(1));
             }
         }
 
         if( (dv_mass > mass_4 - 3*Gamma_4) && (dv_mass < mass_4 + 3*Gamma_4) ) {
-
-            if ((lepton_eta.at(0) > 0.4) && (lepton_eta.at(1) > 0.4)){
 
             // truth yield
             m_truth_yields_map_pt_eta_4->Fill(dv_pt, dv_eta, p_weight);
@@ -670,19 +687,19 @@ StatusCode EfficiencyStudy::execute() {
             else if (dv_eta < eta2) {
                     m_dv_eff_pt_eta2_mass4->FillWeighted(isReconstructed, p_weight, dv_pt);
 
+                    // investigating specific bin
                     if ((dv_pt > 300.) && (dv_pt < 500.)) m_weight2->Fill(p_weight);
                     if ((dv_pt > 300.) && (dv_pt < 500.)) m_DeltaR2->Fill(dv_dr);
                     if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta2->Fill(lepton_eta.at(0));
                     if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_eta2->Fill(lepton_eta.at(1));
+                    if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_pt2->Fill(lepton_pt.at(0));
+                    if ((dv_pt > 300.) && (dv_pt < 500.)) m_lepton_pt2->Fill(lepton_pt.at(1));
 
             }
             else if (dv_eta < eta3) m_dv_eff_pt_eta3_mass4->FillWeighted(isReconstructed, p_weight, dv_pt);
-
-            }
         }
 
         if( (dv_mass > mass_5 - 3*Gamma_5) && (dv_mass < mass_5 + 3*Gamma_5) ) {
-            if ((lepton_eta.at(0) > 0.4) && (lepton_eta.at(1) > 0.4)){
 
             // truth yield
             m_truth_yields_map_pt_eta_5->Fill(dv_pt, dv_eta, p_weight);
@@ -696,11 +713,13 @@ StatusCode EfficiencyStudy::execute() {
             else if (dv_eta < eta3) {
                 m_dv_eff_pt_eta3_mass5->FillWeighted(isReconstructed, p_weight, dv_pt);
 
+                // investigating specific bin
                 if (dv_pt < 150.) m_weight3->Fill(p_weight);
                 if (dv_pt < 150.) m_DeltaR3->Fill(dv_dr);
                 if (dv_pt < 150.) m_lepton_eta3->Fill(lepton_eta.at(0));
                 if (dv_pt < 150.) m_lepton_eta3->Fill(lepton_eta.at(1));
-            }
+                if (dv_pt < 150.) m_lepton_pt3->Fill(lepton_pt.at(0));
+                if (dv_pt < 150.) m_lepton_pt3->Fill(lepton_pt.at(1));
             }
         }
 

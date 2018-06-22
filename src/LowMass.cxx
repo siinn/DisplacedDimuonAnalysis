@@ -614,7 +614,7 @@ StatusCode LowMass::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv,true);
                 if(tru_matched) m_dv_mumu_cf->Fill("Truth matched", 1);
             }
         } // end of mumu
@@ -688,7 +688,7 @@ StatusCode LowMass::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv,true);
                 if(tru_matched) m_dv_ee_cf->Fill("Truth matched", 1);
             }
 
@@ -763,7 +763,7 @@ StatusCode LowMass::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv,true);
                 if(tru_matched) m_dv_emu_cf->Fill("Truth matched", 1);
             }
 
@@ -832,7 +832,7 @@ StatusCode LowMass::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv,true);
                 if(tru_matched) m_dv_mut_cf->Fill("Truth matched", 1);
             }
 
@@ -902,7 +902,7 @@ StatusCode LowMass::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv,true);
                 if(tru_matched) m_dv_et_cf->Fill("Truth matched", 1);
             }
 
@@ -977,7 +977,7 @@ StatusCode LowMass::execute() {
                 // create truth vertex for matching
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
-                tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                tru_matched = m_dvutils->getClosestTruthVertex(dv,true);
                 if(tru_matched) m_dv_idid_cf->Fill("Truth matched", 1);
             }
 

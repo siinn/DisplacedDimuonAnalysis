@@ -48,7 +48,7 @@ class IDVUtils: virtual public IAlgTool {
         virtual float getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2) = 0;
 
         // get closest truth DV
-        virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv) = 0;
+        virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *rv, bool reqSignal) = 0;
 
 
         //----------------------------------------

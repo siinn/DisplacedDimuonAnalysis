@@ -95,7 +95,7 @@ bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::Tra
     bool pass = true;
 
     // set selection
-    float pt_min = 10.;    // GeV
+    float pt_min = 5.;    // GeV
     float eta_max = 2.5;
     
     // both tracks need to pass pt and eta cut
@@ -111,7 +111,7 @@ bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1) {
     bool pass = false;
 
     // set selection
-    float pt_min = 10.;    // GeV
+    float pt_min = 5.;    // GeV
     float eta_max = 2.5;
     
     // both tracks need to pass pt and eta cut

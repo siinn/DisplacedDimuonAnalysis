@@ -136,6 +136,17 @@ StatusCode TrackingSystematics::initialize() {
     m_dv_LRT_M_eta3 = new TH1F("dv_LRT_M_eta3","K_{S} candidate mass in MeV (eta_3)", 100, 350, 650 );
     m_dv_LRT_M_eta4 = new TH1F("dv_LRT_M_eta4","K_{S} candidate mass in MeV (eta_4)", 100, 350, 650 );
 
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu0","K_{S} candidate mass in MeV (mu0)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu1","K_{S} candidate mass in MeV (mu1)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu2","K_{S} candidate mass in MeV (mu2)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu3","K_{S} candidate mass in MeV (mu3)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu4","K_{S} candidate mass in MeV (mu4)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu5","K_{S} candidate mass in MeV (mu5)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu6","K_{S} candidate mass in MeV (mu6)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu7","K_{S} candidate mass in MeV (mu7)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu8","K_{S} candidate mass in MeV (mu8)", 100, 350, 650 ));
+    m_vec_LRT_M_mu.push_back(new TH1F("dv_LRT_M_mu9","K_{S} candidate mass in MeV (mu9)", 100, 350, 650 ));
+
     // Ks using only ST tracks
     m_dv_ST_M = new TH1F("dv_ST_M","K_{S} candidate mass in MeV (ST+ST)", 100, 350, 650 );
     m_dv_ST_M_R1 = new TH1F("dv_ST_M_R1","K_{S} candidate mass in MeV (R_1),(ST+ST)", 100, 350, 650 );
@@ -154,6 +165,17 @@ StatusCode TrackingSystematics::initialize() {
     m_dv_ST_M_eta3 = new TH1F("dv_ST_M_eta3","K_{S} candidate mass in MeV (eta_3)", 100, 350, 650 );
     m_dv_ST_M_eta4 = new TH1F("dv_ST_M_eta4","K_{S} candidate mass in MeV (eta_4)", 100, 350, 650 );
 
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu0","K_{S} candidate mass in MeV (mu0)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu1","K_{S} candidate mass in MeV (mu1)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu2","K_{S} candidate mass in MeV (mu2)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu3","K_{S} candidate mass in MeV (mu3)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu4","K_{S} candidate mass in MeV (mu4)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu5","K_{S} candidate mass in MeV (mu5)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu6","K_{S} candidate mass in MeV (mu6)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu7","K_{S} candidate mass in MeV (mu7)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu8","K_{S} candidate mass in MeV (mu8)", 100, 350, 650 ));
+    m_vec_ST_M_mu.push_back(new TH1F("dv_ST_M_mu9","K_{S} candidate mass in MeV (mu9)", 100, 350, 650 ));
+
     // Ks using ST and LRT tracks
     m_dv_STLRT_M = new TH1F("dv_STLRT_M","K_{S} candidate mass in MeV (LRT +ST)", 100, 350, 650 );
     m_dv_STLRT_M_R1 = new TH1F("dv_STLRT_M_R1","K_{S} candidate mass in MeV (R_1),(ST+LRT)", 100, 350, 650 );
@@ -171,6 +193,17 @@ StatusCode TrackingSystematics::initialize() {
     m_dv_STLRT_M_eta2 = new TH1F("dv_STLRT_M_eta2","K_{S} candidate mass in MeV (eta_2)", 100, 350, 650 );
     m_dv_STLRT_M_eta3 = new TH1F("dv_STLRT_M_eta3","K_{S} candidate mass in MeV (eta_3)", 100, 350, 650 );
     m_dv_STLRT_M_eta4 = new TH1F("dv_STLRT_M_eta4","K_{S} candidate mass in MeV (eta_4)", 100, 350, 650 );
+
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu0","K_{S} candidate mass in MeV (mu0)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu1","K_{S} candidate mass in MeV (mu1)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu2","K_{S} candidate mass in MeV (mu2)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu3","K_{S} candidate mass in MeV (mu3)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu4","K_{S} candidate mass in MeV (mu4)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu5","K_{S} candidate mass in MeV (mu5)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu6","K_{S} candidate mass in MeV (mu6)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu7","K_{S} candidate mass in MeV (mu7)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu8","K_{S} candidate mass in MeV (mu8)", 100, 350, 650 ));
+    m_vec_STLRT_M_mu.push_back(new TH1F("dv_STLRT_M_mu9","K_{S} candidate mass in MeV (mu9)", 100, 350, 650 ));
 
 
     // output histograms
@@ -204,6 +237,17 @@ StatusCode TrackingSystematics::initialize() {
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_eta3", m_dv_LRT_M_eta3) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_eta4", m_dv_LRT_M_eta4) );
 
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu0", m_vec_LRT_M_mu.at(0)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu1", m_vec_LRT_M_mu.at(1)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu2", m_vec_LRT_M_mu.at(2)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu3", m_vec_LRT_M_mu.at(3)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu4", m_vec_LRT_M_mu.at(4)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu5", m_vec_LRT_M_mu.at(5)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu6", m_vec_LRT_M_mu.at(6)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu7", m_vec_LRT_M_mu.at(7)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu8", m_vec_LRT_M_mu.at(8)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_LRT/m/dv_LRT_M_mu9", m_vec_LRT_M_mu.at(9)) );
+
     // Ks using only ST tracks
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/dv_ST_M", m_dv_ST_M) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_R1", m_dv_ST_M_R1) );
@@ -221,6 +265,17 @@ StatusCode TrackingSystematics::initialize() {
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta2", m_dv_ST_M_eta2) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta3", m_dv_ST_M_eta3) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_eta4", m_dv_ST_M_eta4) );
+
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu0", m_vec_ST_M_mu.at(0)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu1", m_vec_ST_M_mu.at(1)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu2", m_vec_ST_M_mu.at(2)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu3", m_vec_ST_M_mu.at(3)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu4", m_vec_ST_M_mu.at(4)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu5", m_vec_ST_M_mu.at(5)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu6", m_vec_ST_M_mu.at(6)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu7", m_vec_ST_M_mu.at(7)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu8", m_vec_ST_M_mu.at(8)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_ST/m/dv_ST_M_mu9", m_vec_ST_M_mu.at(9)) );
 
     // Ks using ST and LRT tracks
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/dv_STLRT_M", m_dv_STLRT_M) );
@@ -240,6 +295,17 @@ StatusCode TrackingSystematics::initialize() {
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_eta3", m_dv_STLRT_M_eta3) );
     CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_eta4", m_dv_STLRT_M_eta4) );
 
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu0", m_vec_STLRT_M_mu.at(0)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu1", m_vec_STLRT_M_mu.at(1)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu2", m_vec_STLRT_M_mu.at(2)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu3", m_vec_STLRT_M_mu.at(3)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu4", m_vec_STLRT_M_mu.at(4)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu5", m_vec_STLRT_M_mu.at(5)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu6", m_vec_STLRT_M_mu.at(6)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu7", m_vec_STLRT_M_mu.at(7)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu8", m_vec_STLRT_M_mu.at(8)) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/dv_STLRT/m/dv_STLRT_M_mu9", m_vec_STLRT_M_mu.at(9)) );
+
 
 
     // truth-matched Ks and Z' comparison
@@ -248,24 +314,28 @@ StatusCode TrackingSystematics::initialize() {
     m_Ks_pt = new TH1F("dv_Ks_pt","K_{S} candidate pt", 50,0,500); // GeV
     m_Ks_eta = new TH1F("dv_Ks_eta","K_{S} candidate eta", 60,-3,3); // GeV
     m_Ks_DeltaR = new TH1F("dv_Ks_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
+    m_Ks_lepton_pt = new TH1F("dv_Ks_lepton_pt","K_{S} candidate lepton_pt", 100,0,1000);
 
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_r", m_Ks_r) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_z", m_Ks_z) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_pt", m_Ks_pt) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_eta", m_Ks_eta) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_DeltaR", m_Ks_DeltaR) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_Ks/Ks_lepton_pt", m_Ks_lepton_pt) );
 
     m_zp_r = new TH1F("dv_zp_r","K_{S} candidate r", 60,0,300);
     m_zp_z = new TH1F("dv_zp_z","K_{S} candidate z", 50,-1000,1000);
     m_zp_pt = new TH1F("dv_zp_pt","K_{S} candidate pt", 50,0,500); // GeV
     m_zp_eta = new TH1F("dv_zp_eta","K_{S} candidate eta", 60,-3,3); // GeV
     m_zp_DeltaR = new TH1F("dv_zp_DeltaR","K_{S} candidate #DeltaR", 100,0,5.);
+    m_zp_lepton_pt = new TH1F("dv_zp_lepton_pt","K_{S} candidate z", 100,0,1000);
 
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_r", m_zp_r) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_z", m_zp_z) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_pt", m_zp_pt) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_eta", m_zp_eta) );
     CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_DeltaR", m_zp_DeltaR) );
+    CHECK( histSvc->regHist("/DV/tracking_syst/truth-matched_zp/zp_lepton_pt", m_zp_lepton_pt) );
 
     return StatusCode::SUCCESS;
 }
@@ -294,19 +364,14 @@ StatusCode TrackingSystematics::execute() {
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
     // get combine weight from pileup reweighting tool
-    int mu = 0;
     if (m_usePRW && isMC) {
         p_weight = m_prw->getCombinedWeight(*evtInfo);
         ATH_MSG_DEBUG("pileup weight = " << p_weight);
-
-        // pile-up
-        mu = evtInfo->actualInteractionsPerCrossing();
     }
 
     // fill pileup distribution
-    m_pileup->Fill(mu,1);
-    m_pileup_reweighted->Fill(mu,p_weight);
-
+    m_pileup->Fill(pileup,1);
+    m_pileup_reweighted->Fill(pileup,p_weight);
 
     // retrieve lepton container
     const xAOD::MuonContainer* muc = nullptr;
@@ -434,6 +499,11 @@ StatusCode TrackingSystematics::execute() {
             float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
             float dv_eta = std::abs(m_dvutils->getEta( *dv, *pv )); // r in [mm]
 
+            // position w.r.t. beam spot
+            float dv_R_wrt_beam = (*dv).position().perp();    // R in [mm]
+            float dv_z_wrt_beam = (*dv).position().z();       // z in [mm]
+            float dv_l_wrt_beam = sqrt( dv_R_wrt_beam*dv_R_wrt_beam + dv_z_wrt_beam*dv_z_wrt_beam );
+
             // access invariant mass, pt, eta
             float dv_mass = std::abs(m_accMass(*dv)); // in MeV
             float dv_pt = std::abs(m_acc_pt(*dv)) / 1000.; // in GeV
@@ -482,11 +552,11 @@ StatusCode TrackingSystematics::execute() {
                 m_dv_idid_cf->Fill("m < 650 MeV", p_weight);
 
                 // DV R <  300 mm
-                if(dv_R > dv_R_max) continue;
+                if(dv_R_wrt_beam > dv_R_max) continue;
                 m_dv_idid_cf->Fill("R_{DV} > 300 mm", p_weight);
 
                 // DV z <  300 mm
-                if(std::abs(dv_z) > dv_z_max) continue;
+                if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
                 m_dv_idid_cf->Fill("z_{DV} > 300 mm", p_weight);
 
                 // Ks candidate selection
@@ -499,14 +569,14 @@ StatusCode TrackingSystematics::execute() {
 
                 // fill vertex parameters
                 m_dv_idid_M->Fill(dv_mass,p_weight);
-                m_dv_idid_R->Fill(dv_R,p_weight);
-                m_dv_idid_z->Fill(dv_z,p_weight);
-                m_dv_idid_l->Fill(dv_l,p_weight);
+                m_dv_idid_R->Fill(dv_R_wrt_beam,p_weight);
+                m_dv_idid_z->Fill(dv_z_wrt_beam,p_weight);
+                m_dv_idid_l->Fill(dv_l_wrt_beam,p_weight);
                 m_dv_idid_pt->Fill(dv_pt,p_weight);
                 m_dv_idid_eta->Fill(dv_eta,p_weight);
                 m_dv_idid_mu->Fill(pileup,p_weight);
                 m_dv_idid_DeltaR->Fill(deltaR,p_weight);
-                m_dv_idid_R_M->Fill(dv_R, dv_mass,p_weight);
+                m_dv_idid_R_M->Fill(dv_R_wrt_beam, dv_mass,p_weight);
 
                 // fill track parameter
                 m_dv_idid_track_pt->Fill(tp1.pt() / 1000.,p_weight);
@@ -522,11 +592,11 @@ StatusCode TrackingSystematics::execute() {
                     m_dv_LRT_M->Fill(dv_mass, p_weight);
 
                     // fill mass plot in bins of R
-                    if (dv_R < 100) m_dv_LRT_M_R1->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 100) and (dv_R < 150)) m_dv_LRT_M_R2->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 150) and (dv_R < 200)) m_dv_LRT_M_R3->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 200) and (dv_R < 250)) m_dv_LRT_M_R4->Fill(dv_mass,p_weight);
-                    else if (dv_R >= 250) m_dv_LRT_M_R5->Fill(dv_mass,p_weight);
+                    if (dv_R_wrt_beam < 100) m_dv_LRT_M_R1->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 100) and (dv_R < 150)) m_dv_LRT_M_R2->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 150) and (dv_R < 200)) m_dv_LRT_M_R3->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 200) and (dv_R < 250)) m_dv_LRT_M_R4->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 250) and (dv_R < 300)) m_dv_LRT_M_R5->Fill(dv_mass,p_weight);
 
                     // fill mass plot in bins of eta
                     if (dv_eta < 0.5) m_dv_LRT_M_eta1->Fill(dv_mass,p_weight);
@@ -540,6 +610,18 @@ StatusCode TrackingSystematics::execute() {
                     else if ((dv_pt >= 3.0) and (dv_pt < 4.0)) m_dv_LRT_M_pt3->Fill(dv_mass,p_weight);
                     else m_dv_LRT_M_pt4->Fill(dv_mass,p_weight);
 
+                    // fill mass plot in bins of eta
+                    if (pileup == 0) m_vec_LRT_M_mu.at(0)->Fill(dv_mass, p_weight);
+                    else if ((pileup > 0) && (pileup < 10)) m_vec_LRT_M_mu.at(1)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 10) && (pileup < 15)) m_vec_LRT_M_mu.at(2)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 15) && (pileup < 20)) m_vec_LRT_M_mu.at(3)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 20) && (pileup < 25)) m_vec_LRT_M_mu.at(4)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 25) && (pileup < 30)) m_vec_LRT_M_mu.at(5)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 30) && (pileup < 35)) m_vec_LRT_M_mu.at(6)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 35) && (pileup < 40)) m_vec_LRT_M_mu.at(7)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 40) && (pileup < 45)) m_vec_LRT_M_mu.at(8)->Fill(dv_mass, p_weight);
+                    else if (pileup >= 45) m_vec_LRT_M_mu.at(9)->Fill(dv_mass, p_weight);
+
                 }
 
                 // if both tracks are reconstructed by standard tracking
@@ -552,11 +634,11 @@ StatusCode TrackingSystematics::execute() {
                     m_dv_ST_M->Fill(dv_mass, p_weight);
 
                     // fill mass plot in bins of R
-                    if (dv_R < 100) m_dv_ST_M_R1->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 100) and (dv_R < 150)) m_dv_ST_M_R2->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 150) and (dv_R < 200)) m_dv_ST_M_R3->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 200) and (dv_R < 250)) m_dv_ST_M_R4->Fill(dv_mass,p_weight);
-                    else if (dv_R >= 250) m_dv_ST_M_R5->Fill(dv_mass,p_weight);
+                    if (dv_R_wrt_beam < 100) m_dv_ST_M_R1->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 100) and (dv_R < 150)) m_dv_ST_M_R2->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 150) and (dv_R < 200)) m_dv_ST_M_R3->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 200) and (dv_R < 250)) m_dv_ST_M_R4->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 250) and (dv_R < 300)) m_dv_ST_M_R5->Fill(dv_mass,p_weight);
 
                     // fill mass plot in bins of eta
                     if (dv_eta < 0.5) m_dv_ST_M_eta1->Fill(dv_mass,p_weight);
@@ -569,6 +651,18 @@ StatusCode TrackingSystematics::execute() {
                     else if ((dv_pt >= 2.5) and (dv_pt < 3.0)) m_dv_ST_M_pt2->Fill(dv_mass,p_weight);
                     else if ((dv_pt >= 3.0) and (dv_pt < 4.0)) m_dv_ST_M_pt3->Fill(dv_mass,p_weight);
                     else m_dv_ST_M_pt4->Fill(dv_mass,p_weight);
+
+                    // fill mass plot in bins of eta
+                    if (pileup == 0) m_vec_ST_M_mu.at(0)->Fill(dv_mass, p_weight);
+                    else if ((pileup > 0) && (pileup < 10)) m_vec_ST_M_mu.at(1)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 10) && (pileup < 15)) m_vec_ST_M_mu.at(2)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 15) && (pileup < 20)) m_vec_ST_M_mu.at(3)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 20) && (pileup < 25)) m_vec_ST_M_mu.at(4)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 25) && (pileup < 30)) m_vec_ST_M_mu.at(5)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 30) && (pileup < 35)) m_vec_ST_M_mu.at(6)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 35) && (pileup < 40)) m_vec_ST_M_mu.at(7)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 40) && (pileup < 45)) m_vec_ST_M_mu.at(8)->Fill(dv_mass, p_weight);
+                    else if (pileup >= 45) m_vec_ST_M_mu.at(9)->Fill(dv_mass, p_weight);
                 }
 
                 // if one track is reconstructed by ST and the other track is reconstructed by LRT
@@ -581,11 +675,11 @@ StatusCode TrackingSystematics::execute() {
                     m_dv_STLRT_M->Fill(dv_mass, p_weight);
 
                     // fill mass plot in bins of R
-                    if (dv_R < 100) m_dv_STLRT_M_R1->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 100) and (dv_R < 150)) m_dv_STLRT_M_R2->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 150) and (dv_R < 200)) m_dv_STLRT_M_R3->Fill(dv_mass,p_weight);
-                    else if ((dv_R >= 200) and (dv_R < 250)) m_dv_STLRT_M_R4->Fill(dv_mass,p_weight);
-                    else if (dv_R >= 250) m_dv_STLRT_M_R5->Fill(dv_mass,p_weight);
+                    if (dv_R_wrt_beam < 100) m_dv_STLRT_M_R1->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 100) and (dv_R < 150)) m_dv_STLRT_M_R2->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 150) and (dv_R < 200)) m_dv_STLRT_M_R3->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 200) and (dv_R < 250)) m_dv_STLRT_M_R4->Fill(dv_mass,p_weight);
+                    else if ((dv_R_wrt_beam >= 250) and (dv_R < 300)) m_dv_STLRT_M_R5->Fill(dv_mass,p_weight);
 
                     // fill mass plot in bins of eta
                     if (dv_eta < 0.5) m_dv_STLRT_M_eta1->Fill(dv_mass,p_weight);
@@ -598,31 +692,45 @@ StatusCode TrackingSystematics::execute() {
                     else if ((dv_pt >= 2.5) and (dv_pt < 3.0)) m_dv_STLRT_M_pt2->Fill(dv_mass,p_weight);
                     else if ((dv_pt >= 3.0) and (dv_pt < 4.0)) m_dv_STLRT_M_pt3->Fill(dv_mass,p_weight);
                     else m_dv_STLRT_M_pt4->Fill(dv_mass,p_weight);
+
+                    // fill mass plot in bins of eta
+                    if (pileup == 0) m_vec_STLRT_M_mu.at(0)->Fill(dv_mass, p_weight);
+                    else if ((pileup > 0) && (pileup < 10)) m_vec_STLRT_M_mu.at(1)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 10) && (pileup < 15)) m_vec_STLRT_M_mu.at(2)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 15) && (pileup < 20)) m_vec_STLRT_M_mu.at(3)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 20) && (pileup < 25)) m_vec_STLRT_M_mu.at(4)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 25) && (pileup < 30)) m_vec_STLRT_M_mu.at(5)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 30) && (pileup < 35)) m_vec_STLRT_M_mu.at(6)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 35) && (pileup < 40)) m_vec_STLRT_M_mu.at(7)->Fill(dv_mass, p_weight);
+                    else if ((pileup >= 40) && (pileup < 45)) m_vec_STLRT_M_mu.at(8)->Fill(dv_mass, p_weight);
+                    else if (pileup >= 45) m_vec_STLRT_M_mu.at(9)->Fill(dv_mass, p_weight);
                 }
 
                 
             }
 
-            //// make histograms from truth-matched Ks
-            //if (isMC){
+            // make histograms from truth-matched Ks
+            if (isMC){
 
-            //    // find closest truth vertex
-            //    const xAOD::TruthVertex *tru_matched = nullptr;
-            //    tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                // find closest truth vertex
+                const xAOD::TruthVertex *tru_matched = nullptr;
+                tru_matched = m_dvutils->getClosestTruthVertex(dv, false);
 
-            //    // check if the matched truth vertex is from Ks
-            //    if (tru_matched){
-            //        const xAOD::TruthParticle* parent = tru_matched->incomingParticle(0);
-            //        if (!(parent->absPdgId() ==310)) continue;
+                // check if the matched truth vertex is from Ks
+                if (tru_matched){
+                    const xAOD::TruthParticle* parent = tru_matched->incomingParticle(0);
+                    if (!(parent->absPdgId() ==310)) continue;
 
-            //        m_Ks_r->Fill(dv_R,p_weight);
-            //        m_Ks_z->Fill(dv_z,p_weight);
-            //        m_Ks_pt->Fill(dv_pt,p_weight);
-            //        m_Ks_eta->Fill(dv_eta,p_weight); 
-            //        m_Ks_DeltaR->Fill(deltaR,p_weight); 
+                    m_Ks_r->Fill(dv_R_wrt_beam,p_weight);
+                    m_Ks_z->Fill(dv_z,p_weight);
+                    m_Ks_pt->Fill(dv_pt,p_weight);
+                    m_Ks_eta->Fill(dv_eta,p_weight); 
+                    m_Ks_DeltaR->Fill(deltaR,p_weight); 
+                    m_Ks_lepton_pt->Fill(tp1.pt() / 1000.,p_weight);
+                    m_Ks_lepton_pt->Fill(tp2.pt() / 1000.,p_weight);
 
-            //    }
-            //}
+                }
+            }
         } // end of Ks loop
     }
 
@@ -701,10 +809,14 @@ StatusCode TrackingSystematics::execute() {
             float dv_l = m_dvutils->getr( *dv, *pv ); // r in [mm]
             float dv_eta = m_dvutils->getEta( *dv, *pv ); // r in [mm]
 
+            // position w.r.t. beam spot
+            float dv_R_wrt_beam = (*dv).position().perp();    // R in [mm]
+            float dv_z_wrt_beam = (*dv).position().z();       // z in [mm]
+            float dv_l_wrt_beam = sqrt( dv_R_wrt_beam*dv_R_wrt_beam + dv_z_wrt_beam*dv_z_wrt_beam );
+
             // collect leptons from this dv
             auto dv_muc = m_accMu(*dv);
             auto dv_elc = m_accEl(*dv);
-
 
             if ((channel == "mumu") or (channel == "emu") or (channel == "ee")) {
 
@@ -723,40 +835,45 @@ StatusCode TrackingSystematics::execute() {
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
 
-                // material veto
-                if(!m_dvc->PassMaterialVeto(*dv)) continue;
+                // material veto (excluding mumu)
+                if (channel != "mumu") {
+                    if(!m_dvc->PassMaterialVeto(*dv)) continue;
+                }
 
                 // low mass veto
                 if(dv_mass < mass_min) continue;
 
                 // cosmic veto
-                if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+                //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
 
                 // RPVLL filter matching
-                if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+                //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
 
                 // DV R <  300 mm
-                if(dv_R > dv_R_max) continue;
+                if(dv_R_wrt_beam > dv_R_max) continue;
 
                 // DV z <  300 mm
-                if(std::abs(dv_z) > dv_z_max) continue;
+                if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
 
                 // make histograms from truth-matched Ks
                 if(isMC){
+
                     // find closest truth vertex
                     const xAOD::TruthVertex *tru_matched = nullptr;
-                    tru_matched = m_dvutils->getClosestTruthVertex(dv);
+                    tru_matched = m_dvutils->getClosestTruthVertex(dv, true);
 
                     // check if the matched truth vertex is from Z'
                     if (tru_matched){
                         const xAOD::TruthParticle* parent = tru_matched->incomingParticle(0);
                         if (!(parent->absPdgId() ==32)) continue;
 
-                        m_zp_r->Fill(dv_R,p_weight);
-                        m_zp_z->Fill(dv_z,p_weight);
+                        m_zp_r->Fill(dv_R_wrt_beam,p_weight);
+                        m_zp_z->Fill(dv_z_wrt_beam,p_weight);
                         m_zp_pt->Fill(dv_pt,p_weight);
                         m_zp_eta->Fill(dv_eta,p_weight); 
                         m_zp_DeltaR->Fill(deltaR,p_weight); 
+                        m_zp_lepton_pt->Fill(tp1.pt() / 1000.,p_weight);
+                        m_zp_lepton_pt->Fill(tp2.pt() / 1000.,p_weight);
 
                     }
 
@@ -825,7 +942,7 @@ bool TrackingSystematics::PassKsSelection(const xAOD::Vertex& dv, const xAOD::Ve
     KsFlightDirection.SetVect(dv_pos - pv_pos);
 
     // |z0_1 - z0_2|
-    float delta_z0 = tp1.auxdataConst<float>("z0_wrtSV") - tp2.auxdataConst<float>("z0_wrtSV");
+    float delta_z0 = std::abs(tp1.auxdataConst<float>("z0_wrtSV") - tp2.auxdataConst<float>("z0_wrtSV"));
 
     // decay length
     float dv_l = std::sqrt(dv.x()*dv.x() + dv.y()*dv.y() + dv.z()*dv.z());

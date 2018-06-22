@@ -124,6 +124,8 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_dv_LRT_M_eta3; //!
         TH1F* m_dv_LRT_M_eta4; //!
 
+        std::vector<TH1F*> m_vec_LRT_M_mu; //!
+
         // Ks candidate (ST+ST)
         TH1F* m_dv_ST_M; //!
         TH1F* m_dv_ST_M_R1; //!
@@ -141,6 +143,8 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_dv_ST_M_eta2; //!
         TH1F* m_dv_ST_M_eta3; //!
         TH1F* m_dv_ST_M_eta4; //!
+
+        std::vector<TH1F*> m_vec_ST_M_mu; //!
 
         // Ks candidate (ST+LRT)
         TH1F* m_dv_STLRT_M; //!
@@ -160,18 +164,22 @@ class TrackingSystematics: public ::AthAnalysisAlgorithm {
         TH1F* m_dv_STLRT_M_eta3; //!
         TH1F* m_dv_STLRT_M_eta4; //!
 
+        std::vector<TH1F*> m_vec_STLRT_M_mu; //!
+
         // truth-matched Ks, Z' comparison
         TH1F* m_Ks_pt; //!
         TH1F* m_Ks_eta; //!
         TH1F* m_Ks_r; //!
         TH1F* m_Ks_z; //!
         TH1F* m_Ks_DeltaR; //!
+        TH1F* m_Ks_lepton_pt; //!
 
         TH1F* m_zp_pt; //!
         TH1F* m_zp_eta; //!
         TH1F* m_zp_r; //!
         TH1F* m_zp_z; //!
         TH1F* m_zp_DeltaR; //!
+        TH1F* m_zp_lepton_pt; //!
 
         // count LRT and standard vertex
         int n_standard = 0;

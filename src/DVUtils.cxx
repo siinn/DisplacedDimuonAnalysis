@@ -27,7 +27,8 @@ m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
 m_mc("DDL::MuonCuts/DiLepMuonCuts"),
 m_trig("DDL::TrigMatch/TrigMatch"),
 m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
-m_tmt("Trig::MatchingTool/TrigMatchingTool")
+m_tmt("Trig::MatchingTool/TrigMatchingTool"),
+m_accMass("mass")
 {
     declareInterface<IDVUtils>(this);
     declareProperty("MuonCut", m_mc);
@@ -358,9 +359,9 @@ float DVUtils::getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParti
 }
 
 // get closest truth vertex
-const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv){
+const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv, bool reqSignal){
     
-    double maxDistance = 1.0;
+    double maxDistance = 0.7;
     //double maxDistance = 5.0;
     
     double minDistance = std::numeric_limits<double>::max();
@@ -369,11 +370,11 @@ const xAOD::TruthVertex* DVUtils::getClosestTruthVertex(const xAOD::Vertex *rv){
     // retrieve truth vertex container
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     evtStore()->retrieve( tru_vc, "TruthVertices");
-    
+
     for (const auto tv : *tru_vc) {
 
         // select only signal vertex
-        if(!isSignalVertex(tv)) continue;
+        if ((reqSignal) && (!isSignalVertex(tv))) continue;
    
         // find distance between reco and truth vertex
         double dist =

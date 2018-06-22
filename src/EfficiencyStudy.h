@@ -133,10 +133,15 @@ class EfficiencyStudy: public ::AthAnalysisAlgorithm {
         TH1F* m_DeltaR2; //!
         TH1F* m_DeltaR3; //!
         
-        // lepton pt distribution to investigate discrepancy in specific bins
+        // lepton eta distribution to investigate discrepancy in specific bins
         TH1F* m_lepton_eta1; //!
         TH1F* m_lepton_eta2; //!
         TH1F* m_lepton_eta3; //!
+
+        // lepton pt distribution to investigate discrepancy in specific bins
+        TH1F* m_lepton_pt1; //!
+        TH1F* m_lepton_pt2; //!
+        TH1F* m_lepton_pt3; //!
 
     
 }; 

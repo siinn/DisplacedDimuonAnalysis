@@ -53,7 +53,8 @@ m_prw("CP::PileupReweightingTool/PileupReweightingTool"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
 m_phmatch("DDL::PhotonMatch/PhotonMatch"),
-m_accMass("mass")
+m_accMass("mass"),
+m_vxwght("DDL::VxWeights/VxWeights")
 {
     // initialize tools
     declareProperty("DiLepDVCuts", m_dilepdvc);
@@ -68,6 +69,7 @@ m_accMass("mass")
     declareProperty("OverlapRemoval", m_or);
     declareProperty("PileupReweightingTool", m_prw);
     declareProperty("PhotonMatch", m_phmatch);
+    declareProperty("VxWeights", m_vxwght);
 
     declareProperty("usePRW", m_usePRW = false );
 }
@@ -109,28 +111,55 @@ StatusCode DVEfficiency::initialize() {
     // efficiency plots
     // custom binning
     Double_t m_eta_bins_d[] = {0,0.5,1.0,1.5,2.5,4.0};
-    //Double_t m_pt_bins_d[] = {0,150,300,500,1000};
     Double_t m_pt_bins_d[] = {0,100,200,300,400,500,600,700,800,900,1000};
     Double_t m_R_bins_d[] = {0,100,150,200,250,300};
+    
+    m_dv_eff_eta = new TH1F( "m_dv_eff_eta", "DV reconstruction efficiency vs eta ", 20, -2.5, 2.5);
+    m_dv_eff_phi = new TH1F( "m_dv_eff_phi", "DV reconstruction efficiency vs phi ", 20, -M_PI, M_PI);
+    m_dv_eff_R = new TH1F( "m_dv_eff_R", "DV reconstruction efficiency vs R ", 10, 0,300); // mm
+    m_dv_eff_z = new TH1F( "m_dv_eff_z", "DV reconstruction efficiency vs z ", 20, -300, 300); // mm
+    m_dv_eff_mass = new TH1F( "m_dv_eff_mass", "DV reconstruction efficiency vs mass ", 150, 0, 1500); // GeV
+    m_dv_eff_d0 = new TH1F( "m_dv_eff_d0", "DV reconstruction efficiency vs d0 ", 30, 0, 400); // mm
+    m_dv_eff_DeltaR = new TH1F( "m_dv_eff_DeltaR", "DV reconstruction efficiency vs DeltaR ", 10, 0, 2*M_PI); // mm
 
-    m_dv_eff_eta = new TEfficiency( "m_dv_eff_eta", "DV reconstruction efficiency vs eta", 5, m_eta_bins_d);
-    m_dv_eff_phi = new TEfficiency( "m_dv_eff_phi", "DV reconstruction efficiency vs phi", 20, -M_PI, M_PI);
-    m_dv_eff_mass = new TEfficiency( "m_dv_eff_mass", "DV reconstruction efficiency vs mass", 150, 0, 1500); // GeV
-    m_dv_eff_R = new TEfficiency( "m_dv_eff_R", "DV reconstruction efficiency vs R", 5, m_R_bins_d); // mm
-    m_dv_eff_z = new TEfficiency( "m_dv_eff_z", "DV reconstruction efficiency vs z", 20, -1000, 1000); // mm
-    m_dv_eff_d0 = new TEfficiency( "m_dv_eff_d0", "DV reconstruction efficiency vs d0", 30, 0, 400); // mm
-    m_dv_eff_DeltaR = new TEfficiency( "m_dv_eff_DeltaR", "DV reconstruction efficiency vs DeltaR", 10, 0, 2*M_PI); // mm
+    m_dv_eff_eta_den = new TH1F( "m_dv_eff_eta_den", "DV reconstruction efficiency vs eta (den)", 20, -2.5, 2.5);
+    m_dv_eff_phi_den = new TH1F( "m_dv_eff_phi_den", "DV reconstruction efficiency vs phi (den)", 20, -M_PI, M_PI);
+    m_dv_eff_R_den = new TH1F( "m_dv_eff_R_den", "DV reconstruction efficiency vs R (den)", 10, 0,300); // mm
+    m_dv_eff_z_den = new TH1F( "m_dv_eff_z_den", "DV reconstruction efficiency vs z (den)", 20, -300, 300); // mm
+    m_dv_eff_mass_den = new TH1F( "m_dv_eff_mass_den", "DV reconstruction efficiency vs mass (den)", 150, 0, 1500); // GeV
+    m_dv_eff_d0_den = new TH1F( "m_dv_eff_d0_den", "DV reconstruction efficiency vs d0 (den)", 30, 0, 400); // mm
+    m_dv_eff_DeltaR_den = new TH1F( "m_dv_eff_DeltaR_den", "DV reconstruction efficiency vs DeltaR (den)", 10, 0, 2*M_PI); // mm
+
+    m_dv_eff_eta_num = new TH1F( "m_dv_eff_eta_num", "DV reconstruction efficiency vs eta (num)", 20, -2.5, 2.5);
+    m_dv_eff_phi_num = new TH1F( "m_dv_eff_phi_num", "DV reconstruction efficiency vs phi (num)", 20, -M_PI, M_PI);
+    m_dv_eff_R_num = new TH1F( "m_dv_eff_R_num", "DV reconstruction efficiency vs R (num)", 10, 0,300); // mm
+    m_dv_eff_z_num = new TH1F( "m_dv_eff_z_num", "DV reconstruction efficiency vs z (num)", 20, -300, 300); // mm
+    m_dv_eff_mass_num = new TH1F( "m_dv_eff_mass_num", "DV reconstruction efficiency vs mass (num)", 150, 0, 1500); // GeV
+    m_dv_eff_d0_num = new TH1F( "m_dv_eff_d0_num", "DV reconstruction efficiency vs d0 (num)", 30, 0, 400); // mm
+    m_dv_eff_DeltaR_num = new TH1F( "m_dv_eff_DeltaR_num", "DV reconstruction efficiency vs DeltaR (num)", 10, 0, 2*M_PI); // mm
 
     // efficiency as a function of Z' parameters
-    m_dv_eff_zp_eta = new TEfficiency("m_dv_eff_zp_eta", "DV reconstruction efficiency vs Z' eta", 5, m_eta_bins_d);
-    m_dv_eff_zp_beta = new TEfficiency("m_dv_eff_zp_beta", "DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
-    m_dv_eff_zp_pt = new TEfficiency("m_dv_eff_zp_pt", "DV reconstruction efficiency vs Z' pt", 10, m_pt_bins_d); // GeV
+    m_dv_eff_zp_eta = new TH1F("m_dv_eff_zp_eta", " DV reconstruction efficiency vs Z' eta", 5, m_eta_bins_d);
+    m_dv_eff_zp_beta = new TH1F("m_dv_eff_zp_beta", " DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
+    m_dv_eff_zp_pt = new TH1F("m_dv_eff_zp_pt", " DV reconstruction efficiency vs Z' pt", 10, m_pt_bins_d); // GeV
+
+    m_dv_eff_zp_eta_den = new TH1F("m_dv_eff_zp_eta_den", "(den) DV reconstruction efficiency vs Z' eta", 5, m_eta_bins_d);
+    m_dv_eff_zp_beta_den = new TH1F("m_dv_eff_zp_beta_den", "(den) DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
+    m_dv_eff_zp_pt_den = new TH1F("m_dv_eff_zp_pt_den", "(den) DV reconstruction efficiency vs Z' pt", 10, m_pt_bins_d); // GeV
+
+    m_dv_eff_zp_eta_num = new TH1F("m_dv_eff_zp_eta_num", "(num) DV reconstruction efficiency vs Z' eta", 5, m_eta_bins_d);
+    m_dv_eff_zp_beta_num = new TH1F("m_dv_eff_zp_beta_num", "(num) DV reconstruction efficiency vs Z' beta", 25, 0, 1.0);
+    m_dv_eff_zp_pt_num = new TH1F("m_dv_eff_zp_pt_num", "(num) DV reconstruction efficiency vs Z' pt", 10, m_pt_bins_d); // GeV
 
     // efficiency as a function of mu
-    m_dv_eff_mu = new TEfficiency("m_dv_eff_mu", "DV reconstruction efficiency vs #mu", 50, 0, 50);
+    m_dv_eff_mu = new TH1F("m_dv_eff_mu", "DV reconstruction efficiency vs #mu ", 50, 0, 50);
+    m_dv_eff_mu_den = new TH1F("m_dv_eff_mu_den", "DV reconstruction efficiency vs #mu (den)", 50, 0, 50);
+    m_dv_eff_mu_num = new TH1F("m_dv_eff_mu_num", "DV reconstruction efficiency vs #mu (num)", 50, 0, 50);
 
     // trigger effieicny test
-    m_dv_eff_trig = new TH1D("m_dv_eff_trig", "Trigger efficiency", 4, 0, 4);
+    m_dv_eff_trig = new TH1F("m_dv_eff_trig", "Trigger efficiency", 4, 0, 5);
+    m_dv_eff_trig_den = new TH1F("m_dv_eff_trig_den", "Trigger efficiency (den)", 4, 0, 5);
+    m_dv_eff_trig_num = new TH1F("m_dv_eff_trig_num", "Trigger efficiency (num)", 4, 0, 5);
 
 
     // efficiency map (Z' pt and eta)
@@ -145,7 +174,7 @@ StatusCode DVEfficiency::initialize() {
 
     m_dv_eff_map_pt_eta_den = new TH2F("m_dv_eff_map_pt_eta_den", "DV reconstruction efficiency map, pt vs eta (den)", 10, m_pt_bins, 5, m_eta_bins); // GeV
     m_dv_eff_map_pt_eta_num = new TH2F("m_dv_eff_map_pt_eta_num", "DV reconstruction efficiency map, pt vs eta (num)", 10, m_pt_bins, 5, m_eta_bins); // GeV
-    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, m_pt_bins, 4,m_eta_bins); // GeV
+    m_dv_eff_map_pt_eta = new TH2F("m_dv_eff_map_pt_eta", "DV reconstruction efficiency map, pt vs eta", 10, m_pt_bins, 5,m_eta_bins); // GeV
 
     // pile up systematic variation, up 
     m_dv_eff_map_up_pt_eta_den = new TH2F("m_dv_eff_map_up_pt_eta_den", "DV reconstruction efficiency map_up, pt vs eta (den)", 10, m_pt_bins, 5, m_eta_bins); // GeV
@@ -163,20 +192,44 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regHist("/DV/truth/dv_mass", m_dv_mass) );
 
     // efficiency plots
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_eta", reinterpret_cast<TGraph*>(m_dv_eff_eta)));
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_phi", reinterpret_cast<TGraph*>(m_dv_eff_phi)));
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_mass",reinterpret_cast<TGraph*>(m_dv_eff_mass)));
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_R",reinterpret_cast<TGraph*>(m_dv_eff_R)) );
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_z",reinterpret_cast<TGraph*>(m_dv_eff_z)) );
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_d0",reinterpret_cast<TGraph*>(m_dv_eff_d0)) );
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv/dv_eff_DeltaR",reinterpret_cast<TGraph*>(m_dv_eff_DeltaR)) );
-
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_eta",reinterpret_cast<TGraph*>(m_dv_eff_zp_eta)) );
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_beta",reinterpret_cast<TGraph*>(m_dv_eff_zp_beta)) );
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/zp/dv_eff_zp_pt",reinterpret_cast<TGraph*>(m_dv_eff_zp_pt)) );
-
-    CHECK( histSvc->regGraph("/DV/truth/efficiency/dv_eff_mu",reinterpret_cast<TGraph*>(m_dv_eff_mu)) );
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_eta", m_dv_eff_eta));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_phi", m_dv_eff_phi));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_mass",m_dv_eff_mass));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_R",m_dv_eff_R)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_z",m_dv_eff_z)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_d0",m_dv_eff_d0)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_DeltaR",m_dv_eff_DeltaR)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_eta",m_dv_eff_zp_eta)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_beta",m_dv_eff_zp_beta)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_pt",m_dv_eff_zp_pt)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_mu",m_dv_eff_mu)) ;
     CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_trig", m_dv_eff_trig) );
+
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_eta_den", m_dv_eff_eta_den));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_phi_den", m_dv_eff_phi_den));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_mass_den",m_dv_eff_mass_den));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_R_den",m_dv_eff_R_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_z_den",m_dv_eff_z_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_d0_den",m_dv_eff_d0_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_DeltaR_den",m_dv_eff_DeltaR_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_eta_den",m_dv_eff_zp_eta_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_beta_den",m_dv_eff_zp_beta_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_pt_den",m_dv_eff_zp_pt_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_mu_den",m_dv_eff_mu_den)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_trig_den", m_dv_eff_trig_den) );
+
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_eta_num", m_dv_eff_eta_num));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_phi_num", m_dv_eff_phi_num));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_mass_num",m_dv_eff_mass_num));
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_R_num",m_dv_eff_R_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_z_num",m_dv_eff_z_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_d0_num",m_dv_eff_d0_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv/dv_eff_DeltaR_num",m_dv_eff_DeltaR_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_eta_num",m_dv_eff_zp_eta_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_beta_num",m_dv_eff_zp_beta_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_zp_pt_num",m_dv_eff_zp_pt_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_mu_num",m_dv_eff_mu_num)) ;
+    CHECK( histSvc->regHist("/DV/truth/efficiency/dv_eff_trig_num", m_dv_eff_trig_num) );
 
     // efficiency map
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_mu_eta", m_dv_eff_map_mu_eta) );
@@ -195,17 +248,6 @@ StatusCode DVEfficiency::initialize() {
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_down_pt_eta_den", m_dv_eff_map_down_pt_eta_den) );
     CHECK( histSvc->regHist("/DV/truth/efficiency/zp/dv_eff_map_down_pt_eta_num", m_dv_eff_map_down_pt_eta_num) );
 
-    // Use weighted events in TEfficiency class
-    m_dv_eff_eta->SetUseWeightedEvents();
-    m_dv_eff_phi->SetUseWeightedEvents();
-    m_dv_eff_mass->SetUseWeightedEvents();
-    m_dv_eff_R->SetUseWeightedEvents();
-    m_dv_eff_z->SetUseWeightedEvents();
-    m_dv_eff_d0->SetUseWeightedEvents();
-    m_dv_eff_zp_eta->SetUseWeightedEvents();
-    m_dv_eff_zp_beta->SetUseWeightedEvents();
-    m_dv_eff_zp_pt->SetUseWeightedEvents();
-    m_dv_eff_mu->SetUseWeightedEvents();
 
 
     return StatusCode::SUCCESS;
@@ -213,6 +255,31 @@ StatusCode DVEfficiency::initialize() {
 
 StatusCode DVEfficiency::finalize() {
     ATH_MSG_INFO ("Finalizing " << name() << "...");
+
+    // store sum of squares of weights
+    m_dv_eff_eta_den->Sumw2();
+    m_dv_eff_phi_den->Sumw2();
+    m_dv_eff_mass_den->Sumw2();
+    m_dv_eff_R_den->Sumw2();
+    m_dv_eff_z_den->Sumw2();
+    m_dv_eff_d0_den->Sumw2();
+    m_dv_eff_zp_eta_den->Sumw2();
+    m_dv_eff_zp_beta_den->Sumw2();
+    m_dv_eff_zp_pt_den->Sumw2();
+    m_dv_eff_mu_den->Sumw2();
+    m_dv_eff_trig_den->Sumw2();
+    
+    m_dv_eff_eta_num->Sumw2();
+    m_dv_eff_phi_num->Sumw2();
+    m_dv_eff_mass_num->Sumw2();
+    m_dv_eff_R_num->Sumw2();
+    m_dv_eff_z_num->Sumw2();
+    m_dv_eff_d0_num->Sumw2();
+    m_dv_eff_zp_eta_num->Sumw2();
+    m_dv_eff_zp_beta_num->Sumw2();
+    m_dv_eff_zp_pt_num->Sumw2();
+    m_dv_eff_mu_num->Sumw2();
+    m_dv_eff_trig_num->Sumw2();
     
     // store sum of squares of weights
     m_dv_eff_map_pt_eta_num->Sumw2();
@@ -227,6 +294,18 @@ StatusCode DVEfficiency::finalize() {
     m_dv_eff_map_down_pt_eta_den->Sumw2();
 
     // calculate efficiency
+    m_dv_eff_eta->Divide(m_dv_eff_eta_num, m_dv_eff_eta_den,1,1, "b");
+    m_dv_eff_phi->Divide(m_dv_eff_phi_num, m_dv_eff_phi_den,1,1, "b");
+    m_dv_eff_mass->Divide(m_dv_eff_mass_num, m_dv_eff_mass_den,1,1, "b");
+    m_dv_eff_R->Divide(m_dv_eff_R_num, m_dv_eff_R_den,1,1, "b");
+    m_dv_eff_z->Divide(m_dv_eff_z_num, m_dv_eff_z_den,1,1, "b");
+    m_dv_eff_d0->Divide(m_dv_eff_d0_num, m_dv_eff_d0_den,1,1, "b");
+    m_dv_eff_zp_eta->Divide(m_dv_eff_zp_eta_num, m_dv_eff_zp_eta_den,1,1, "b");
+    m_dv_eff_zp_beta->Divide(m_dv_eff_zp_beta_num, m_dv_eff_zp_beta_den,1,1, "b");
+    m_dv_eff_zp_pt->Divide(m_dv_eff_zp_pt_num, m_dv_eff_zp_pt_den,1,1, "b");
+    m_dv_eff_mu->Divide(m_dv_eff_mu_num, m_dv_eff_mu_den,1,1, "b");
+    m_dv_eff_trig->Divide(m_dv_eff_trig_num, m_dv_eff_trig_den,1,1, "b");
+    
     m_dv_eff_map_pt_eta->Divide(m_dv_eff_map_pt_eta_num, m_dv_eff_map_pt_eta_den,1,1, "b");
     m_dv_eff_map_mu_eta->Divide(m_dv_eff_map_mu_eta_num, m_dv_eff_map_mu_eta_den,1,1, "b");
 
@@ -324,63 +403,72 @@ StatusCode DVEfficiency::execute() {
     //=================================================
 
     // place holder
-    m_dv_eff_cutflow->Fill("RPVLL",0);
-    m_dv_eff_cutflow->Fill("GRL",0);
-    m_dv_eff_cutflow->Fill("EventCleaning",0);
+    m_dv_eff_cutflow->Fill("All events",0);
+    m_dv_eff_cutflow->Fill("GRL (Data)",0);
+    m_dv_eff_cutflow->Fill("EventCleaning (Data)",0);
     m_dv_eff_cutflow->Fill("TrigFilter",0);
+    m_dv_eff_cutflow->Fill("z_{PV} < 200 mm",0);
 
     // event selection flag
     bool event_passed = true;
 
     // all events
-    m_dv_eff_cutflow->Fill("RPVLL",1);
+    m_dv_eff_cutflow->Fill("All events",1);
 
     // GRL
     if (!isMC and !m_grlTool->passRunLB(*evtInfo)) event_passed = false;
-    if (event_passed) m_dv_eff_cutflow->Fill("GRL",1);
+    if (event_passed) m_dv_eff_cutflow->Fill("GRL (Data)",p_weight);
 
     // event cleaning
     if (!m_evtc->PassEventCleaning(*evtInfo)) event_passed = false;
-    if (event_passed) m_dv_eff_cutflow->Fill("EventCleaning",1);
+    if (event_passed) m_dv_eff_cutflow->Fill("EventCleaning (Data)",p_weight);
 
     // trigger filter
     bool trig_passed = false;
-    
-    m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",0);
-    m_dv_eff_trig->Fill("HLT_g140_loose",0);
-    m_dv_eff_trig->Fill("HLT_2g50_loose",0);
+   
+    // fill denominator 
+    m_dv_eff_trig_den->Fill("HLT_mu60_0eta105_msonly",p_weight);
+    m_dv_eff_trig_den->Fill("HLT_g140_loose",p_weight);
+    m_dv_eff_trig_den->Fill("HLT_2g50_loose",p_weight);
+    m_dv_eff_trig_den->Fill("Combined",p_weight);
+
+    // place holder
+    m_dv_eff_trig_num->Fill("HLT_mu60_0eta105_msonly",0);
+    m_dv_eff_trig_num->Fill("HLT_g140_loose",0);
+    m_dv_eff_trig_num->Fill("HLT_2g50_loose",0);
+    m_dv_eff_trig_num->Fill("Combined",0);
 
     //---------------------------------------------------------
     // check trigger and fill histogram for trigger efficiency
     //---------------------------------------------------------
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) {
-        m_dv_eff_trig->Fill("HLT_mu60_0eta105_msonly",1);
+        m_dv_eff_trig_num->Fill("HLT_mu60_0eta105_msonly",p_weight);
         trig_passed = true;
         }
     if (m_tdt->isPassed("HLT_g140_loose")) {
-        m_dv_eff_trig->Fill("HLT_g140_loose",1);
+        m_dv_eff_trig_num->Fill("HLT_g140_loose",p_weight);
         trig_passed = true;
         }
     if (m_tdt->isPassed("HLT_2g50_loose")) {
-        m_dv_eff_trig->Fill("HLT_2g50_loose",1);
+        m_dv_eff_trig_num->Fill("HLT_2g50_loose",p_weight);
         trig_passed = true;
         }
 
-    if(!trig_passed) {
-        event_passed = false;
+    if(trig_passed) {
+        m_dv_eff_trig_num->Fill("Combined",p_weight);
     }
     else {
-        m_dv_eff_trig->Fill("Combined",1);
+        event_passed = false;
     }
     //---------------------------------------------------------
 
     // trigger filter
-    if (event_passed) m_dv_eff_cutflow->Fill("TrigFilter",1);
+    if (event_passed) m_dv_eff_cutflow->Fill("TrigFilter",p_weight);
 
     // cosmic veto
     if(!m_cos->PassCosmicEventVeto(*elc, *muc)) event_passed = false;
     
-    if (event_passed) m_dv_eff_cutflow->Fill("CosmicVeto", 1);
+    if (event_passed) m_dv_eff_cutflow->Fill("CosmicVeto",p_weight);
     else m_dv_eff_cutflow->Fill("CosmicVeto", 0);
 
     // PV position < 200 mm
@@ -397,8 +485,7 @@ StatusCode DVEfficiency::execute() {
     }
     else event_passed = false;
 
-    if (event_passed) m_dv_eff_cutflow->Fill("z_{PV} < 200 mm", 1);
-    else m_dv_eff_cutflow->Fill("z_{PV} < 200 mm", 0);
+    if (event_passed) m_dv_eff_cutflow->Fill("z_{PV} < 200 mm",p_weight);
 
 
     //=================================================
@@ -414,7 +501,7 @@ StatusCode DVEfficiency::execute() {
         bool vertex_passed = true;
 
         // vertex found
-        m_dv_eff_cutflow->Fill("Vertex",1);
+        m_dv_eff_cutflow->Fill("Vertex",p_weight);
 
         // access tracks from vertex
         auto tpLinks = dv->trackParticleLinks();
@@ -428,10 +515,6 @@ StatusCode DVEfficiency::execute() {
         float mass_min = 10.;
         float dv_R_max = 300;
         float dv_z_max = 300;
-
-        // collect leptons from this dv
-        auto dv_muc = m_accMu(*dv);
-        auto dv_elc = m_accEl(*dv);
 
         // perform lepton matching
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
@@ -461,6 +544,10 @@ StatusCode DVEfficiency::execute() {
         float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
         float dv_z = std::abs(m_dvutils->getz( *dv, *pv ));       // z in [mm]
 
+        // posotion w.r.t beam spot
+        float dv_R_wrt_beam = (*dv).position().perp();    // R in [mm]
+        float dv_z_wrt_beam = (*dv).position().z();       // z in [mm]
+
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) vertex_passed = false;
 
@@ -469,62 +556,84 @@ StatusCode DVEfficiency::execute() {
 
         // only select mumu, ee, or emu
         if (!((channel == "mumu") or (channel == "emu") or (channel == "ee"))) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("LeptonID",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("LeptonID",p_weight);
 
         // Trigger matching
-        if(!m_dvutils->TrigMatching(*dv)) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("Trig.Matching",1);
+        //if(!m_dvutils->TrigMatching(*dv)) vertex_passed = false;
+        if(!m_dilepdvc->PassTriggerMatching(*dv)) vertex_passed = false;
+        if(vertex_passed) m_dv_eff_cutflow->Fill("Trig.Matching",p_weight);
 
         // vertex fit quality
         if(!m_dvc->PassChisqCut(*dv)) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("#chi^{2} / DOF",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("#chi^{2} / DOF",p_weight);
 
         // minimum distance from pv (from 0 for MC)
         if(!m_dvc->PassDistCut(*dv, *pvc)) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("Disp. > 2 mm",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("Disp. > 2 mm",p_weight);
 
         // charge requirements
         if(!m_dvc->PassChargeRequirement(*dv)) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("Oppo.Charge",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("Oppo.Charge",p_weight);
 
         // disabled module
         if(!m_dvc->PassDisabledModuleVeto(*dv)) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("DisabledModule",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("DisabledModule",p_weight);
 
         if ((channel == "emu") or (channel == "ee")) {
             if(!m_dvc->PassMaterialVeto(*dv)) vertex_passed = false;
         }
-        if(vertex_passed) m_dv_eff_cutflow->Fill("MaterialVeto",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("MaterialVeto",p_weight);
 
         // low mass veto
         if(dv_mass < mass_min) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("LowMass",1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("LowMass",p_weight);
 
         // cosmic veto (R_CR)
         //if(!PassCosmicVeto_R_CR(tp1, tp2)) vertex_passed = false;
-        //if(vertex_passed) m_dv_eff_cutflow->Fill("R_{CR} > 0.01",1);
+        //if(vertex_passed) m_dv_eff_cutflow->Fill("R_{CR} > 0.01",p_weight);
 
         // RPVLL filter matching
         if(!m_dilepdvc->PassFilterMatching(*dv)) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("FilterMatching", 1);
+        if(vertex_passed) m_dv_eff_cutflow->Fill("FilterMatching",p_weight);
 
         // DV R <  300 mm
-        if(dv_R > dv_R_max) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("R_{DV} > 300 mm", 1);
+        if(dv_R_wrt_beam > dv_R_max) vertex_passed = false;
+        if(vertex_passed) m_dv_eff_cutflow->Fill("R_{DV} > 300 mm",p_weight);
 
         // DV z <  300 mm
-        if(dv_z > dv_z_max) vertex_passed = false;
-        if(vertex_passed) m_dv_eff_cutflow->Fill("z_{DV} > 300 mm", 1);
+        if(std::abs(dv_z_wrt_beam) > dv_z_max) vertex_passed = false;
+        if(vertex_passed) m_dv_eff_cutflow->Fill("z_{DV} > 300 mm",p_weight);
 
-        // mark this event as reconstructed
-        dv_matched = true;
+        // find closest truth vertex by position
+        if(vertex_passed) {
+            const xAOD::TruthVertex* matched_truth = m_dvutils->getClosestTruthVertex(dv, true);
+            if(matched_truth) {
 
+                // fill truth matched
+                m_dv_eff_cutflow->Fill("Truth matched",p_weight);
 
-        //} // end of isMC
+                // mark this event as reconstructed
+                matched_truth->auxdecor<bool>("reconstructed") = 1;
+
+                // collect leptons from this dv
+                auto dv_muc = m_accMu(*dv);
+                auto dv_elc = m_accEl(*dv);
+
+                // get scale factors
+                auto trigsf = m_vxwght->GetTrigSF(*dv_elc, *dv_muc);
+
+                // decorate truth vertex with trigger scale factor
+                matched_truth->auxdecor<bool>("trigger_sc") = trigsf.at(DDL::Syst::Nom);
+
+                // fill truth matched
+                m_dv_eff_cutflow->Fill("Trigger SF",p_weight*trigsf.at(DDL::Syst::Nom));
+            }
+        }
+
     } // end of dv loop
     
     // if event didn't pass event selection, mark as not reconstructed
-    if (!event_passed) dv_matched = false;
+    //if (!event_passed) dv_matched = false;
 
     //-----------------------------------------------------------------
     // End of cut flow.
@@ -541,6 +650,13 @@ StatusCode DVEfficiency::execute() {
         // only selecting signal truth
         if (!m_dvutils->isSignalVertex(tru_v)) continue;
 
+        // check if this truth dv is reconstructed
+        bool dv_matched = (tru_v->auxdecor<bool>("reconstructed") && event_passed);
+
+        // retrieve trigger scale factor
+        float trigger_sc = 1.0;
+        if(dv_matched) float trigger_sc = tru_v->auxdecor<bool>("trigger_sc");
+
         // fill truth signal vertex mass
         float DVMass = m_dvutils->TruthMass(tru_v) / 1000.;
         m_dv_mass->Fill(DVMass);
@@ -548,47 +664,53 @@ StatusCode DVEfficiency::execute() {
         // get opening angle
         float dv_dr = m_dvutils->Truth_dr(tru_v);
 
-        //---------------------------------------------------------
-        // filter by DeltaR
-        //---------------------------------------------------------
-        // only selecting vertex with DeltaR between 1 and 3.5
-        float DeltaR_min = 1.0;
-        float DeltaR_max = 2*M_PI;
-        //if ((dv_dr < DeltaR_min) || (dv_dr > DeltaR_max)) continue;
-        //---------------------------------------------------------
-     
-        // fill efficiency plots
-        m_dv_eff_eta->FillWeighted(dv_matched,p_weight, tru_v->eta());
-        m_dv_eff_phi->FillWeighted(dv_matched,p_weight, tru_v->phi());
-        m_dv_eff_mass->FillWeighted(dv_matched,p_weight, DVMass);
-        m_dv_eff_R->FillWeighted(dv_matched,p_weight, tru_v->perp());
-        m_dv_eff_z->FillWeighted(dv_matched,p_weight, tru_v->z());
-        m_dv_eff_d0->FillWeighted(dv_matched,p_weight, m_dvutils->GetMaxd0(tru_v));
-        m_dv_eff_DeltaR->FillWeighted(dv_matched,p_weight, dv_dr);
-
-        // efficiency as a function of Z'
+        // Z' parameters
         float zp_eta = std::abs(tru_v->incomingParticle(0)->eta());
         float zp_pt = tru_v->incomingParticle(0)->pt() / 1000.; // GeV
         float zp_m = tru_v->incomingParticle(0)->m();
         float zp_e = tru_v->incomingParticle(0)->e();
         float zp_beta = sqrt(1 - (zp_m/zp_e)*(zp_m/zp_e));
+     
+        // fill denominator with generator weight
+        m_dv_eff_eta_den->Fill(tru_v->eta(), 1);
+        m_dv_eff_phi_den->Fill(tru_v->phi(), 1);
+        m_dv_eff_mass_den->Fill(DVMass, 1);
+        m_dv_eff_R_den->Fill(tru_v->perp(), 1);
+        m_dv_eff_z_den->Fill(tru_v->z(), 1);
+        m_dv_eff_d0_den->Fill(m_dvutils->GetMaxd0(tru_v), 1);
+        m_dv_eff_DeltaR_den->Fill(dv_dr, 1);
 
-        m_dv_eff_zp_eta->FillWeighted(dv_matched, p_weight, zp_eta);
-        m_dv_eff_zp_beta->FillWeighted(dv_matched, p_weight, zp_beta);
-        m_dv_eff_zp_pt->FillWeighted(dv_matched, p_weight, zp_pt);
-        m_dv_eff_mu->FillWeighted(dv_matched, p_weight, mu);
+        m_dv_eff_zp_eta_den->Fill(zp_eta, 1);
+        m_dv_eff_zp_beta_den->Fill(zp_beta, 1);
+        m_dv_eff_zp_pt_den->Fill(zp_pt, 1);
+        m_dv_eff_mu_den->Fill(mu, 1);
 
-        // fill efficiency map
-        m_dv_eff_map_pt_eta_den->Fill(zp_pt, zp_eta, p_weight);
-        m_dv_eff_map_mu_eta_den->Fill(mu, zp_eta, p_weight);
+        // efficiency map
+        m_dv_eff_map_pt_eta_den->Fill(zp_pt, zp_eta, 1);
+        m_dv_eff_map_mu_eta_den->Fill(mu, zp_eta, 1);
 
         // systematic variation
-        m_dv_eff_map_up_pt_eta_den->Fill(zp_pt, zp_eta, p_weight_up);
-        m_dv_eff_map_down_pt_eta_den->Fill(zp_pt, zp_eta, p_weight_down);
+        m_dv_eff_map_up_pt_eta_den->Fill(zp_pt, zp_eta, 1);
+        m_dv_eff_map_down_pt_eta_den->Fill(zp_pt, zp_eta, 1);
 
+        // if matched, use weights to fill numerator
         if (dv_matched) {
-            m_dv_eff_map_pt_eta_num->Fill(zp_pt, zp_eta, p_weight); 
-            m_dv_eff_map_mu_eta_num->Fill(mu, zp_eta, p_weight); 
+            m_dv_eff_eta_num->Fill(tru_v->eta(), p_weight*trigger_sc);
+            m_dv_eff_phi_num->Fill(tru_v->phi(), p_weight*trigger_sc);
+            m_dv_eff_mass_num->Fill(DVMass, p_weight*trigger_sc);
+            m_dv_eff_R_num->Fill(tru_v->perp(), p_weight*trigger_sc);
+            m_dv_eff_z_num->Fill(tru_v->z(), p_weight*trigger_sc);
+            m_dv_eff_d0_num->Fill(m_dvutils->GetMaxd0(tru_v), p_weight*trigger_sc);
+            m_dv_eff_DeltaR_num->Fill(dv_dr, p_weight*trigger_sc);
+
+            m_dv_eff_zp_eta_num->Fill(zp_eta, p_weight*trigger_sc);
+            m_dv_eff_zp_beta_num->Fill(zp_beta, p_weight*trigger_sc);
+            m_dv_eff_zp_pt_num->Fill(zp_pt, p_weight*trigger_sc);
+            m_dv_eff_mu_num->Fill(mu, p_weight*trigger_sc);
+
+            // efficiency map
+            m_dv_eff_map_pt_eta_num->Fill(zp_pt, zp_eta, p_weight*trigger_sc); 
+            m_dv_eff_map_mu_eta_num->Fill(mu, zp_eta, p_weight*trigger_sc); 
 
             // systematic variation
             m_dv_eff_map_up_pt_eta_num->Fill(zp_pt, zp_eta, p_weight_up); 

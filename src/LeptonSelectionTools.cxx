@@ -71,7 +71,6 @@ void LeptonSelectionTools::ElectronKinematicCut(xAOD::Vertex& dv) {
     // set pt, eta, and d0 threshold
     float el_pt_min = 10.;
     float el_eta_max = 2.47;
-    float el_d0_min = 2.0;
 
 
     auto dv_elc = m_accEl(dv);
@@ -79,6 +78,7 @@ void LeptonSelectionTools::ElectronKinematicCut(xAOD::Vertex& dv) {
 
         // access electron ID track
         auto el_tr = (*el)->trackParticle();
+        //auto el_tr = xAOD::EgammaHelpers::getOriginalTrackParticle(*el);
 
         // check if we have proper ID track
         if(el_tr != nullptr) {
@@ -86,7 +86,6 @@ void LeptonSelectionTools::ElectronKinematicCut(xAOD::Vertex& dv) {
             // requirement electron eta, track pt
             if(el_tr->pt() / 1000. < el_pt_min) dv_elc->erase(el);
             else if(std::fabs(el_tr->eta()) > el_eta_max) dv_elc->erase(el);
-            else if(std::fabs(el_tr->d0()) < el_d0_min) dv_elc->erase(el);
             else ++el;
         }
         else dv_elc->erase(el);
@@ -101,19 +100,17 @@ bool LeptonSelectionTools::ElectronKinematicCut(xAOD::Electron& el) {
     // set pt, eta, and d0 threshold
     float el_pt_min = 10.;
     float el_eta_max = 2.47;
-    float el_d0_min = 2.0;
 
     // access electron ID track
     auto el_tr = (el).trackParticle();
+    //auto el_tr = xAOD::EgammaHelpers::getOriginalTrackParticle(&el);
 
     // check if we have proper ID track
     if(el_tr != nullptr) {
 
         // requirement electron eta, track pt
         if(el_tr->pt() / 1000. < el_pt_min) pass = false;
-        //else if(std::fabs((el).caloCluster()->etaBE(2)) > el_eta_max) pass = false;
         else if(std::fabs(el_tr->eta() > el_eta_max)) pass = false;
-        else if(std::fabs(el_tr->d0()) < el_d0_min) pass = false;
     }
     else pass = false;
 
@@ -146,7 +143,6 @@ void LeptonSelectionTools::MuonSelection(xAOD::Vertex& dv) {
     // set minimum pt
     float mu_pt_min = 10.;
     float mu_eta_max = 2.5;
-    float mu_d0_min = 2.0;
 
     auto dv_muc = m_accMu(dv);
     for(auto mu = dv_muc->begin(); mu != dv_muc->end();) {
@@ -157,17 +153,16 @@ void LeptonSelectionTools::MuonSelection(xAOD::Vertex& dv) {
 
             // retrieve muon pt
             float mu_pt = mu_tr->pt() / 1000.;
-            //float mu_eta = std::fabs((**mu).eta());
             float mu_eta = std::fabs(mu_tr->eta());
-            float mu_d0 = std::fabs(mu_tr->d0());
+
+            ATH_MSG_DEBUG("DEBUG: MuonSelection, pt = " << mu_pt);
             
             // apply muon correction. If fail, erase muon
-            if(!(m_mct->applyCorrection(**mu))) dv_muc->erase(mu);
-            else if(!(m_mst->accept(**mu))) dv_muc->erase(mu);
+            //if(!(m_mct->applyCorrection(**mu))) dv_muc->erase(mu);
+            if(!(m_mst->accept(**mu))) dv_muc->erase(mu);
             else if(mu_pt < mu_pt_min) dv_muc->erase(mu);
             else if(mu_eta > mu_eta_max) dv_muc->erase(mu);
             else if(!((**mu).muonType() == xAOD::Muon::Combined)) dv_muc->erase(mu);
-            else if(!(mu_d0 > mu_d0_min)) dv_muc->erase(mu);
             else ++mu;
         }
         else {
@@ -183,7 +178,6 @@ bool LeptonSelectionTools::MuonSelection(xAOD::Muon& mu) {
     // set minimum pt
     float mu_pt_min = 10.;
     float mu_eta_max = 2.5;
-    float mu_d0_min = 2.0;
 
     bool pass = true;
 
@@ -194,14 +188,12 @@ bool LeptonSelectionTools::MuonSelection(xAOD::Muon& mu) {
         // retrieve muon pt, eta, and d0
         float mu_pt = mu_tr->pt() / 1000.;
         float mu_eta = std::fabs(mu_tr->eta());
-        float mu_d0 = std::fabs(mu_tr->d0());
 
-        if(!(m_mct->applyCorrection(mu))) pass = false;
-        else if(!(m_mst->accept(mu))) pass = false;
+        //if(!(m_mct->applyCorrection(mu))) pass = false;
+        if(!(m_mst->accept(mu))) pass = false;
         else if(mu_pt < mu_pt_min) pass = false;
         else if(mu_eta > mu_eta_max) pass = false;
         else if(!(mu.muonType() == xAOD::Muon::Combined)) pass = false;
-        else if(!(mu_d0 > mu_d0_min)) return true;
     }
     else pass = false;
 
