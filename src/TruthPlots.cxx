@@ -14,12 +14,12 @@
 #include "xAODTruth/TruthVertexContainer.h"
 
 // xAOD Muon
-#include "xAODMuon/MuonContainer.h"
-#include "xAODMuon/MuonAuxContainer.h"
+//#include "xAODMuon/MuonContainer.h"
+//#include "xAODMuon/MuonAuxContainer.h"
 
 // xAOD Vertex
-#include "xAODTracking/VertexContainer.h"
-#include "cmath"
+//#include "xAODTracking/VertexContainer.h"
+//#include "cmath"
 
 
 TruthPlots::TruthPlots( const std::string& name, ISvcLocator* pSvcLocator ) :
@@ -56,10 +56,11 @@ StatusCode TruthPlots::initialize() {
     // signal el
     m_el_m = new TH1F("m_el_m", "signal el m", 100, 0, 1.0); // MeV
     m_el_pt = new TH1F("m_el_pt", "signal el pt", 1000, 0, 1000); // GeV
+    m_el_pt_max = new TH1F("m_el_pt_max", "signal el pt", 1000, 0, 1000); // GeV
     m_el_pt_low = new TH1F("m_el_pt_low", "signal el pt", 50, 0, 50); // GeV
     m_el_eta = new TH1F("m_el_eta", "signal el eta", 30, -3.0, 3.0);
     m_el_phi = new TH1F("m_el_phi", "signal el phi", 50, -M_PI, M_PI);
-    m_el_R = new TH1F("m_el_R", "signal el R", 50, 0., 300.0);
+    m_el_R = new TH1F("m_el_R", "signal el R", 200, 0., 1200.0);
     m_el_z = new TH1F("m_el_z", "signal el z", 50, -500.0, 500.0);
     m_el_d0 = new TH1F("m_el_d0", "signal el d0", 3000, 0, 300);
     m_el_z0 = new TH1F("m_el_z0", "signal el z0", 100, -500, 500);
@@ -68,10 +69,11 @@ StatusCode TruthPlots::initialize() {
     // signal muon
     m_muon_m = new TH1F("m_muon_m", "signal muon m", 100, 0, 0.2); // GeV
     m_muon_pt = new TH1F("m_muon_pt", "signal muon pt", 1000, 0, 1000); // GeV
+    m_muon_pt_max = new TH1F("m_muon_pt_max", "signal muon pt", 1000, 0, 1000); // GeV
     m_muon_pt_low = new TH1F("m_muon_pt_low", "signal muon pt", 50, 0, 50); // GeV
     m_muon_eta = new TH1F("m_muon_eta", "signal muon eta", 30, -3.0, 3.0);
     m_muon_phi = new TH1F("m_muon_phi", "signal muon phi", 50, -M_PI, M_PI);
-    m_muon_R = new TH1F("m_muon_R", "signal muon R", 50, 0., 300.0);
+    m_muon_R = new TH1F("m_muon_R", "signal muon R", 200, 0., 1200.0);
     m_muon_z = new TH1F("m_muon_z", "signal muon z", 50, -500.0, 500.0);
     m_muon_d0 = new TH1F("m_muon_d0", "signal muon d0", 3000, 0, 300);
     m_muon_z0 = new TH1F("m_muon_z0", "signal muon z0", 100, -500, 500);
@@ -82,21 +84,21 @@ StatusCode TruthPlots::initialize() {
     m_muon_acceptance = new TProfile("m_muon_acceptance", "ratio of muons passing eta cut", 50, 0, 300); // muon passing eta over all muon
 
     // signal dilep
-    m_dilep_m = new TH1F("m_dilep_m", "signal dilep m", 750, 0, 1500); // GeV
-    m_dilep_pt = new TH1F("m_dilep_pt", "signal dilep pt", 50, 0, 1000); // GeV
+    m_dilep_m = new TH1F("m_dilep_m", "signal dilep m", 100, 0, 100); // GeV
+    m_dilep_pt = new TH1F("m_dilep_pt", "signal dilep pt", 100, 0, 200); // GeV
     m_dilep_dr = new TH1F("m_dilep_dr", "signal dilep dr", 50, 0, 2*M_PI);
 
     // signal Z'
-    m_zp_pt = new TH1F("m_zp_pt", "Z' pt distribution", 50, 0, 1000);
+    m_zp_pt = new TH1F("m_zp_pt", "Z' pt distribution", 100, 0, 200);
     m_zp_eta = new TH1F("m_zp_eta", "Z' eta distribution", 30, -3.0, 3.0);
     m_zp_phi = new TH1F("m_zp_phi", "Z' phi distribution", 50, -M_PI, M_PI);
-    m_zp_m = new TH1F("m_zp_m", "Z' m distribution", 750, 0, 1500); // GeV
+    m_zp_m = new TH1F("m_zp_m", "Z' m distribution", 100, 0, 100); // GeV
     m_zp_pdgId = new TH1F("m_zp_pdgId", "signal zp pdgId", 35, 0, 35);
     m_zp_beta = new TH1F("m_zp_beta", "Z' beta distribution", 50, 0, 1.0);
     m_zp_ctau0 = new TH1F("m_zp_ctau0", "Z' ctau0 distribution", 50, 0, 2000);
     m_zp_l = new TH1F("m_zp_l", "Z' l distribution", 50, 0, 500);
     m_zp_z = new TH1F("m_zp_z", "Z' z distribution", 100, -500, 500);
-    m_zp_R = new TH1F("m_zp_R", "Z' R distribution", 50, 0, 300.0); 
+    m_zp_R = new TH1F("m_zp_R", "Z' R distribution", 600, 0., 1200.0); 
     m_zp_R_low = new TH1F("m_zp_R_low", "Z' R distribution low", 50, 0, 50.0); 
     m_zp_t_barrel = new TH1F("m_zp_t_barrel", "Z' lifetime in lab frame (barrel)", 50, 0, 25);
     m_zp_t_endcap = new TH1F("m_zp_t_endcap", "Z' lifetime in lab frame (endcap)", 50, 0, 25);
@@ -115,6 +117,7 @@ StatusCode TruthPlots::initialize() {
     CHECK( histSvc->regHist("/DV/truth/signal_el/m/el_m", m_el_m) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/pt/el_pt", m_el_pt) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/pt/el_pt_low", m_el_pt_low) );
+    CHECK( histSvc->regHist("/DV/truth/signal_el/pt/el_pt_max", m_el_pt_max) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/eta/el_eta", m_el_eta) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/phi/el_phi", m_el_phi) );
     CHECK( histSvc->regHist("/DV/truth/signal_el/R/el_R", m_el_R) );
@@ -127,6 +130,7 @@ StatusCode TruthPlots::initialize() {
     CHECK( histSvc->regHist("/DV/truth/signal_muon/m/muon_m", m_muon_m) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/pt/muon_pt", m_muon_pt) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/pt/muon_pt_low", m_muon_pt_low) );
+    CHECK( histSvc->regHist("/DV/truth/signal_muon/pt/muon_pt_max", m_muon_pt_max) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/eta/muon_eta", m_muon_eta) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/phi/muon_phi", m_muon_phi) );
     CHECK( histSvc->regHist("/DV/truth/signal_muon/R/muon_R", m_muon_R) );
@@ -202,6 +206,10 @@ StatusCode TruthPlots::execute() {
     const xAOD::TruthVertexContainer* tru_vc = nullptr;
     CHECK( evtStore()->retrieve( tru_vc, "TruthVertices"));
 
+    // maximum lepton pT in each event
+    double muon_pt_max = 0;
+    double el_pt_max = 0;
+
     // loop over the truth vertex container
     for (auto tru_v: *tru_vc){
 
@@ -210,10 +218,15 @@ StatusCode TruthPlots::execute() {
         // get lowset pt muon
         //float min_muon_pt = m_dvutils->GetMinPT(tru_v); // GeV
 
+        //ATH_MSG_INFO("New Zd particle");
+
         // fill lepton plots
         for (unsigned int i=0; i < tru_v->nOutgoingParticles(); i++){
+        
 
             const xAOD::TruthParticle* signal_lep = m_dvutils->FindFinalState(tru_v->outgoingParticle(i));
+
+            //ATH_MSG_INFO("signal lepton " << i << ", pdgid = " << signal_lep->pdgId());
 
             // skip if particle is not charged (to remove neutrino)
             if (signal_lep->isNeutral()) continue;
@@ -228,10 +241,11 @@ StatusCode TruthPlots::execute() {
                 m_el_phi->Fill(signal_lep->phi(), p_weight);
                 m_el_R->Fill(tru_v->perp(), p_weight);
                 m_el_z->Fill(tru_v->z(), p_weight);
-                m_el_d0->Fill(signal_lep->auxdata< float >("d0"), p_weight);
-                m_el_z0->Fill(signal_lep->auxdata< float >("z0"), p_weight);
+                //m_el_d0->Fill(signal_lep->auxdata< float >("d0"), p_weight);
+                //m_el_z0->Fill(signal_lep->auxdata< float >("z0"), p_weight);
                 m_el_pt->Fill( signal_lep->pt() / 1000., p_weight);
                 m_el_pt_low->Fill( signal_lep->pt() / 1000. , p_weight);
+                el_pt_max = std::max(signal_lep->pt() / 1000., el_pt_max);
             }
 
             //------------------------------
@@ -244,10 +258,11 @@ StatusCode TruthPlots::execute() {
                 m_muon_phi->Fill(signal_lep->phi(), p_weight);
                 m_muon_R->Fill(tru_v->perp(), p_weight);
                 m_muon_z->Fill(tru_v->z(), p_weight);
-                m_muon_d0->Fill(signal_lep->auxdata< float >("d0"), p_weight);
-                m_muon_z0->Fill(signal_lep->auxdata< float >("z0"), p_weight);
+                //m_muon_d0->Fill(signal_lep->auxdata< float >("d0"), p_weight);
+                //m_muon_z0->Fill(signal_lep->auxdata< float >("z0"), p_weight);
                 m_muon_pt->Fill( signal_lep->pt() / 1000., p_weight);
                 m_muon_pt_low->Fill( signal_lep->pt() / 1000. , p_weight);
+                muon_pt_max = std::max(signal_lep->pt() / 1000., muon_pt_max);
 
                 // fill signal muon plots
                 m_muon_pt_vs_prodVtxR->Fill( tru_v->perp(), signal_lep->pt() / 1000.);
@@ -261,8 +276,9 @@ StatusCode TruthPlots::execute() {
 
         } // end of outgoing particle loop
 
+
         //------------------------------
-        // signal muon basic plots
+        // signal lepton basic plots
         //------------------------------
         float dilep_m = m_dvutils->TruthMass(tru_v);
         float dilep_pt = m_dvutils->TruthPt(tru_v);
@@ -319,6 +335,13 @@ StatusCode TruthPlots::execute() {
         m_truth_zp_acceptance->Fill( zp_R, zp_passed);
 
     } // end of truth vertex loop
+
+    //------------------------------
+    // signal lepton maximum pt
+    //------------------------------
+    m_el_pt_max->Fill( el_pt_max, p_weight);
+    m_muon_pt_max->Fill( muon_pt_max, p_weight);
+
 
     return StatusCode::SUCCESS;
 }

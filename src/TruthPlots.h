@@ -31,12 +31,17 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
         // pileup weight
         float p_weight = 1;
 
+        // maximum lepton pT in each event
+        double muon_pt_max;
+        double el_pt_max;
+
         // pile-up distribution
         TH1F* m_pileup; //!
         TH1F* m_pileup_reweighted; //!
 
         // signal el distribution
         TH1F* m_el_pt; //!
+        TH1F* m_el_pt_max; //!
         TH1F* m_el_pt_low; //!
         TH1F* m_el_eta; //!
         TH1F* m_el_m; //!
@@ -49,6 +54,7 @@ class TruthPlots: public ::AthAnalysisAlgorithm {
 
         // signal muon distribution
         TH1F* m_muon_pt; //!
+        TH1F* m_muon_pt_max; //!
         TH1F* m_muon_pt_low; //!
         TH1F* m_muon_eta; //!
         TH1F* m_muon_m; //!

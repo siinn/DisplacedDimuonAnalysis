@@ -687,18 +687,18 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // DV R <  300 mm
             if(dv_R_wrt_beam > dv_R_max) continue;
-            m_dv_mumu_cf->Fill("R_{DV} > 300 mm", p_weight);
+            m_dv_mumu_cf->Fill("R_{DV} < 300 mm", p_weight);
 
             // DV z <  300 mm
             if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
-            m_dv_mumu_cf->Fill("z_{DV} > 300 mm", p_weight);
+            m_dv_mumu_cf->Fill("z_{DV} < 300 mm", p_weight);
 
             // get scale factors
             auto trigsf = m_vxwght->GetTrigSF(*dv_elc, *dv_muc);
             float trigger_sc = trigsf.at(DDL::Syst::Nom);
 
             // apply trigger scale factor
-            m_dv_mumu_cf->Fill("Trigger SF", p_weight * trigger_sc);
+            //m_dv_mumu_cf->Fill("Trigger SF", p_weight * trigger_sc);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -712,7 +712,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
                 tru_matched = m_dvutils->getClosestTruthVertex(dv, true);
-                if(tru_matched) m_dv_mumu_cf->Fill("Truth matched", p_weight);
+                //if(tru_matched) m_dv_mumu_cf->Fill("Truth matched", p_weight);
             }
         } // end of mumu
 
@@ -761,18 +761,18 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // DV R <  300 mm
             if(dv_R_wrt_beam > dv_R_max) continue;
-            m_dv_ee_cf->Fill("R_{DV} > 300 mm", p_weight);
+            m_dv_ee_cf->Fill("R_{DV} < 300 mm", p_weight);
 
             // DV z <  300 mm
             if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
-            m_dv_ee_cf->Fill("z_{DV} > 300 mm", p_weight);
+            m_dv_ee_cf->Fill("z_{DV} < 300 mm", p_weight);
 
             // get scale factors
             auto trigsf = m_vxwght->GetTrigSF(*dv_elc, *dv_muc);
             float trigger_sc = trigsf.at(DDL::Syst::Nom);
 
             // apply trigger scale factor
-            m_dv_ee_cf->Fill("Trigger SF", p_weight * trigger_sc);
+            //m_dv_ee_cf->Fill("Trigger SF", p_weight * trigger_sc);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -786,7 +786,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
                 tru_matched = m_dvutils->getClosestTruthVertex(dv, true);
-                if(tru_matched) m_dv_ee_cf->Fill("Truth matched", p_weight);
+                //if(tru_matched) m_dv_ee_cf->Fill("Truth matched", p_weight);
             }
 
         } // end of ee
@@ -836,18 +836,18 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // DV R <  300 mm
             if(dv_R_wrt_beam > dv_R_max) continue;
-            m_dv_emu_cf->Fill("R_{DV} > 300 mm", p_weight);
+            m_dv_emu_cf->Fill("R_{DV} < 300 mm", p_weight);
 
             // DV z <  300 mm
             if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
-            m_dv_emu_cf->Fill("z_{DV} > 300 mm", p_weight);
+            m_dv_emu_cf->Fill("z_{DV} < 300 mm", p_weight);
 
             // get scale factors
             auto trigsf = m_vxwght->GetTrigSF(*dv_elc, *dv_muc);
             float trigger_sc = trigsf.at(DDL::Syst::Nom);
 
             // apply trigger scale factor
-            m_dv_emu_cf->Fill("Trigger SF", p_weight * trigger_sc);
+            //m_dv_emu_cf->Fill("Trigger SF", p_weight * trigger_sc);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -861,7 +861,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
                 const xAOD::TruthVertex *tru_matched = nullptr;
 
                 tru_matched = m_dvutils->getClosestTruthVertex(dv, true);
-                if(tru_matched) m_dv_emu_cf->Fill("Truth matched", p_weight);
+                //if(tru_matched) m_dv_emu_cf->Fill("Truth matched", p_weight);
             }
 
         } // end of emu
@@ -905,11 +905,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // DV R <  300 mm
             if(dv_R_wrt_beam > dv_R_max) continue;
-            m_dv_mut_cf->Fill("R_{DV} > 300 mm", p_weight);
+            m_dv_mut_cf->Fill("R_{DV} < 300 mm", p_weight);
 
             // DV z <  300 mm
             if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
-            m_dv_mut_cf->Fill("z_{DV} > 300 mm", p_weight);
+            m_dv_mut_cf->Fill("z_{DV} < 300 mm", p_weight);
 
             // track parameter cut
             if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
@@ -973,11 +973,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // DV R <  300 mm
             if(dv_R_wrt_beam > dv_R_max) continue;
-            m_dv_et_cf->Fill("R_{DV} > 300 mm", p_weight);
+            m_dv_et_cf->Fill("R_{DV} < 300 mm", p_weight);
 
             // DV z <  300 mm
             if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
-            m_dv_et_cf->Fill("z_{DV} > 300 mm", p_weight);
+            m_dv_et_cf->Fill("z_{DV} < 300 mm", p_weight);
 
             // track parameter cut
             if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
@@ -1040,11 +1040,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
             // DV R <  300 mm
             if(dv_R_wrt_beam > dv_R_max) continue;
-            m_dv_idid_cf->Fill("R_{DV} > 300 mm", p_weight);
+            m_dv_idid_cf->Fill("R_{DV} < 300 mm", p_weight);
 
             // DV z <  300 mm
             if(std::abs(dv_z_wrt_beam) > dv_z_max) continue;
-            m_dv_idid_cf->Fill("z_{DV} > 300 mm", p_weight);
+            m_dv_idid_cf->Fill("z_{DV} < 300 mm", p_weight);
 
             // track parameter cut
             if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;

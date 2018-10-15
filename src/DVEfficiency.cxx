@@ -512,7 +512,7 @@ StatusCode DVEfficiency::execute() {
         float dv_mass = std::fabs(m_accMass(*dv)) / 1000.; // in GeV
 
         // mass and position cut
-        float mass_min = 10.;
+        float mass_min = 12.;
         float dv_R_max = 300;
         float dv_z_max = 300;
 

@@ -45,11 +45,11 @@ DVUtils::~DVUtils() {}
 
 StatusCode DVUtils::initialize() {
     // initialize tools
-    ATH_CHECK(m_tdt.retrieve());
-    ATH_CHECK(m_tmt.retrieve());
-    ATH_CHECK(m_dilepdvc.retrieve());
-    ATH_CHECK(m_mc.retrieve());
-    ATH_CHECK(m_trig.retrieve());
+    //ATH_CHECK(m_tdt.retrieve());
+    //ATH_CHECK(m_tmt.retrieve());
+    //ATH_CHECK(m_dilepdvc.retrieve());
+    //ATH_CHECK(m_mc.retrieve());
+    //ATH_CHECK(m_trig.retrieve());
     return StatusCode::SUCCESS;
 }
 
@@ -901,6 +901,7 @@ bool DVUtils::isSignal (const xAOD::TruthParticle* p) {
 // check if truth vertex is signal vertex
 bool DVUtils::isSignalVertex (const xAOD::TruthVertex* v) {
 
+
     bool signal = true;
 
     if (!(v->nIncomingParticles() == 1)) signal = false;
@@ -909,7 +910,8 @@ bool DVUtils::isSignalVertex (const xAOD::TruthVertex* v) {
         signal = false;
     }
 
-    // access parent
+
+    // access parent particle
     const xAOD::TruthParticle* parent = v->incomingParticle(0);
     if (parent) {
         if (!((parent->absPdgId() ==32) or (parent->absPdgId() ==1000022)))
@@ -1000,11 +1002,15 @@ float DVUtils::Truth_dr (const xAOD::TruthVertex* v) {
 
     } // end of outgoingn particle loop
 
-    // define TLorentzVector of muons
-    TLorentzVector tlv_p0 = outgoingParticles.at(0)->p4();
-    TLorentzVector tlv_p1 = outgoingParticles.at(1)->p4();
+    // angle betweet two particles
+    float deltaR_tlv = 0;
 
-    float deltaR_tlv = tlv_p0.DeltaR(tlv_p1);
+    // define TLorentzVector of muons
+    if (outgoingParticles.size() == 2){
+        TLorentzVector tlv_p0 = outgoingParticles.at(0)->p4();
+        TLorentzVector tlv_p1 = outgoingParticles.at(1)->p4();
+        deltaR_tlv = tlv_p0.DeltaR(tlv_p1);
+    }
 
     return deltaR_tlv;
 } // end of Truth_dr
